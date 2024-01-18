@@ -7,12 +7,9 @@ import logging
 
 from config.settings import settings
 
-if os.path.exists('.env'):
-    load_dotenv()
-else:
-    if not os.getenv('DEV'):
-        logging.error("Application has no file .env")
-        exit(0)
+if not settings.DEV:
+    logging.error("Application has no file .env")
+    exit(0)
 
 storage = MemoryStorage()
 bot = Bot(token=settings.TELEGRAM_API_KEY, parse_mode='Markdown')

@@ -3,7 +3,7 @@ from aiogram.types import ContentType
 
 from handler.handlers import start, option_one, add_address, select_nft, main, exit_game, add_nft, \
     wallet, get_nft_on_arena, remove_nft_from_arena, search, invite, search_game, nft_yes, callback_game_payment_prove, arena_yes, fight_yes, inline_handler, \
-    rel, check, callback_account_payment_prove, top_callback
+    callback_account_payment_prove, top_callback
 from utils.game import UserState
 
 
@@ -14,8 +14,6 @@ def register_handlers_client(dp: Dispatcher) -> None:
     # Listeners
     dp.register_message_handler(add_address, state=UserState.addr)
     dp.register_inline_handler(inline_handler)
-    dp.register_message_handler(rel, commands=["id"])
-    dp.register_message_handler(check, content_types=ContentType.VIDEO)
     # Callbacks
     dp.register_callback_query_handler(option_one, text='option_one')
     dp.register_callback_query_handler(callback_account_payment_prove, text='prov')

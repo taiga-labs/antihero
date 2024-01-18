@@ -18,3 +18,8 @@ class UserDAO(BaseDAO):
     async def edit_by_user_id(self, user_id: int, **params) -> None:
         sql = update(self.model).where(self.model.user_id == user_id).values(**params)
         await self.session.execute(sql)
+
+    async def get_top(self) -> list:
+        sql = select(self.model).order_by(User.win.desc()).limit(10)
+        data = await self.session.execute(sql)
+        return list(data.scalars().all())

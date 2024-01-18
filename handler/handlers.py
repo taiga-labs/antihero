@@ -3,8 +3,7 @@ import hashlib
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from tonsdk.contract.token.nft import NFTItem
-from tonsdk.utils import bytes_to_b64str, Address, to_nano
+from tonsdk.utils import to_nano
 from TonTools import *
 
 from config.settings import settings
@@ -38,7 +37,7 @@ async def start(message: types.Message):
 
     if message.chat.type == 'private':
         if len(message.get_args()) > 0:
-            id = message.get_args()
+            opponent_id = message.get_args()
 
             # Перешедший по ссылке
             nfts = await nft_dao.get_by_params(user_id=message.from_user.id)
@@ -46,11 +45,11 @@ async def start(message: types.Message):
             buttons = []
             keyboard = types.InlineKeyboardMarkup(row_width=1)
             for nft in nfts:
-                button = InlineKeyboardButton(text=f"{nft.name_nft}", callback_data=f"fight_{id}_{nft.address}")
+                button = InlineKeyboardButton(text=f"{nft.name_nft}", callback_data=f"fight_{opponent_id}_{nft.address}")
                 buttons.append(button)
             keyboard.add(*buttons)
-            main = InlineKeyboardButton(text="Главное меню", callback_data="main")
-            keyboard.add(main)
+            kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
+            keyboard.add(kb_main)
             await message.answer("Выберите NFT для игры", reply_markup=keyboard)
 
         await bot.delete_message(message.chat.id, message.message_id)
@@ -71,7 +70,10 @@ async def start(message: types.Message):
             keyboard.add(li)
             await bot.send_video(chat_id=message.chat.id,
                                  video='BAACAgIAAxkBAAPSZMTai_fugBIXQvUCISwMawVGrmMAAj03AALuBxhKZ4r81mDV5EAvBA',
-                                 caption=F"Приветствуем в боте коллекции <a href='https://getgems.io/collection/{settings.MAIN_COLLECTION_ADDRESS}'>TON ANTIHERO!</a>\nНаш <a href='https://t.me/TON_ANTIHERO_NFT'>ТЕЛЕГРАМ КАНАЛ☢️</a>\nДля подтверждения наличия NFT нужно пройти верификацию:",
+                                 caption=F"Приветствуем в боте коллекции "
+                                         F"<a href='https://getgems.io/collection/{settings.MAIN_COLLECTION_ADDRESS}'>TON ANTIHERO!</a>\n"
+                                         F"Наш <a href='{settings.TELEGRAM_BOT_URL}'>ТЕЛЕГРАМ КАНАЛ☢️</a>\n"
+                                         F"Для подтверждения наличия NFT нужно пройти верификацию:",
                                  reply_markup=keyboard)
         if user.verif:
             keyboard = await main_menu()
@@ -383,98 +385,42 @@ async def fight_yes(call: types.CallbackQuery):
     opponent_id = split_result[1]  # ID link
     nft_address = split_result[2]  # NFT address
 
+    nft_data = await nft_dao.get_by_params(address=nft_address, arena=True)
+    nft = nft_data[0]
+
     nft_data = await nft_dao.get_by_params(user_id=opponent_id, arena=True)
     nft_opponent = nft_data[0]
 
-    await nft_dao.edit_by_user_id(user_id=nft_link.user_id, arena=True)
+    await nft_dao.edit_by_user_id(user_id=nft_opponent.user.user_id, arena=True)
     await nft_dao.edit_by_user_id(user_id=call.from_user.id, arena=True)
     await db_session.commit()
-    # cursor.execute(f"UPDATE nfts SET arena=1 WHERE user={result[2]}")
-    # cursor.execute(f"UPDATE nfts SET arena=1 WHERE user={call.from_user.id}")
-    # conn.commit()
 
-    # res = cursor.execute(
-    #     f"SELECT address, rare, name_nft, user FROM nfts WHERE name_nft='{name_two}'").fetchone()  # TO LINK
-    nft_data = await nft_dao.get_by_params(name_nft=name_two)
-    nft_to_link: Nft = nft_link[0]
-
-    chance = determine_winner(nft_link.rare * 10, nft_to_link.rare * 10, nft_link.user_id, nft_to_link.user_id)
-    keyboard = types.InlineKeyboardMarkup(row_width=1)
-    main = InlineKeyboardButton(text="Главное меню", callback_data="main")
-    keyboard.add(main)
-    client = TonApiClient("AFUY7GKTV35FWTQAAAADSRAF4LJ7EXUZZCTDJWBERXJIOBVQNDTO3W3S2UVN655L3JMTXWY")
-    my_wallet_mnemonics = ['bleak', 'bag', 'clerk', 'artist', 'loop', 'tongue', 'middle', 'eternal', 'buzz', 'heavy',
-                           'exile', 'such', 'fiber', 'frequent', 'flock', 'wrong', 'escape', 'stable', 'heart', 'burst',
-                           'unfold', 'ticket', 'kangaroo', 'antenna']
-    my_wallet = Wallet(provider=client, mnemonics=my_wallet_mnemonics, version='v4r2')
-
-    vs = f"NFT:\n{nft_link.user_id} ⚔️ {nft_to_link.user_id}"
-    if chance == 1:
-        # print("Выиграл NFT №1")
-        await bot.send_message(chat_id=result[2], text=f"Вы выиграли!\n\nСкоро NFT придёт на ваш адрес\n\n{vs}",
-                               reply_markup=keyboard)
-        await bot.send_message(chat_id=call.from_user.id, text=f"Вы проиграли!\n\n{vs}", reply_markup=keyboard)
-
-        cursor.execute(f"UPDATE users SET win=win+1, bonus=bonus+1 WHERE user_id={result[2]}")
-        cursor.execute(f"UPDATE users SET bonus=bonus-1 WHERE user_id={call.from_user.id}")
-        conn.commit()
-
-        # win = cursor.execute(f"SELECT address FROM users WHERE user_id={result[2]}").fetchone()
-        user_data = await user_dao.get_by_params(user_id=nft_link.user_id)
-        winner: User = user_data[0]
-        # await transfer_nft(win[0], result[0])
-        resp = await my_wallet.transfer_nft(destination_address=winner.address, nft_address=nft_to_link.address)
-        # print(resp)  # 200
-        await asyncio.sleep(25)
-        resp = await my_wallet.transfer_nft(destination_address=winner.address, nft_address=nft_link.address)
-    # print(resp)  # 200
-    elif chance == 2:
-        # print("Выиграл NFT №2")
-        await bot.send_message(chat_id=nft_link.user_id, text=f"Вы проиграли!\n\n{vs}", reply_markup=keyboard)
-        await bot.send_message(chat_id=call.from_user.id, text=f"Вы выиграли!\n\nСкоро NFT придёт на ваш адрес\n\n{vs}",
-                               reply_markup=keyboard)
-
-        cursor.execute(f"UPDATE users SET win=win+1, bonus=bonus+1 WHERE user_id={call.from_user.id}")
-        cursor.execute(f"UPDATE users SET bonus=bonus-1 WHERE user_id={nft_link.user_id}")
-        conn.commit()
-
-        # win = cursor.execute(f"SELECT address FROM users WHERE user_id={call.from_user.id}").fetchone()
-        user_data = await user_dao.get_by_params(user_id=call.from_user.id)
-        winner: User = user_data[0]
-
-        # await transfer_nft(win[0], res[0])
-        resp = await my_wallet.transfer_nft(destination_address=winner.address, nft_address=nft_link.address)
-        # print(resp)  # 200
-        await asyncio.sleep(25)
-        resp = await my_wallet.transfer_nft(destination_address=winner.address, nft_address=nft_to_link.address)
-    # print(resp)  # 200
+    game_outcome = determine_winner(nft_opponent.rare * 10, nft.rare * 10, nft_opponent.user.bonus, nft.user.bonus)
+    if game_outcome == 1:
+        await game_winner_determined(w_nft=nft_opponent, l_nft=nft)
+    elif game_outcome == 2:
+        await game_winner_determined(w_nft=nft, l_nft=nft_opponent)
     else:
-        await bot.send_message(chat_id=nft_link.user_id, text=f"Ничья!\n\n{vs}", reply_markup=keyboard)
-        await bot.send_message(chat_id=call.from_user.id, text=f"Ничья!\n\n{vs}", reply_markup=keyboard)
+        await game_draw(nft_d1=nft, nft_d2=nft_opponent)
 
-        cursor.execute(f"UPDATE users SET bonus=bonus-1 WHERE user_id={nft_link.user_id}")
-        cursor.execute(f"UPDATE users SET bonus=bonus-1 WHERE user_id={call.from_user.id}")
-        conn.commit()
-
-    # cursor.execute(f"DELETE FROM nfts WHERE address='{nft_link.address]}'")
-    # cursor.execute(f"DELETE FROM nfts WHERE address='{address}'")
-    # conn.commit()
-
-    await nft_dao.delete_by_address(address=nft_link.address)
-    await nft_dao.delete_by_address(address=address)
+    await nft_dao.delete_by_address(address=nft.address)
+    await nft_dao.delete_by_address(address=nft_opponent.address)
     await db_session.commit()
 
 
 async def top_callback(call: types.CallbackQuery):
+    db_session = async_session()
+    user_dao = UserDAO(session=db_session)
+
     keyboard = types.InlineKeyboardMarkup(row_width=1)
-    main = InlineKeyboardButton(text="Главное меню", callback_data="main")
-    keyboard.add(main)
+    kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    keyboard.add(kb_main)
 
-    cursor.execute(f"SELECT name, win FROM users ORDER BY win DESC LIMIT 10")
-    result = cursor.fetchall()
-
+    top = await user_dao.get_top()
+    if not top:
+        top = []
     await call.message.edit_text(
-        "Топ пользователь:{}".format("".join(["\n" + str(f"<b>%s</b> %s" % (row[0], row[1])) for row in result])),
+        "Топ пользователей:{}".format("".join(["\n" + str(f"<b>%s</b> %s" % (user.name, user.win)) for user in top])),
         reply_markup=keyboard)
 
 
@@ -484,12 +430,12 @@ async def inline_handler(query: types.InlineQuery):
 
     id = query.from_user.id
 
-    text = f"<a href='https://t.me/BATTLE_GAME_ANTIHERO_BOT'>TON ANTIHERO☢️</a>\nСразись с моим {text}\nНА АРЕНЕ."
+    text = f"<a href='{settings.TELEGRAM_BOT_URL}'>TON ANTIHERO☢️</a>\nСразись с моим {text}\nНА АРЕНЕ."
     title = 'Пригласить на бой'
     description = "Пригласи друга в бой"
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
-    test = InlineKeyboardButton(text="Сразиться", url=f"http://t.me/Test_code_torkusz_bot?start={id}")
+    test = InlineKeyboardButton(text="Сразиться", url=f"{settings.TELEGRAM_BOT_URL}?start={id}")
     keyboard.add(test)
 
     articles = [types.InlineQueryResultArticle(
@@ -502,13 +448,3 @@ async def inline_handler(query: types.InlineQuery):
     )]
 
     await query.answer(articles, cache_time=2, is_personal=True)
-
-
-async def rel(message: types.Message):
-    if message.from_user.id == 710140441:
-        await message.reply(f"{message.chat.id}")
-
-
-async def check(message: types.Message):
-    if message.from_user.id == 710140441:
-        await message.reply(f"{message}")

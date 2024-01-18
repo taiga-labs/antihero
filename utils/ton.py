@@ -59,14 +59,6 @@ async def search_nft_by_name(name: str, address: str, user_id: str) -> str:
             return nft_address
 
 
-import asyncio
-
-asyncio.run(search_nft_by_name(name='Aufin',
-                               address=settings.MAIN_WALLET_ADDRESS,
-                               user_id='1')
-            )
-
-
 async def search_nft_game(name: str) -> str | None:
     tonapi = AsyncTonapi(api_key=settings.TON_API_KEY)
     search = await tonapi.accounts.get_nfts(account_id=settings.MAIN_WALLET_ADDRESS,

@@ -3,6 +3,8 @@ from pydantic_settings import BaseSettings
 
 
 class Config(BaseSettings):
+    DEV: bool
+
     DATABASE_URL: PostgresDsn
 
     TELEGRAM_API_KEY: str
@@ -10,6 +12,7 @@ class Config(BaseSettings):
     WEBHOOK_PATH: str
     WEBHOOK_PORT: str
     PATH_CERT: str
+    TELEGRAM_BOT_URL: str
 
     TON_API_KEY: str
     MAIN_WALLET_ADDRESS: str
