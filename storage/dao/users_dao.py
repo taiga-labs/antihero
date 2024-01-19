@@ -9,14 +9,14 @@ class UserDAO(BaseDAO):
     def __init__(self, session: AsyncSession, model=User):
         super().__init__(model, session)
 
-    async def is_exists(self, user_id) -> bool:
-        data = await self.get_by_params(user_id=user_id)
+    async def is_exists(self, telegram_id) -> bool:
+        data = await self.get_by_params(telegram_id=telegram_id)
         if data:
             return True
         return False
 
-    async def edit_by_user_id(self, user_id: int, **params) -> None:
-        sql = update(self.model).where(self.model.user_id == user_id).values(**params)
+    async def edit_by_telegram_id(self, telegram_id: int, **params) -> None:
+        sql = update(self.model).where(self.model.telegram_id == telegram_id).values(**params)
         await self.session.execute(sql)
 
     async def get_top(self) -> list:

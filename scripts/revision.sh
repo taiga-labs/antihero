@@ -1,3 +1,3 @@
 #!/bin/sh -e
 
-alembic revision -m "first start" --autogenerate
+alembic revision -m "nft telegram_id constraint" --autogenerate

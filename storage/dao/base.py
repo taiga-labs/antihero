@@ -20,10 +20,9 @@ class BaseDAO:
         data = await self.session.execute(sql)
         return list(data.scalars().all())
 
-    async def add(self, data: dict) -> int:
-        sql = insert(self.model).values(**data).returning(self.model.id)
-        row = await self.session.execute(sql)
-        return row.fetchone().id
+    async def add(self, data: dict) -> None:
+        sql = insert(self.model).values(**data)
+        await self.session.execute(sql)
 
     async def edit_by_id(self, id: int, **params) -> None:
         sql = update(self.model).where(self.model.id == id).values(**params)

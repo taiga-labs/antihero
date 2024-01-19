@@ -1,4 +1,4 @@
-from sqlalchemy import update, select, delete, func
+from sqlalchemy import update, select, delete, func, not_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from storage.dao.base import BaseDAO
@@ -14,14 +14,14 @@ class NftDAO(BaseDAO):
         await self.session.execute(sql)
 
     async def edit_by_address(self, address: str, **params) -> None:
-        sql = update(self.model).where(self.model.addr == address).values(**params)
+        sql = update(self.model).where(self.model.address == address).values(**params)
         await self.session.execute(sql)
 
     async def delete_by_address(self, address: str) -> None:
-        sql = delete(self.model).where(self.model.addr == address)
+        sql = delete(self.model).where(self.model.address == address)
         await self.session.execute(sql)
 
     async def get_opponent(self, user_id: str) -> Nft:
-        sql = select(self.model).order_by(func.random()).where(self.model.duel == True).filter(self.model.user_id.notlike(user_id))
+        sql = select(self.model).order_by(func.random()).where(self.model.duel == True).filter(not_(self.model.user_id == user_id))
         data = await self.session.execute(sql)
         return data.scalar_one_or_none()    # TODO check fetchone() or first()

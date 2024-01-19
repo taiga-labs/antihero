@@ -2,9 +2,8 @@ from pydantic import BaseModel
 
 
 class UserModel(BaseModel):
-    user_id: int
+    telegram_id: int
     name: str
-    address: str
 
 
 class NftModel(BaseModel):
