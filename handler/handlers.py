@@ -284,7 +284,7 @@ async def remove_nft_from_arena(call: types.CallbackQuery):
     nft_data = await nft_dao.get_by_params(user_id=call.from_user.id, address=address)
     nft = nft_data[0]
 
-    await nft_dao.edit_by_address(address=address, arens=False)
+    await nft_dao.edit_by_address(address=address, arena=False)
     await db_session.commit()
 
     keyboard = types.InlineKeyboardMarkup(row_width=2)
@@ -326,7 +326,7 @@ async def arena_yes(call: types.CallbackQuery):
 
     address = call.data[6:]
     await nft_dao.edit_by_address(address=address, arena=True)
-    db_session.commit()
+    await db_session.commit()
 
     nft_data = await nft_dao.get_by_params(address=address)
     nft = nft_data[0]

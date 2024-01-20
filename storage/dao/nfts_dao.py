@@ -21,7 +21,8 @@ class NftDAO(BaseDAO):
         sql = delete(self.model).where(self.model.address == address)
         await self.session.execute(sql)
 
-    async def get_opponent(self, user_id: str) -> Nft:
-        sql = select(self.model).order_by(func.random()).where(self.model.duel == True).filter(not_(self.model.user_id == user_id))
+    async def get_opponent(self, user_id: int) -> Nft | None:
+        sql = select(self.model).order_by(func.random()).where(self.model.duel == True,
+                                                               not_(self.model.user_id.in_([user_id])))
         data = await self.session.execute(sql)
-        return data.scalar_one_or_none()    # TODO check fetchone() or first()
+        return data.scalar()
