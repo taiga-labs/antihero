@@ -38,7 +38,7 @@ async def start(message: types.Message):
             opponent_id = message.get_args()
 
             # Перешедший по ссылке
-            nfts = await nft_dao.get_by_params(telegram_id=message.from_user.id)
+            nfts = await nft_dao.get_by_params(user_id=message.from_user.id)
 
             buttons = []
             keyboard = types.InlineKeyboardMarkup(row_width=1)
