@@ -3,6 +3,7 @@ from aiogram import types
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import InlineKeyboardButton
 
+from config.settings import settings
 from create_bot import bot
 from storage.dao.users_dao import UserDAO
 from storage.driver import async_session
@@ -55,22 +56,22 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft):
     kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main)
 
-    vs = f"NFT:\n{w_nft.user.user_id} ⚔️ {l_nft.user.user_id}"
+    vs = f"NFT:\n{w_nft.user.telegram_id} ⚔️ {l_nft.user.telegram_id}"
 
     # print("Выиграл NFT №1")
-    await bot.send_message(chat_id=w_nft.user.user_id,
+    await bot.send_message(chat_id=w_nft.user.telegram_id,
                            text=f"Вы выиграли!\n\nСкоро NFT придёт на ваш адрес\n\n{vs}",
                            reply_markup=keyboard)
-    await bot.send_message(chat_id=l_nft.user.user_id,
+    await bot.send_message(chat_id=l_nft.user.telegram_id,
                            text=f"Вы проиграли!\n\n{vs}",
                            reply_markup=keyboard)
 
-    await user_dao.edit_by_telegram_id(telegram_id=w_nft.user.user_id, win=w_nft.user.win + 1)
-    await user_dao.edit_by_telegram_id(telegram_id=l_nft.user.user_id, bonus=l_nft.user.bonus - 1)
+    await user_dao.edit_by_telegram_id(telegram_id=w_nft.user.telegram_id, win=w_nft.user.win + 1)
+    await user_dao.edit_by_telegram_id(telegram_id=l_nft.user.telegram_id, bonus=l_nft.user.bonus - 1)
     await db_session.commit()
 
-    client = TonApiClient()
-    my_wallet_mnemonics = []
+    client = TonApiClient(settings.TON_API_KEY)
+    my_wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS)
     my_wallet = Wallet(provider=client, mnemonics=my_wallet_mnemonics, version='v4r2')
 
     # TODO добавить в бд проверку, что nft возвращена
@@ -91,17 +92,18 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft):
     kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main)
 
-    vs = f"NFT:\n{nft_d1.user.user_id} ⚔️ {nft_d2.user.user_id}"
+    vs = f"NFT:\n{nft_d1.user.telegram_id} ⚔️ {nft_d2.user.telegram_id}"
 
-    await bot.send_message(chat_id=nft_d1.user.user_id, text=f"Ничья!\n\n{vs}", reply_markup=keyboard)
-    await bot.send_message(chat_id=nft_d2.user.user_id, text=f"Ничья!\n\n{vs}", reply_markup=keyboard)
+    await bot.send_message(chat_id=nft_d1.user.telegram_id, text=f"Ничья!\n\n{vs}", reply_markup=keyboard)
+    await bot.send_message(chat_id=nft_d2.user.telegram_id, text=f"Ничья!\n\n{vs}", reply_markup=keyboard)
 
-    await user_dao.edit_by_telegram_id(telegram_id=nft_d1.user.user_id, bonus=nft_d1.user.bonus - 1)
-    await user_dao.edit_by_telegram_id(telegram_id=nft_d2.user.user_id, bonus=nft_d2.user.bonus - 1)
+    await user_dao.edit_by_telegram_id(telegram_id=nft_d1.user.telegram_id, bonus=nft_d1.user.bonus - 1)
+    await user_dao.edit_by_telegram_id(telegram_id=nft_d2.user.telegram_id, bonus=nft_d2.user.bonus - 1)
     await db_session.commit()
 
-    client = TonApiClient()
-    my_wallet_mnemonics = []
+    client = TonApiClient(settings.TON_API_KEY)
+    a = settings.MAIN_WALLET_MNEMONICS
+    my_wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS)
     my_wallet = Wallet(provider=client, mnemonics=my_wallet_mnemonics, version='v4r2')
     await my_wallet.transfer_nft(destination_address=nft_d1.user.address, nft_address=nft_d1.address)
     await asyncio.sleep(25)

@@ -15,6 +15,7 @@ class Config(BaseSettings):
     TELEGRAM_BOT_URL: str
 
     TON_API_KEY: str
+    MAIN_WALLET_MNEMONICS: str
     MAIN_WALLET_ADDRESS: str
     MAIN_COLLECTION_ADDRESS: str
 

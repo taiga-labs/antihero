@@ -51,8 +51,6 @@ async def start(message: types.Message):
             keyboard.add(kb_main)
             await message.reply("Выберите NFT для игры", reply_markup=keyboard)
 
-        # await bot.delete_message(message.chat.id, message.message_id)
-
         if not await user_dao.is_exists(telegram_id=message.from_user.id):
             user_model = UserModel(telegram_id=message.from_user.id,
                                    name=message.from_user.first_name)
@@ -81,6 +79,8 @@ async def start(message: types.Message):
             bt = InlineKeyboardButton(text="Проверка оплаты", callback_data="prov")
             keyboard.add(bt)
             await message.reply("Кажется у тебя нет NFT...", reply_markup=keyboard)
+    await bot.delete_message(chat_id=message.chat.id,
+                             message_id=message.message_id)
     await db_session.close()
 
 
@@ -94,7 +94,7 @@ async def add_address(message: types.Message, state: FSMContext):
     db_session = async_session()
     user_dao = UserDAO(session=db_session)
 
-    await bot.delete_message(message.chat.id, message.message_id)
+    # await bot.delete_message(message.chat.id, message.message_id)
     if message.text.lower() == "отмена":
         await state.finish()
         await message.reply("Отменил\n\nВведите /start")
@@ -111,6 +111,8 @@ async def add_address(message: types.Message, state: FSMContext):
         except Exception as err:
             print(err)
             await bot.send_message(message.from_user.id, "Мне кажется, этот кошелёк уже есть...")
+    await bot.delete_message(chat_id=message.chat.id,
+                             message_id=message.message_id)
     await state.finish()
     await db_session.close()
 
@@ -175,8 +177,9 @@ async def select_nft(call: types.CallbackQuery, state: FSMContext):
                              caption=f"Чтобы сыграть необходимо отправить NFT на адрес <code>{settings.MAIN_WALLET_ADDRESS}</code> и произвести оплату в 0.1 TON",
                              parse_mode=ParseMode.HTML,
                              reply_markup=keyboard)
-        await bot.delete_message(call.message.chat.id, call.message.message_id)
         await state.finish()
+    await bot.delete_message(chat_id=call.message.chat.id,
+                             message_id=call.message.message_id)
     await db_session.close()
 
 
@@ -192,7 +195,7 @@ async def callback_game_payment_prove(call: types.CallbackQuery):
     if await transaction_exist(compare_content=nft_address):
         nft_name, nft_rare = await search_nft(nft_address=nft_address)  # TODO исправить возвращаемые значения
         if nft_rare:
-            await bot.delete_message(call.message.chat.id, call.message.message_id)
+            # await bot.delete_message(call.message.chat.id, call.message.message_id)
             keyboard = await main_menu()
             await call.message.answer(f"Твоя NFT добавлена во внутренний кошелёк", reply_markup=keyboard)
             nft_model = NftModel(user_id=user.telegram_id,
@@ -205,6 +208,8 @@ async def callback_game_payment_prove(call: types.CallbackQuery):
             await call.message.answer(text="Необходимо отправить NFT")
     else:
         await call.message.answer(text="Необходимо заплатить комиссию")
+    await bot.delete_message(chat_id=call.message.chat.id,
+                             message_id=call.message.message_id)
     await db_session.close()
 
 
@@ -400,8 +405,8 @@ async def fight_yes(call: types.CallbackQuery):
     nft_dao = NftDAO(session=db_session)
 
     string = call.data
-    split_result = string.split('_')
-    opponent_id = split_result[1]  # ID link
+    split_result = string.split('_', 2)
+    opponent_id = int(split_result[1])  # ID link
     nft_address = split_result[2]  # NFT address
 
     nft_data = await nft_dao.get_by_params(address=nft_address, arena=True)
@@ -414,7 +419,8 @@ async def fight_yes(call: types.CallbackQuery):
     await nft_dao.edit_by_user_id(user_id=call.from_user.id, arena=True)
     await db_session.commit()
 
-    game_outcome = determine_winner(nft_opponent.rare * 10, nft.rare * 10, nft_opponent.user.bonus, nft.user.bonus)
+    game_outcome = await determine_winner(nft_opponent.rare * 10, nft.rare * 10, nft_opponent.user.bonus, nft.user.bonus)
+    game_outcome = 0
     if game_outcome == 1:
         await game_winner_determined(w_nft=nft_opponent, l_nft=nft)
     elif game_outcome == 2:
