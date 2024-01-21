@@ -49,7 +49,7 @@ async def start(message: types.Message):
             keyboard.add(*buttons)
             kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
             keyboard.add(kb_main)
-            await message.answer("Выберите NFT для игры", reply_markup=keyboard)
+            await message.reply("Выберите NFT для игры", reply_markup=keyboard)
 
         # await bot.delete_message(message.chat.id, message.message_id)
 
@@ -75,12 +75,12 @@ async def start(message: types.Message):
                                    reply_markup=keyboard)
         if user.verif:
             keyboard = await main_menu()
-            await message.answer("Главное меню:", reply_markup=keyboard)
+            await message.reply("Главное меню:", reply_markup=keyboard)
         else:
             keyboard = types.InlineKeyboardMarkup()
             bt = InlineKeyboardButton(text="Проверка оплаты", callback_data="prov")
             keyboard.add(bt)
-            await message.answer("Кажется у тебя нет NFT...", reply_markup=keyboard)
+            await message.reply("Кажется у тебя нет NFT...", reply_markup=keyboard)
     await db_session.close()
 
 
@@ -107,7 +107,7 @@ async def add_address(message: types.Message, state: FSMContext):
             li = InlineKeyboardButton(text="Оплата", url=link)
             bt = InlineKeyboardButton(text="Проверка оплаты", callback_data="prov")
             keyboard.add(li, bt)
-            await message.answer("Переведи 0.01 TON, чтобы я смог найти твои NFT", reply_markup=keyboard)
+            await message.reply("Переведи 0.01 TON, чтобы я смог найти твои NFT", reply_markup=keyboard)
         except Exception as err:
             print(err)
             await bot.send_message(message.from_user.id, "Мне кажется, этот кошелёк уже есть...")
@@ -456,8 +456,8 @@ async def inline_handler(query: types.InlineQuery):
     description = "Пригласи друга в бой"
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
-    test = InlineKeyboardButton(text="Сразиться", url=f"{settings.TELEGRAM_BOT_URL}?start={id}")
-    keyboard.add(test)
+    kb_fight = InlineKeyboardButton(text="Сразиться", url=f"{settings.TELEGRAM_BOT_URL}?start={id}")
+    keyboard.add(kb_fight)
     articles = [types.InlineQueryResultArticle(
         id=result_id,
         title=title,
