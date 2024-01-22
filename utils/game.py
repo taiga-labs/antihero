@@ -102,7 +102,6 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft):
     await db_session.commit()
 
     client = TonApiClient(settings.TON_API_KEY)
-    a = settings.MAIN_WALLET_MNEMONICS
     my_wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS)
     my_wallet = Wallet(provider=client, mnemonics=my_wallet_mnemonics, version='v4r2')
     await my_wallet.transfer_nft(destination_address=nft_d1.user.address, nft_address=nft_d1.address)
