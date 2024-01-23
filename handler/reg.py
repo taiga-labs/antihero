@@ -1,9 +1,9 @@
 from aiogram import Dispatcher
 from aiogram.types import ContentType
 
-from handler.handlers import start, option_one, add_address, select_nft, main, exit_game, add_nft, \
-    wallet, get_nft_on_arena, remove_nft_from_arena, search, invite, search_game, nft_yes, callback_game_payment_prove, arena_yes, fight_yes, inline_handler, \
-    callback_account_payment_prove, top_callback
+from handler.handlers import start, select_nft, main, exit_game, add_nft, \
+    wallet, get_nft_on_arena, remove_nft_from_arena, search, invite, search_game, nft_yes, callback_game_payment_prove, \
+    arena_yes, fight_yes, inline_handler, top_callback, choose_wallet, connect_wallet
 from utils.game import UserState
 
 
@@ -12,11 +12,13 @@ def register_handlers_client(dp: Dispatcher) -> None:
     # Commands
     dp.register_message_handler(start, commands=["start"])
     # Listeners
-    dp.register_message_handler(add_address, state=UserState.addr)
     dp.register_inline_handler(inline_handler)
     # Callbacks
-    dp.register_callback_query_handler(option_one, text='option_one')
-    dp.register_callback_query_handler(callback_account_payment_prove, text='prov')
+    dp.register_callback_query_handler(choose_wallet, text='choose_wallet')
+    dp.register_callback_query_handler(connect_wallet, text_contains='connect:')
+
+
+
     dp.register_callback_query_handler(select_nft, state=UserState.nft)
     dp.register_callback_query_handler(callback_game_payment_prove, text_contains='game_')
     dp.register_callback_query_handler(main, text='main')
