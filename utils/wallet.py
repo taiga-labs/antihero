@@ -3,7 +3,6 @@ from pytonconnect import TonConnect
 from pytonconnect.storage import IStorage
 
 from config.settings import settings
-from storage.driver import get_redis_async_client, red
 
 
 class TcStorage(IStorage):
