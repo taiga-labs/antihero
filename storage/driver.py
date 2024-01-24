@@ -18,3 +18,5 @@ async_session = async_sessionmaker(db_engine,
 
 async def get_redis_async_client() -> Redis:
     return aioredis.from_url(settings.REDIS_URL, decode_responses=True)
+
+red = aioredis.from_url(settings.REDIS_URL, decode_responses=True)

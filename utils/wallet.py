@@ -3,7 +3,7 @@ from pytonconnect import TonConnect
 from pytonconnect.storage import IStorage
 
 from config.settings import settings
-from storage.driver import get_redis_async_client
+from storage.driver import get_redis_async_client, red
 
 
 class TcStorage(IStorage):
@@ -25,7 +25,6 @@ class TcStorage(IStorage):
         await self.client.delete(self._get_key(key))
 
 
-async def get_connector(chat_id: int):
-    redis = await get_redis_async_client()
-    async with redis.client() as broker:
-        return TonConnect(settings.MANIFEST_URL, storage=TcStorage(chat_id=chat_id, broker_client=broker))
+async def get_connector(chat_id: int, broker: Redis):
+    return TonConnect(settings.MANIFEST_URL, storage=TcStorage(chat_id=chat_id, broker_client=broker))
+

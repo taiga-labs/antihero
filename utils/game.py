@@ -11,11 +11,6 @@ from storage.models import Nft
 from TonTools import *
 
 
-async def anti_flood(*args, **kwargs):
-    m = args[0]
-    await m.answer("Не так быстро")
-
-
 async def determine_winner(chance1, chance2, bonus1, bonus2):
     if bonus1 > 0:
         user_one = chance1 + bonus1
@@ -58,8 +53,8 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft):
                            text=f"Вы проиграли!\n\n{vs}",
                            reply_markup=keyboard)
 
-    await user_dao.edit_by_telegram_id(telegram_id=w_nft.user.telegram_id, win=w_nft.user.win + 1)
-    await user_dao.edit_by_telegram_id(telegram_id=l_nft.user.telegram_id, bonus=l_nft.user.bonus - 1)
+    await user_dao.edit_active_by_telegram_id(telegram_id=w_nft.user.telegram_id, win=w_nft.user.win + 1)
+    await user_dao.edit_active_by_telegram_id(telegram_id=l_nft.user.telegram_id, bonus=l_nft.user.bonus - 1)
     await db_session.commit()
 
     client = TonApiClient(settings.TON_API_KEY)
@@ -89,8 +84,8 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft):
     await bot.send_message(chat_id=nft_d1.user.telegram_id, text=f"Ничья!\n\n{vs}", reply_markup=keyboard)
     await bot.send_message(chat_id=nft_d2.user.telegram_id, text=f"Ничья!\n\n{vs}", reply_markup=keyboard)
 
-    await user_dao.edit_by_telegram_id(telegram_id=nft_d1.user.telegram_id, bonus=nft_d1.user.bonus - 1)
-    await user_dao.edit_by_telegram_id(telegram_id=nft_d2.user.telegram_id, bonus=nft_d2.user.bonus - 1)
+    await user_dao.edit_active_by_telegram_id(telegram_id=nft_d1.user.telegram_id, bonus=nft_d1.user.bonus - 1)
+    await user_dao.edit_active_by_telegram_id(telegram_id=nft_d2.user.telegram_id, bonus=nft_d2.user.bonus - 1)
     await db_session.commit()
 
     client = TonApiClient(settings.TON_API_KEY)

@@ -5,7 +5,8 @@ from create_bot import dp
 from handlers.handlers_menu import main_menu
 from storage.dao.nfts_dao import NftDAO
 from storage.driver import async_session
-from utils.game import anti_flood, determine_winner, game_winner_determined, game_draw
+from utils.game import determine_winner, game_winner_determined, game_draw
+from utils.middleware import anti_flood
 
 
 async def invite(call: types.CallbackQuery):

@@ -6,9 +6,9 @@ from config.settings import settings
 from create_bot import dp, bot
 from storage.dao.nfts_dao import NftDAO
 from storage.dao.users_dao import UserDAO
-from storage.driver import async_session
+from storage.driver import async_session, get_redis_async_client
 from storage.schemas import UserModel
-from utils.game import anti_flood
+from utils.middleware import anti_flood
 from utils.wallet import get_connector
 
 
@@ -137,10 +137,16 @@ async def top_callback(call: types.CallbackQuery):
 
 
 async def disconnect(call: types.CallbackQuery):
-    connector = await get_connector(chat_id=call.message.chat.id)
+    db_session = async_session()
+    user_dao = UserDAO(session=db_session)
+    await user_dao.edit_active_by_telegram_id(telegram_id=call.from_user.id, active=False)
+
+    redis = await get_redis_async_client()
+    connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
     await connector.restore_connection()
     await connector.disconnect()
     await call.message.answer('Адрес отвязан')
+    await redis.close()
 
 
 async def inline_handler(query: types.InlineQuery):

@@ -13,9 +13,9 @@ from create_bot import dp, bot
 from handlers.handlers_menu import main_menu
 from storage.dao.nfts_dao import NftDAO
 from storage.dao.users_dao import UserDAO
-from storage.driver import async_session
+from storage.driver import async_session, get_redis_async_client
 from storage.schemas import NftModel
-from utils.game import anti_flood
+from utils.middleware import anti_flood
 from utils.ton import get_nft_by_account, get_nft_by_name
 from utils.wallet import get_connector
 
@@ -47,11 +47,8 @@ async def add_nft(call: types.CallbackQuery):
     user_dao = UserDAO(session=db_session)
     nft_dao = NftDAO(session=db_session)
 
-    connector = await get_connector(chat_id=call.message.chat.id)
-    connected = await connector.restore_connection()
-    if not connected:
-        await call.message.answer('Требуется привязка кошелька!')
-        return
+    redis = await get_redis_async_client()
+    connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
 
     user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
     user = user_data[0]
@@ -82,16 +79,19 @@ async def add_nft(call: types.CallbackQuery):
         await call.message.answer(text='Время подтверждения истекло',
                                   parse_mode=ParseMode.HTML,
                                   reply_markup=keyboard)
+        await redis.close()
         return
     except UserRejectsError:
         await call.message.answer(text='Вы отменили перевод',
                                   parse_mode=ParseMode.HTML,
                                   reply_markup=keyboard)
+        await redis.close()
         return
     except Exception as e:
         await call.message.answer(text=f'Неизвестная ошибка: {e}',
                                   parse_mode=ParseMode.HTML,
                                   reply_markup=keyboard)
+        await redis.close()
         return
 
     nft_model = NftModel(user_id=user.id,
@@ -112,6 +112,7 @@ async def add_nft(call: types.CallbackQuery):
     await bot.delete_message(chat_id=call.message.chat.id,
                              message_id=call.message.message_id)
     await db_session.close()
+    await redis.close()
 
 
 async def select_to_activate_nft(call: types.CallbackQuery):
@@ -140,11 +141,8 @@ async def pay_fee(call: types.CallbackQuery):
     db_session = async_session()
     nft_dao = NftDAO(session=db_session)
 
-    connector = await get_connector(chat_id=call.message.chat.id)
-    connected = await connector.restore_connection()
-    if not connected:
-        await call.message.answer('Требуется привязка кошелька!')
-        return
+    redis = await get_redis_async_client()
+    connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
 
     nft_address = call.data[8:]
     data = {
@@ -175,17 +173,20 @@ async def pay_fee(call: types.CallbackQuery):
             text='Время подтверждения истекло\n Повторно активировать NFT можно в разделе Кошелек',
             parse_mode=ParseMode.HTML,
             reply_markup=keyboard)
+        await redis.close()
         return
     except UserRejectsError:
         await call.message.answer(text='Вы отменили перевод\n Повторно активировать NFT можно в разделе Кошелек',
                                   parse_mode=ParseMode.HTML,
                                   reply_markup=keyboard)
+        await redis.close()
         return
     except Exception as e:
         await call.message.answer(
             text=f'Неизвестная ошибка: {e}\n Повторно активировать NFT можно в разделе Кошелек',
             parse_mode=ParseMode.HTML,
             reply_markup=keyboard)
+        await redis.close()
         return
     await call.message.answer(f"NFT активирована", reply_markup=keyboard)
     await nft_dao.edit_by_address(address=nft_address, activated=True)
@@ -194,6 +195,7 @@ async def pay_fee(call: types.CallbackQuery):
     await bot.delete_message(chat_id=call.message.chat.id,
                              message_id=call.message.message_id)
     await db_session.close()
+    await redis.close()
 
 
 @dp.throttled(anti_flood)

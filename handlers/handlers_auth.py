@@ -5,14 +5,16 @@ from TonTools import *
 from create_bot import dp
 from handlers.handlers_menu import main_menu
 from storage.dao.users_dao import UserDAO
-from storage.driver import async_session
-from utils.game import anti_flood
+from storage.driver import async_session, get_redis_async_client
+from utils.middleware import anti_flood
 from utils.wallet import get_connector
 
 
 async def choose_wallet(call: types.CallbackQuery):
-    connector = await get_connector(chat_id=call.message.chat.id)
+    redis = await get_redis_async_client()
+    connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
     wallets_list = connector.get_wallets()
+    await redis.close()
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for w in wallets_list:
         walet_button = InlineKeyboardButton(text=w['name'], callback_data=f'connect:{w["name"]}')
@@ -27,7 +29,8 @@ async def connect_wallet(call: types.CallbackQuery):
     db_session = async_session()
     user_dao = UserDAO(session=db_session)
 
-    connector = await get_connector(chat_id=call.message.chat.id)
+    redis = await get_redis_async_client()
+    connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
     wallets_list = connector.get_wallets()
     wallet_name = call.data[8:]
     wlt = None
@@ -53,7 +56,7 @@ async def connect_wallet(call: types.CallbackQuery):
             if connector.account.address:
                 wallet_address = connector.account.address
                 wallet_address = Address(wallet_address).to_string(is_user_friendly=True, is_bounceable=False)
-                await user_dao.edit_by_telegram_id(telegram_id=call.from_user.id, address=wallet_address, active=True)
+                await user_dao.edit_active_by_telegram_id(telegram_id=call.from_user.id, address=wallet_address)
                 await db_session.commit()
                 await call.message.answer(f'Успешная авторизация!\nАдрес кошелька:\n\n<code>{wallet_address}</code>',
                                           parse_mode=ParseMode.HTML)
@@ -61,6 +64,7 @@ async def connect_wallet(call: types.CallbackQuery):
                 await call.message.answer("Главное меню:", reply_markup=keyboard)
 
                 # logger.info(f'Connected with address: {wallet_address}')  # TODO logger
+            await redis.close()
             return
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -69,3 +73,4 @@ async def connect_wallet(call: types.CallbackQuery):
     await call.message.answer(f'Истекло время авторизации',
                               parse_mode=ParseMode.HTML,
                               reply_markup=keyboard)
+    await redis.close()
