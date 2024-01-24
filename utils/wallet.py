@@ -1,13 +1,9 @@
 from aioredis import Redis
 from pytonconnect import TonConnect
-from pytonconnect.storage import IStorage, DefaultStorage
-
-from sqlalchemy.ext.asyncio import AsyncSession
+from pytonconnect.storage import IStorage
 
 from config.settings import settings
-from storage.dao.users_dao import UserDAO
 from storage.driver import get_redis_async_client
-from storage.schemas import UserModel
 
 
 class TcStorage(IStorage):
@@ -23,7 +19,6 @@ class TcStorage(IStorage):
 
     async def get_item(self, key: str, default_value: str = None):
         value = await self.client.get(name=self._get_key(key))
-        # return value.decode() if value else default_value
         return value if value else default_value
 
     async def remove_item(self, key: str):

@@ -2,9 +2,11 @@ from aiogram import types
 from aiogram.types import InlineKeyboardButton, ParseMode
 from TonTools import *
 
+from create_bot import dp
 from handlers.handlers_menu import main_menu
 from storage.dao.users_dao import UserDAO
 from storage.driver import async_session
+from utils.game import anti_flood
 from utils.wallet import get_connector
 
 
@@ -20,6 +22,7 @@ async def choose_wallet(call: types.CallbackQuery):
                               reply_markup=keyboard)  # TODO fix отмена
 
 
+@dp.throttled(anti_flood, rate=3)
 async def connect_wallet(call: types.CallbackQuery):
     db_session = async_session()
     user_dao = UserDAO(session=db_session)
@@ -41,16 +44,16 @@ async def connect_wallet(call: types.CallbackQuery):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     url_button = InlineKeyboardButton(text='Подключить', url=generated_url)
     keyboard.add(url_button)
-    await call.message.answer(text='У тебя есть 3 минуты на подключение кошелька',
+    await call.message.answer(text='У тебя есть 5 минут на подключение кошелька',
                               reply_markup=keyboard)
 
-    for i in range(1, 180):
+    for i in range(1, 300):
         await asyncio.sleep(1)
         if connector.connected:
             if connector.account.address:
                 wallet_address = connector.account.address
                 wallet_address = Address(wallet_address).to_string(is_user_friendly=True, is_bounceable=False)
-                await user_dao.edit_by_telegram_id(telegram_id=call.from_user.id, address=wallet_address)
+                await user_dao.edit_by_telegram_id(telegram_id=call.from_user.id, address=wallet_address, active=True)
                 await db_session.commit()
                 await call.message.answer(f'Успешная авторизация!\nАдрес кошелька:\n\n<code>{wallet_address}</code>',
                                           parse_mode=ParseMode.HTML)

@@ -1,6 +1,5 @@
 import random
 from aiogram import types
-from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import InlineKeyboardButton
 
 from config.settings import settings
@@ -15,12 +14,6 @@ from TonTools import *
 async def anti_flood(*args, **kwargs):
     m = args[0]
     await m.answer("Не так быстро")
-
-
-class UserState(StatesGroup):
-    nft = State()
-    name = State()
-    description = State()
 
 
 async def determine_winner(chance1, chance2, bonus1, bonus2):

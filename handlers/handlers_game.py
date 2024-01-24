@@ -10,8 +10,13 @@ from utils.game import anti_flood, determine_winner, game_winner_determined, gam
 
 async def invite(call: types.CallbackQuery):
     db_session = async_session()
+
+    user_dao = NftDAO(session=db_session)
+    user_data = await user_dao.get_by_params(user_id=call.from_user.id, active=True)
+    user = user_data[0]
+
     nft_dao = NftDAO(session=db_session)
-    nft_data = await nft_dao.get_by_params(user_id=call.from_user.id, activated=True)
+    nft_data = await nft_dao.get_by_params(user_id=user.id, activated=True)
     buttons = []
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for nft in nft_data:
@@ -45,9 +50,13 @@ async def arena_yes(call: types.CallbackQuery):
 
 async def search_game(call: types.CallbackQuery):
     db_session = async_session()
-    nft_dao = NftDAO(session=db_session)
 
-    nft_data = await nft_dao.get_by_params(user_id=call.from_user.id, activated=True, arena=False)
+    user_dao = NftDAO(session=db_session)
+    user_data = await user_dao.get_by_params(user_id=call.from_user.id, active=True)
+    user = user_data[0]
+
+    nft_dao = NftDAO(session=db_session)
+    nft_data = await nft_dao.get_by_params(user_id=user.id, activated=True, arena=False)
 
     buttons = []
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -64,13 +73,17 @@ async def search_game(call: types.CallbackQuery):
 @dp.throttled(anti_flood)
 async def nft_yes(call: types.CallbackQuery):
     db_session = async_session()
-    nft_dao = NftDAO(session=db_session)
+
+    user_dao = NftDAO(session=db_session)
+    user_data = await user_dao.get_by_params(user_id=call.from_user.id, active=True)
+    user = user_data[0]
 
     address = call.data[4:]
+    nft_dao = NftDAO(session=db_session)
     await nft_dao.edit_by_address(address=address, duel=True)
     await db_session.commit()
 
-    nft_opponent = await nft_dao.get_opponent(user_id=call.from_user.id)
+    nft_opponent = await nft_dao.get_opponent(user_id=user.id)
 
     if nft_opponent:
         await nft_dao.edit_by_user_id(user_id=nft_opponent.user_id, duel=False)
@@ -106,8 +119,8 @@ async def fight_yes(call: types.CallbackQuery):
 
     string = call.data
     split_result = string.split('_', 2)
-    opponent_id = int(split_result[1])  # ID link
-    nft_address = split_result[2]  # NFT address
+    opponent_id = int(split_result[1])
+    nft_address = split_result[2]
 
     nft_data = await nft_dao.get_by_params(address=nft_address, arena=True)
     nft = nft_data[0]
@@ -121,7 +134,6 @@ async def fight_yes(call: types.CallbackQuery):
 
     game_outcome = await determine_winner(nft_opponent.rare * 10, nft.rare * 10, nft_opponent.user.bonus,
                                           nft.user.bonus)
-    game_outcome = 0
     if game_outcome == 1:
         await game_winner_determined(w_nft=nft_opponent, l_nft=nft)
     elif game_outcome == 2:

@@ -1,28 +1,22 @@
 from typing import Any
 
 import requests
-from aiogram.types import InlineKeyboardButton
 from pytonapi import AsyncTonapi
+from pytonapi.schema.nft import NftItem
 
 from config.settings import settings
 
 
-async def get_nft_by_account(address: str) -> list[InlineKeyboardButton]:
+async def get_nft_by_account(address: str) -> list[NftItem]:
     tonapi = AsyncTonapi(api_key=settings.TON_API_KEY)
     search = await tonapi.accounts.get_nfts(account_id=address,
                                             collection=settings.MAIN_COLLECTION_ADDRESS,
                                             limit=200,
                                             offset=0)
-    buttons = []
-    for nft in search.nft_items:
-        name = nft.metadata.get('name')
-        button = InlineKeyboardButton(text=f"{name}",
-                                      callback_data=f"{name}")
-        buttons.append(button)
-    return buttons
+    return search.nft_items
 
 
-async def search_account_nfts_by_name(address: str, name: str, user_id: str) -> tuple[str, Any | None, Any] | None:
+async def get_nft_by_name(address: str, name: str, user_id: str) -> tuple[str, Any | None, Any] | None:
     tonapi = AsyncTonapi(api_key=settings.TON_API_KEY)
     search = await tonapi.accounts.get_nfts(account_id=address,
                                             collection=settings.MAIN_COLLECTION_ADDRESS,

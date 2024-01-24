@@ -15,7 +15,7 @@ from utils.wallet import get_connector
 async def main_menu() -> InlineKeyboardMarkup:
     keyboard = types.InlineKeyboardMarkup()
     li = InlineKeyboardButton(text="Кошелёк", callback_data="wallet")
-    bt = InlineKeyboardButton(text="Добавить NFT", callback_data="add_nft")
+    bt = InlineKeyboardButton(text="Добавить NFT", callback_data="select_nft")
     top = InlineKeyboardButton(text="ТОП", callback_data="top")
     game = InlineKeyboardButton(text="Игра", callback_data="Search")
     keyboard.add(li, bt, top, game)
@@ -76,13 +76,16 @@ async def start(message: types.Message):
     await db_session.close()
 
 
+@dp.throttled(anti_flood, rate=3)
 async def wallet(call: types.CallbackQuery):
     db_session = async_session()
-    nft_dao = NftDAO(session=db_session)
+
     user_dao = NftDAO(session=db_session)
-    user_data = await user_dao.get_by_params(user_id=call.from_user.id)
-    nft_data = await nft_dao.get_by_params(user_id=call.from_user.id)
+    user_data = await user_dao.get_by_params(user_id=call.from_user.id, active=True)
     user = user_data[0]
+
+    nft_dao = NftDAO(session=db_session)
+    nft_data = await nft_dao.get_by_params(user_id=user.id)
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
@@ -104,6 +107,7 @@ async def wallet(call: types.CallbackQuery):
     await db_session.close()
 
 
+@dp.throttled(anti_flood, rate=3)
 async def search(call: types.CallbackQuery):
     keyboard = types.InlineKeyboardMarkup(row_width=2)
     kb_search_game = InlineKeyboardButton(text="Поиск игры", callback_data="search_game")
@@ -113,6 +117,7 @@ async def search(call: types.CallbackQuery):
     await call.message.edit_text("Выберите игру", reply_markup=keyboard)
 
 
+@dp.throttled(anti_flood, rate=3)
 async def top_callback(call: types.CallbackQuery):
     db_session = async_session()
     user_dao = UserDAO(session=db_session)
