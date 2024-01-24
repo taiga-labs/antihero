@@ -25,7 +25,7 @@ async def on_shutdown(_) -> None:
 # register middleware
 dp.middleware.setup(LoggingMiddleware())
 # register command
-from handler.reg import register_handlers_client
+from handlers.reg import register_handlers_client
 
 register_handlers_client(dp)
 

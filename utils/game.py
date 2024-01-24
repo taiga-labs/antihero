@@ -18,7 +18,6 @@ async def anti_flood(*args, **kwargs):
 
 
 class UserState(StatesGroup):
-    addr = State()
     nft = State()
     name = State()
     description = State()
