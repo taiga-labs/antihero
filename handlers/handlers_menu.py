@@ -22,9 +22,21 @@ async def main_menu() -> InlineKeyboardMarkup:
     return keyboard
 
 
+@dp.callback_query_handler(lambda c: c.message.content_type == "text", text='main')
 async def main(call: types.CallbackQuery):
     keyboard = await main_menu()
     await call.message.edit_text("Главное меню:", reply_markup=keyboard)
+
+
+@dp.callback_query_handler(lambda c: c.message.content_type == "photo", text='main')
+async def main(call: types.CallbackQuery):
+    keyboard = await main_menu()
+    await bot.send_message(chat_id=call.message.chat.id,
+                           text="Главное меню:",
+                           parse_mode=ParseMode.HTML,
+                           reply_markup=keyboard)
+    await bot.delete_message(chat_id=call.message.chat.id,
+                             message_id=call.message.message_id)
 
 
 @dp.throttled(anti_flood, rate=10)
