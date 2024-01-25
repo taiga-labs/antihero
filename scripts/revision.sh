@@ -1,3 +1,3 @@
 #!/bin/sh -e
 
-alembic revision -m "active wallet" --autogenerate
+alembic revision -m "tgid bigint" --autogenerate

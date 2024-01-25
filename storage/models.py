@@ -1,4 +1,4 @@
-from sqlalchemy import String, Integer, ForeignKey, Boolean, JSON, func
+from sqlalchemy import String, BIGINT, Integer, ForeignKey, Boolean, JSON, func
 from sqlalchemy.orm import mapped_column, Mapped, relationship, DeclarativeBase, declared_attr
 
 
@@ -10,7 +10,7 @@ class Base(DeclarativeBase):
 
 class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    telegram_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    telegram_id: Mapped[int] = mapped_column(BIGINT, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     address: Mapped[str] = mapped_column(String, nullable=True, unique=True)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="f")
