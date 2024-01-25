@@ -44,21 +44,25 @@ async def start(message: types.Message):
         if user_data:
             user = user_data[0]
             if len(message.get_args()) > 0:
-                opponent_id = message.get_args()
+                opponent_nft_id = message.get_args()
                 nfts = await nft_dao.get_by_params(user_id=user.id)
-                buttons = []
                 keyboard = types.InlineKeyboardMarkup(row_width=1)
                 for nft in nfts:
                     button = InlineKeyboardButton(text=f"{nft.name_nft}",
-                                                  callback_data=f"fight_{opponent_id}_{nft.address}")
-                    buttons.append(button)
-                keyboard.add(*buttons)
+                                                  callback_data=f"fight_{nft.id}:{opponent_nft_id}")
+                    keyboard.add(button)
                 kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
                 keyboard.add(kb_main)
-                await message.reply("Выберите NFT для игры", reply_markup=keyboard)
+                await bot.send_message(chat_id=message.chat.id,
+                                       text="Выберите NFT для игры",
+                                       parse_mode=ParseMode.HTML,
+                                       reply_markup=keyboard)
             else:
                 keyboard = await main_menu()
-                await message.reply("Главное меню:", reply_markup=keyboard)
+                await bot.send_message(chat_id=message.chat.id,
+                                       text="Главное меню:",
+                                       parse_mode=ParseMode.HTML,
+                                       reply_markup=keyboard)
         else:
             keyboard = types.InlineKeyboardMarkup(row_width=1)
             kb_transfer = InlineKeyboardButton(text="Подключить кошелёк", callback_data="choose_wallet")
@@ -93,16 +97,17 @@ async def wallet(call: types.CallbackQuery):
     kb_pay_fee = InlineKeyboardButton(text="Активировать NFT", callback_data="activate_nft")
     kb_disconnect = InlineKeyboardButton(text="Отвязать кошелёк", callback_data="disconnect")
     keyboard.add(kb_arena, kb_pay_fee, kb_disconnect, kb_main_menu)
-    text_address = f"Адрес кошелька: {user.address}\n\n"
-    text_nft = "Ваши NFT:{}"
+    text_address = f"Адрес кошелька: `{user.address}`\n\n"
+    text_nft = "Ваши NFT:\n{}"
     await call.message.edit_text(
         text_address + text_nft.format(
-            "".join(["\n" + str(f"Name: <b>%s</b>\nAddress: %s\nRare: %d\nActivated: %d\n" % (nft.name_nft,
-                                                                                              nft.address,
-                                                                                              nft.rare,
-                                                                                              nft.activated))
+            "".join(["\n" + str(f"Name: %s\nAddress: %s\nLevel: %d\nActivated: %s\n" % (nft.name_nft,
+                                                                                        f"`{nft.address}`",
+                                                                                        nft.rare,
+                                                                                        "True" if nft.activated
+                                                                                        else "False"))
                      for nft in nft_data])),
-        parse_mode=ParseMode.HTML,
+        parse_mode=ParseMode.MARKDOWN,
         reply_markup=keyboard)
     await db_session.close()
 
@@ -140,27 +145,35 @@ async def disconnect(call: types.CallbackQuery):
     db_session = async_session()
     user_dao = UserDAO(session=db_session)
     await user_dao.edit_active_by_telegram_id(telegram_id=call.from_user.id, active=False)
+    await db_session.commit()
 
     redis = await get_redis_async_client()
     connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
     await connector.restore_connection()
     await connector.disconnect()
-    await call.message.answer('Адрес отвязан')
+    await call.message.edit_text(text='Адрес отвязан\n\n/start чтобы добавить адрес')
     await redis.close()
 
 
 async def inline_handler(query: types.InlineQuery):
-    text = query.query or "echo"
-    result_id: str = hashlib.md5(text.encode()).hexdigest()
+    db_session = async_session()
+    nft_dao = NftDAO(session=db_session)
 
-    id = query.from_user.id
+    nft_id = int(query.query)
+    nft_data = await nft_dao.get_by_params(id=nft_id)
+    nft = nft_data[0]
 
-    text = f"<a href='{settings.TELEGRAM_BOT_URL}'>TON ANTIHERO☢️</a>\nСразись с моим {text}\nНА АРЕНЕ."
+    await nft_dao.edit_by_address(address=nft.address, arena=True)
+    await db_session.commit()
+
+    result_id: str = hashlib.md5(nft.address.encode()).hexdigest()
+
+    text = f"<a href='{settings.TELEGRAM_BOT_URL}'>TON ANTIHERO☢️</a>\nСразись с моим {nft.name_nft}\nНА АРЕНЕ."
     title = 'Пригласить на бой'
     description = "Пригласи друга в бой"
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
-    kb_fight = InlineKeyboardButton(text="Сразиться", url=f"{settings.TELEGRAM_BOT_URL}?start={id}")
+    kb_fight = InlineKeyboardButton(text="Сразиться", url=f"{settings.TELEGRAM_BOT_URL}?start={nft.id}")
     keyboard.add(kb_fight)
     articles = [types.InlineQueryResultArticle(
         id=result_id,

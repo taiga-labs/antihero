@@ -4,6 +4,7 @@ from aiogram.types import InlineKeyboardButton
 from create_bot import dp
 from handlers.handlers_menu import main_menu
 from storage.dao.nfts_dao import NftDAO
+from storage.dao.users_dao import UserDAO
 from storage.driver import async_session
 from utils.game import determine_winner, game_winner_determined, game_draw
 from utils.middleware import anti_flood
@@ -12,37 +13,30 @@ from utils.middleware import anti_flood
 async def invite(call: types.CallbackQuery):
     db_session = async_session()
 
-    user_dao = NftDAO(session=db_session)
-    user_data = await user_dao.get_by_params(user_id=call.from_user.id, active=True)
+    user_dao = UserDAO(session=db_session)
+    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
     user = user_data[0]
 
     nft_dao = NftDAO(session=db_session)
-    nft_data = await nft_dao.get_by_params(user_id=user.id, activated=True)
+    nft_data = await nft_dao.get_by_params(user_id=user.id, activated=True, arena=False)
     buttons = []
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for nft in nft_data:
-        button = InlineKeyboardButton(text=f"{nft.name_nft}", callback_data=f"arena_{nft.address}")
+        button = InlineKeyboardButton(text=f"{nft.name_nft}", callback_data=f"arena_{nft.id}")
         buttons.append(button)
     keyboard.add(*buttons)
     kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main_menu)
-    await call.message.edit_text("Выберите NFT для арены", reply_markup=keyboard)
+    await call.message.edit_text("Выберите свободные NFT для арены", reply_markup=keyboard)
     await db_session.close()
 
 
 @dp.throttled(anti_flood)
 async def arena_yes(call: types.CallbackQuery):
     db_session = async_session()
-    nft_dao = NftDAO(session=db_session)
-
-    address = call.data[6:]
-    await nft_dao.edit_by_address(address=address, arena=True)
-    await db_session.commit()
-
-    nft_data = await nft_dao.get_by_params(address=address)
-    nft = nft_data[0]
+    nft_id = call.data[6:]
     keyboard = types.InlineKeyboardMarkup(row_width=2)
-    kb_invite = InlineKeyboardButton(text="Пригласить на бой", switch_inline_query=f"{nft.name_nft}")
+    kb_invite = InlineKeyboardButton(text="Пригласить на бой", switch_inline_query=f"{nft_id}")
     kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_invite, kb_main_menu)
     await call.message.edit_text("Пригласите противника", reply_markup=keyboard)
@@ -52,8 +46,8 @@ async def arena_yes(call: types.CallbackQuery):
 async def search_game(call: types.CallbackQuery):
     db_session = async_session()
 
-    user_dao = NftDAO(session=db_session)
-    user_data = await user_dao.get_by_params(user_id=call.from_user.id, active=True)
+    user_dao = UserDAO(session=db_session)
+    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
     user = user_data[0]
 
     nft_dao = NftDAO(session=db_session)
@@ -62,7 +56,7 @@ async def search_game(call: types.CallbackQuery):
     buttons = []
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for nft in nft_data:
-        button = InlineKeyboardButton(text=f"{nft.name_nft}", callback_data=f"nft_{nft.address}")
+        button = InlineKeyboardButton(text=f"{nft.name_nft}", callback_data=f"nft_{nft.id}")
         buttons.append(button)
     keyboard.add(*buttons)
     kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
@@ -75,13 +69,13 @@ async def search_game(call: types.CallbackQuery):
 async def nft_yes(call: types.CallbackQuery):
     db_session = async_session()
 
-    user_dao = NftDAO(session=db_session)
-    user_data = await user_dao.get_by_params(user_id=call.from_user.id, active=True)
+    user_dao = UserDAO(session=db_session)
+    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
     user = user_data[0]
 
-    address = call.data[4:]
+    nft_id = int(call.data[4:])
     nft_dao = NftDAO(session=db_session)
-    await nft_dao.edit_by_address(address=address, duel=True)
+    await nft_dao.edit_by_id(id=nft_id, duel=True)
     await db_session.commit()
 
     nft_opponent = await nft_dao.get_opponent(user_id=user.id)
@@ -91,7 +85,7 @@ async def nft_yes(call: types.CallbackQuery):
         await nft_dao.edit_by_user_id(user_id=call.from_user.id, duel=False)
         await db_session.commit()
 
-        nft_data = await nft_dao.get_by_params(address=address)
+        nft_data = await nft_dao.get_by_params(id=nft_id)
         nft = nft_data[0]
 
         game_outcome = determine_winner(nft_opponent.rare * 10, nft.rare * 10, nft_opponent.user.bonus, nft.user.bonus)
@@ -118,19 +112,18 @@ async def fight_yes(call: types.CallbackQuery):
     db_session = async_session()
     nft_dao = NftDAO(session=db_session)
 
-    string = call.data
-    split_result = string.split('_', 2)
-    opponent_id = int(split_result[1])
-    nft_address = split_result[2]
+    ids = call.data[6:]
+    split_ids = ids.split(':')
+    nft_id = int(split_ids[0])
+    opponent_nft_id = int(split_ids[1])
 
-    nft_data = await nft_dao.get_by_params(address=nft_address, arena=True)
+    nft_data = await nft_dao.get_by_params(id=nft_id)
     nft = nft_data[0]
 
-    nft_data = await nft_dao.get_by_params(user_id=opponent_id, arena=True)
+    nft_data = await nft_dao.get_by_params(id=opponent_nft_id)
     nft_opponent = nft_data[0]
 
-    await nft_dao.edit_by_user_id(user_id=nft_opponent.user.telegram_id, arena=True)
-    await nft_dao.edit_by_user_id(user_id=call.from_user.id, arena=True)
+    await nft_dao.edit_by_address(address=nft.address, arena=True)
     await db_session.commit()
 
     game_outcome = await determine_winner(nft_opponent.rare * 10, nft.rare * 10, nft_opponent.user.bonus,

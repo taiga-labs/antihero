@@ -1,6 +1,6 @@
 import random
 from aiogram import types
-from aiogram.types import InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, ParseMode
 
 from config.settings import settings
 from create_bot import bot
@@ -43,13 +43,15 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft):
     kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main)
 
-    vs = f"NFT:\n{w_nft.user.telegram_id} ⚔️ {l_nft.user.telegram_id}"
+    vs = f"{w_nft.user.name}'s {w_nft.name_nft} ⚔️ {l_nft.user.name}'s {l_nft.name_nft}"
 
     await bot.send_message(chat_id=w_nft.user.telegram_id,
                            text=f"Вы выиграли!\n\nСкоро NFT придёт на ваш адрес\n\n{vs}",
+                           parse_mode=ParseMode.HTML,
                            reply_markup=keyboard)
     await bot.send_message(chat_id=l_nft.user.telegram_id,
                            text=f"Вы проиграли!\n\n{vs}",
+                           parse_mode=ParseMode.HTML,
                            reply_markup=keyboard)
 
     await user_dao.edit_active_by_telegram_id(telegram_id=w_nft.user.telegram_id, win=w_nft.user.win + 1)
@@ -61,9 +63,9 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft):
     wallet = Wallet(mnemonics=wallet_mnemonics, version='v4r2', provider=provider)
 
     # TODO добавить в бд проверку, что nft возвращена
-    await wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=l_nft.address, fee=0.1)   # TODO fee size
+    await wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=l_nft.address, fee=0.015)
     await asyncio.sleep(25)
-    await wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=w_nft.address, fee=0.1)
+    await wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=w_nft.address, fee=0.015)
 
 
 async def game_draw(nft_d1: Nft, nft_d2: Nft):
@@ -75,10 +77,16 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft):
     kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main)
 
-    vs = f"NFT:\n{nft_d1.user.telegram_id} ⚔️ {nft_d2.user.telegram_id}"
+    vs = f"{nft_d1.user.name}'s {nft_d1.name_nft} ⚔️ {nft_d2.user.name}'s {nft_d2.name_nft}"
 
-    await bot.send_message(chat_id=nft_d1.user.telegram_id, text=f"Ничья!\n\n{vs}", reply_markup=keyboard)
-    await bot.send_message(chat_id=nft_d2.user.telegram_id, text=f"Ничья!\n\n{vs}", reply_markup=keyboard)
+    await bot.send_message(chat_id=nft_d1.user.telegram_id,
+                           text=f"Ничья!\n\n{vs}",
+                           parse_mode=ParseMode.HTML,
+                           reply_markup=keyboard)
+    await bot.send_message(chat_id=nft_d2.user.telegram_id,
+                           text=f"Ничья!\n\n{vs}",
+                           parse_mode=ParseMode.HTML,
+                           reply_markup=keyboard)
 
     await user_dao.edit_active_by_telegram_id(telegram_id=nft_d1.user.telegram_id, bonus=nft_d1.user.bonus - 1)
     await user_dao.edit_active_by_telegram_id(telegram_id=nft_d2.user.telegram_id, bonus=nft_d2.user.bonus - 1)
@@ -87,6 +95,6 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft):
     provider = TonCenterClient(key=settings.TONCENTER_API_KEY)
     wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS)
     wallet = Wallet(mnemonics=wallet_mnemonics, version='v4r2', provider=provider)
-    await wallet.transfer_nft(destination_address=nft_d1.user.address, nft_address=nft_d1.address, fee=0.1)
+    await wallet.transfer_nft(destination_address=nft_d1.user.address, nft_address=nft_d1.address, fee=0.015)
     await asyncio.sleep(25)
-    await wallet.transfer_nft(destination_address=nft_d2.user.address, nft_address=nft_d2.address, fee=0.1)
+    await wallet.transfer_nft(destination_address=nft_d2.user.address, nft_address=nft_d2.address, fee=0.015)

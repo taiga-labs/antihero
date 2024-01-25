@@ -19,7 +19,8 @@ async def choose_wallet(call: types.CallbackQuery):
     for w in wallets_list:
         walet_button = InlineKeyboardButton(text=w['name'], callback_data=f'connect:{w["name"]}')
         keyboard.add(walet_button)
-    await call.message.answer(text='Выбери кошелек для авторизации\n\n<i>Для отмены напиши</i>"<code>Отмена</code>"',
+    await call.message.answer(text='Выбери кошелек для авторизации',
+                              # \n\n<i>Для отмены напиши</i>"<code>Отмена</code>"
                               parse_mode=ParseMode.HTML,
                               reply_markup=keyboard)  # TODO fix отмена
 
@@ -47,8 +48,8 @@ async def connect_wallet(call: types.CallbackQuery):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     url_button = InlineKeyboardButton(text='Подключить', url=generated_url)
     keyboard.add(url_button)
-    await call.message.answer(text='У тебя есть 5 минут на подключение кошелька',
-                              reply_markup=keyboard)
+    await call.message.edit_text(text='У тебя есть 5 минут на подключение кошелька',
+                                 reply_markup=keyboard)
 
     for i in range(1, 300):
         await asyncio.sleep(1)
@@ -56,12 +57,14 @@ async def connect_wallet(call: types.CallbackQuery):
             if connector.account.address:
                 wallet_address = connector.account.address
                 wallet_address = Address(wallet_address).to_string(is_user_friendly=True, is_bounceable=False)
+                wallet_address = wallet_address.replace("+", '-').replace("/", '_')
                 await user_dao.edit_by_telegram_id(telegram_id=call.from_user.id, address=wallet_address, active=True)
                 await db_session.commit()
-                await call.message.answer(f'Успешная авторизация!\nАдрес кошелька:\n\n<code>{wallet_address}</code>',
-                                          parse_mode=ParseMode.HTML)
                 keyboard = await main_menu()
-                await call.message.answer("Главное меню:", reply_markup=keyboard)
+                await call.message.edit_text(
+                    text=f'Успешная авторизация!\nАдрес кошелька:\n\n<code>{wallet_address}</code>\n\nГлавное меню:',
+                    reply_markup=keyboard,
+                    parse_mode=ParseMode.HTML)
 
                 # logger.info(f'Connected with address: {wallet_address}')  # TODO logger
             await redis.close()

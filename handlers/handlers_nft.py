@@ -129,17 +129,31 @@ async def select_to_activate_nft(call: types.CallbackQuery):
     user = user_data[0]
 
     nft_dao = NftDAO(session=db_session)
-    nft_data = await nft_dao.get_by_params(user_id=user.id)
+    nft_data = await nft_dao.get_by_params(user_id=user.id, activated=False)
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for nft in nft_data:
         kb_nft = InlineKeyboardButton(text=f"{nft.name_nft}",
-                                      callback_data=f"pay_fee_{nft.address}")
+                                      callback_data=f"show_nft_{nft.address}")
         keyboard.add(kb_nft)
     kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main_menu)
     await call.message.edit_text("Выбери NFT, которую хочешь активировать", reply_markup=keyboard)
     await db_session.close()
+
+
+async def show_nft(call: types.CallbackQuery):
+    nft_address = call.data[9:]
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    kb_nft_prov = InlineKeyboardButton(text="Оплатить", callback_data=f"pay_fee_{nft_address}")
+    keyboard.add(kb_nft_prov)
+    kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    keyboard.add(kb_main_menu)
+    await bot.send_photo(chat_id=call.from_user.id,
+                         photo=open(f'images/{call.from_user.id}.png', 'rb'),
+                         caption=f"Для активации NFT необходимо заплатить комиссию 0.01 TON",
+                         parse_mode=ParseMode.HTML,
+                         reply_markup=keyboard)
 
 
 @dp.throttled(anti_flood, rate=10)
@@ -170,36 +184,42 @@ async def pay_fee(call: types.CallbackQuery):
             data
         ]
     }
-    await call.message.edit_text(text='Подтвердите платёж в приложении своего кошелька в течение 5 минут',
-                                 parse_mode=ParseMode.HTML)  # TODO add отмена
+    await call.message.edit_caption(caption='Подтвердите платёж в приложении своего кошелька в течение 5 минут',
+                                    parse_mode=ParseMode.HTML)  # TODO add отмена
     keyboard = await main_menu()
     try:
         await asyncio.wait_for(connector.send_transaction(transaction=transaction), timeout=300)
     except asyncio.TimeoutError:
-        await call.message.edit_text(
-            text='Время подтверждения истекло\n Повторно активировать NFT можно в разделе Кошелек',
+        await call.message.edit_caption(
+            caption='Время подтверждения истекло\n Повторно активировать NFT можно в разделе Кошелек',
             parse_mode=ParseMode.HTML,
-            reply_markup=keyboard)
+            reply_markup=keyboard)  # TODO отмена
         await redis.close()
         return
     except UserRejectsError:
-        await call.message.edit_text(text='Вы отменили перевод\n Повторно активировать NFT можно в разделе Кошелек',
-                                     parse_mode=ParseMode.HTML,
-                                     reply_markup=keyboard)
-        await redis.close()
-        return
-    except Exception as e:
-        await call.message.edit_text(
-            text=f'Неизвестная ошибка: {e}\n Повторно активировать NFT можно в разделе Кошелек',
+        await call.message.edit_caption(
+            caption='Вы отменили перевод\n Повторно активировать NFT можно в разделе Кошелек',
             parse_mode=ParseMode.HTML,
             reply_markup=keyboard)
         await redis.close()
         return
-    await call.message.edit_text(f"NFT активирована",
-                                 parse_mode=ParseMode.HTML,
-                                 reply_markup=keyboard)
+    except Exception as e:
+        await call.message.edit_caption(
+            caption=f'Неизвестная ошибка: {e}\n Повторно активировать NFT можно в разделе Кошелек',
+            parse_mode=ParseMode.HTML,
+            reply_markup=keyboard)
+        await redis.close()
+        return
+
     await nft_dao.edit_by_address(address=nft_address, activated=True)
     await db_session.commit()
+
+    await bot.send_message(chat_id=call.message.chat.id,
+                           text=f"NFT активирована",
+                           parse_mode=ParseMode.HTML,
+                           reply_markup=keyboard)
+    await bot.delete_message(chat_id=call.message.chat.id,
+                             message_id=call.message.message_id)
 
     await db_session.close()
     await redis.close()

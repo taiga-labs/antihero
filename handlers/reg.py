@@ -3,7 +3,8 @@ from aiogram import Dispatcher
 from handlers.handlers_auth import choose_wallet, connect_wallet
 from handlers.handlers_game import invite, arena_yes, search_game, nft_yes, fight_yes, exit_game
 from handlers.handlers_menu import start, inline_handler, wallet, search, top_callback, main, disconnect
-from handlers.handlers_nft import add_nft, select_to_add_nft, select_to_activate_nft, pay_fee, get_nft_on_arena, remove_nft_from_arena
+from handlers.handlers_nft import add_nft, select_to_add_nft, select_to_activate_nft, pay_fee, get_nft_on_arena, \
+    remove_nft_from_arena, show_nft
 from utils.middleware import WalletConnectionMiddleware
 
 
@@ -26,6 +27,7 @@ def register_handlers_client(dp: Dispatcher) -> None:
     dp.register_callback_query_handler(select_to_add_nft, text='select_nft')
     dp.register_callback_query_handler(add_nft, text_contains='add_nft_')
     dp.register_callback_query_handler(select_to_activate_nft, text='activate_nft')
+    dp.register_callback_query_handler(show_nft, text_contains='show_nft_')
     dp.register_callback_query_handler(pay_fee, text_contains='pay_fee_')
     dp.register_callback_query_handler(get_nft_on_arena, text='nft_arena')
     dp.register_callback_query_handler(remove_nft_from_arena, text_contains='remove_')
