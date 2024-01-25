@@ -80,8 +80,8 @@ async def start(message: types.Message):
 async def wallet(call: types.CallbackQuery):
     db_session = async_session()
 
-    user_dao = NftDAO(session=db_session)
-    user_data = await user_dao.get_by_params(user_id=call.from_user.id, active=True)
+    user_dao = UserDAO(session=db_session)
+    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
     user = user_data[0]
 
     nft_dao = NftDAO(session=db_session)

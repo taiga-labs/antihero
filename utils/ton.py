@@ -31,6 +31,6 @@ async def get_nft_by_name(address: str, name: str, user_id: str) -> tuple[str, A
             r = requests.get(url, allow_redirects=True)
             with open(filename, 'wb') as f:
                 f.write(r.content)
-            rare = a[0].get('value')
+            rare = nft.metadata.get('attributes')[0].get('value')
             name = nft.metadata.get('name')
-            return nft_address, name, rare
+            return nft_address, name, int(rare)

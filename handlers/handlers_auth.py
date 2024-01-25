@@ -56,7 +56,7 @@ async def connect_wallet(call: types.CallbackQuery):
             if connector.account.address:
                 wallet_address = connector.account.address
                 wallet_address = Address(wallet_address).to_string(is_user_friendly=True, is_bounceable=False)
-                await user_dao.edit_active_by_telegram_id(telegram_id=call.from_user.id, address=wallet_address)
+                await user_dao.edit_by_telegram_id(telegram_id=call.from_user.id, address=wallet_address, active=True)
                 await db_session.commit()
                 await call.message.answer(f'Успешная авторизация!\nАдрес кошелька:\n\n<code>{wallet_address}</code>',
                                           parse_mode=ParseMode.HTML)

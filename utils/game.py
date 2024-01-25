@@ -45,7 +45,6 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft):
 
     vs = f"NFT:\n{w_nft.user.telegram_id} ⚔️ {l_nft.user.telegram_id}"
 
-    # print("Выиграл NFT №1")
     await bot.send_message(chat_id=w_nft.user.telegram_id,
                            text=f"Вы выиграли!\n\nСкоро NFT придёт на ваш адрес\n\n{vs}",
                            reply_markup=keyboard)
@@ -57,17 +56,14 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft):
     await user_dao.edit_active_by_telegram_id(telegram_id=l_nft.user.telegram_id, bonus=l_nft.user.bonus - 1)
     await db_session.commit()
 
-    client = TonApiClient(settings.TON_API_KEY)
-    my_wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS)
-    my_wallet = Wallet(provider=client, mnemonics=my_wallet_mnemonics, version='v4r2')
+    provider = TonCenterClient(key=settings.TONCENTER_API_KEY)
+    wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS)
+    wallet = Wallet(mnemonics=wallet_mnemonics, version='v4r2', provider=provider)
 
     # TODO добавить в бд проверку, что nft возвращена
-    # await transfer_nft(win[0], result[0])
-    resp = await my_wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=l_nft.address)
-    # print(resp)  # 200
+    await wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=l_nft.address, fee=0.1)   # TODO fee size
     await asyncio.sleep(25)
-    resp = await my_wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=w_nft.address)
-    # print(resp)  # 200
+    await wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=w_nft.address, fee=0.1)
 
 
 async def game_draw(nft_d1: Nft, nft_d2: Nft):
@@ -88,9 +84,9 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft):
     await user_dao.edit_active_by_telegram_id(telegram_id=nft_d2.user.telegram_id, bonus=nft_d2.user.bonus - 1)
     await db_session.commit()
 
-    client = TonApiClient(settings.TON_API_KEY)
-    my_wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS)
-    my_wallet = Wallet(provider=client, mnemonics=my_wallet_mnemonics, version='v4r2')
-    await my_wallet.transfer_nft(destination_address=nft_d1.user.address, nft_address=nft_d1.address)
+    provider = TonCenterClient(key=settings.TONCENTER_API_KEY)
+    wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS)
+    wallet = Wallet(mnemonics=wallet_mnemonics, version='v4r2', provider=provider)
+    await wallet.transfer_nft(destination_address=nft_d1.user.address, nft_address=nft_d1.address, fee=0.1)
     await asyncio.sleep(25)
-    await my_wallet.transfer_nft(destination_address=nft_d2.user.address, nft_address=nft_d2.address)
+    await wallet.transfer_nft(destination_address=nft_d2.user.address, nft_address=nft_d2.address, fee=0.1)

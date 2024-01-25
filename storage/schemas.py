@@ -10,4 +10,4 @@ class NftModel(BaseModel):
     user_id: int
     address: str
     name_nft: str
-    rare: str
+    rare: int
