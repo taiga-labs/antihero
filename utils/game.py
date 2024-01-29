@@ -1,6 +1,6 @@
 import random
 from aiogram import types
-from aiogram.types import InlineKeyboardButton, ParseMode
+from aiogram.types import InlineKeyboardButton
 
 from config.settings import settings
 from create_bot import bot
@@ -47,11 +47,9 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft):
 
     await bot.send_message(chat_id=w_nft.user.telegram_id,
                            text=f"Вы выиграли!\n\nСкоро NFT придёт на ваш адрес\n\n{vs}",
-                           parse_mode=ParseMode.HTML,
                            reply_markup=keyboard)
     await bot.send_message(chat_id=l_nft.user.telegram_id,
                            text=f"Вы проиграли!\n\n{vs}",
-                           parse_mode=ParseMode.HTML,
                            reply_markup=keyboard)
 
     await user_dao.edit_active_by_telegram_id(telegram_id=w_nft.user.telegram_id, win=w_nft.user.win + 1)
@@ -81,11 +79,9 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft):
 
     await bot.send_message(chat_id=nft_d1.user.telegram_id,
                            text=f"Ничья!\n\n{vs}",
-                           parse_mode=ParseMode.HTML,
                            reply_markup=keyboard)
     await bot.send_message(chat_id=nft_d2.user.telegram_id,
                            text=f"Ничья!\n\n{vs}",
-                           parse_mode=ParseMode.HTML,
                            reply_markup=keyboard)
 
     await user_dao.edit_active_by_telegram_id(telegram_id=nft_d1.user.telegram_id, bonus=nft_d1.user.bonus - 1)

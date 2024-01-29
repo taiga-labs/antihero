@@ -5,7 +5,7 @@ from handlers.handlers_game import invite, arena_yes, search_game, nft_yes, figh
 from handlers.handlers_menu import start, inline_handler, wallet, search, top_callback, disconnect
 from handlers.handlers_nft import add_nft, select_to_add_nft, select_to_activate_nft, pay_fee, get_nft_on_arena, \
     remove_nft_from_arena, show_nft
-from utils.middleware import WalletConnectionMiddleware
+from utils.middleware import WalletNotConnectedMiddleware, WalletConnectedMiddleware
 
 
 # bot handlers
@@ -41,4 +41,5 @@ def register_handlers_client(dp: Dispatcher) -> None:
     dp.register_callback_query_handler(exit_game, text='exit')
 
     # mw
-    dp.middleware.setup(WalletConnectionMiddleware())
+    dp.middleware.setup(WalletNotConnectedMiddleware())
+    dp.middleware.setup(WalletConnectedMiddleware())

@@ -33,7 +33,6 @@ async def main(call: types.CallbackQuery):
     keyboard = await main_menu()
     await bot.send_message(chat_id=call.message.chat.id,
                            text="Главное меню:",
-                           parse_mode=ParseMode.HTML,
                            reply_markup=keyboard)
     await bot.delete_message(chat_id=call.message.chat.id,
                              message_id=call.message.message_id)
@@ -67,13 +66,11 @@ async def start(message: types.Message):
                 keyboard.add(kb_main)
                 await bot.send_message(chat_id=message.chat.id,
                                        text="Выберите NFT для игры",
-                                       parse_mode=ParseMode.HTML,
                                        reply_markup=keyboard)
             else:
                 keyboard = await main_menu()
                 await bot.send_message(chat_id=message.chat.id,
                                        text="Главное меню:",
-                                       parse_mode=ParseMode.HTML,
                                        reply_markup=keyboard)
         else:
             keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -85,7 +82,6 @@ async def start(message: types.Message):
                                              F"<a href='https://getgems.io/collection/{settings.MAIN_COLLECTION_ADDRESS}'>TON ANTIHERO!</a>\n"
                                              F"Наш <a href='https://t.me/TON_ANTIHERO_NFT'>ТЕЛЕГРАМ КАНАЛ☢️</a>\n"
                                              F"Для начала игры нужно пройти авторизацию через TON кошелёк",
-                                     parse_mode=ParseMode.HTML,
                                      reply_markup=keyboard)
     await bot.delete_message(chat_id=message.chat.id,
                              message_id=message.message_id)
@@ -114,12 +110,11 @@ async def wallet(call: types.CallbackQuery):
     await call.message.edit_text(
         text_address + text_nft.format(
             "".join(["\n" + str(f"Name: %s\nAddress: %s\nLevel: %d\nActivated: %s\n" % (nft.name_nft,
-                                                                                        f"`{nft.address}`",
+                                                                                        f"<code>{nft.address}</code>",
                                                                                         nft.rare,
                                                                                         "True" if nft.activated
                                                                                         else "False"))
                      for nft in nft_data])),
-        parse_mode=ParseMode.MARKDOWN,
         reply_markup=keyboard)
     await db_session.close()
 
@@ -148,7 +143,6 @@ async def top_callback(call: types.CallbackQuery):
         top = []
     await call.message.edit_text(
         "Топ пользователей:{}".format("".join(["\n" + str(f"<b>%s</b> %s" % (user.name, user.win)) for user in top])),
-        parse_mode=ParseMode.HTML,
         reply_markup=keyboard)
     await db_session.close()
 

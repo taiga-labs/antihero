@@ -3,6 +3,8 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import logging
 
+from aiogram.types import ParseMode
+
 from config.settings import settings
 
 if not settings.DEV:
@@ -10,6 +12,6 @@ if not settings.DEV:
     exit(0)
 
 storage = MemoryStorage()
-bot = Bot(token=settings.TELEGRAM_API_KEY, parse_mode='MarkdownV2')
+bot = Bot(token=settings.TELEGRAM_API_KEY, parse_mode=ParseMode.HTML)
 dp = Dispatcher(bot, storage=storage)
 logging.getLogger('poull_log').setLevel(logging.DEBUG)

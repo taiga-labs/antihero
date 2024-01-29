@@ -2,7 +2,7 @@ import time
 from base64 import urlsafe_b64encode
 
 from aiogram import types
-from aiogram.types import InlineKeyboardButton, ParseMode
+from aiogram.types import InlineKeyboardButton
 from pytonconnect.exceptions import UserRejectsError
 from tonsdk.boc import begin_cell
 from tonsdk.utils import to_nano
@@ -73,28 +73,24 @@ async def add_nft(call: types.CallbackQuery):
             }
         ]
     }
-    await call.message.edit_text(text='Подтвердите перевод в приложении своего кошелька в течение 5 минут',
-                                 parse_mode=ParseMode.HTML)
+    await call.message.edit_text(text='Подтвердите перевод в приложении своего кошелька в течение 5 минут')
     keyboard = await main_menu()
     try:
         await asyncio.wait_for(connector.send_transaction(transaction=transaction), timeout=300)
     except asyncio.TimeoutError:
         await call.message.edit_text(text='Время подтверждения истекло',
-                                     parse_mode=ParseMode.HTML,
                                      reply_markup=keyboard)
         await redis.close()
         connector.pause_connection()
         return
     except UserRejectsError:
         await call.message.edit_text(text='Вы отменили перевод',
-                                     parse_mode=ParseMode.HTML,
                                      reply_markup=keyboard)
         await redis.close()
         connector.pause_connection()
         return
     except Exception as e:
         await call.message.edit_text(text=f'Неизвестная ошибка: {e}',
-                                     parse_mode=ParseMode.HTML,
                                      reply_markup=keyboard)
         await redis.close()
         connector.pause_connection()
@@ -116,7 +112,6 @@ async def add_nft(call: types.CallbackQuery):
                          photo=open(f'images/{call.from_user.id}.png', 'rb'),
                          caption=f"Твоя NFT добавлена во внутренний кошелёк\n"
                                  f"Для активации NFT необходимо заплатить комиссию 0.01 TON",
-                         parse_mode=ParseMode.HTML,
                          reply_markup=keyboard)
     await bot.delete_message(chat_id=call.message.chat.id,
                              message_id=call.message.message_id)
@@ -156,7 +151,6 @@ async def show_nft(call: types.CallbackQuery):
     await bot.send_photo(chat_id=call.from_user.id,
                          photo=open(f'images/{call.from_user.id}.png', 'rb'),
                          caption=f"Для активации NFT необходимо заплатить комиссию 0.01 TON",
-                         parse_mode=ParseMode.HTML,
                          reply_markup=keyboard)
 
 
@@ -188,15 +182,13 @@ async def pay_fee(call: types.CallbackQuery):
             data
         ]
     }
-    await call.message.edit_caption(caption='Подтвердите платёж в приложении своего кошелька в течение 5 минут',
-                                    parse_mode=ParseMode.HTML)  # TODO add отмена
+    await call.message.edit_caption(caption='Подтвердите платёж в приложении своего кошелька в течение 5 минут')  # TODO add отмена
     keyboard = await main_menu()
     try:
         await asyncio.wait_for(connector.send_transaction(transaction=transaction), timeout=300)
     except asyncio.TimeoutError:
         await call.message.edit_caption(
             caption='Время подтверждения истекло\n Повторно активировать NFT можно в разделе Кошелек',
-            parse_mode=ParseMode.HTML,
             reply_markup=keyboard)  # TODO отмена
         await redis.close()
         connector.pause_connection()
@@ -204,7 +196,6 @@ async def pay_fee(call: types.CallbackQuery):
     except UserRejectsError:
         await call.message.edit_caption(
             caption='Вы отменили перевод\n Повторно активировать NFT можно в разделе Кошелек',
-            parse_mode=ParseMode.HTML,
             reply_markup=keyboard)
         await redis.close()
         connector.pause_connection()
@@ -212,7 +203,6 @@ async def pay_fee(call: types.CallbackQuery):
     except Exception as e:
         await call.message.edit_caption(
             caption=f'Неизвестная ошибка: {e}\n Повторно активировать NFT можно в разделе Кошелек',
-            parse_mode=ParseMode.HTML,
             reply_markup=keyboard)
         await redis.close()
         connector.pause_connection()
@@ -223,7 +213,6 @@ async def pay_fee(call: types.CallbackQuery):
 
     await bot.send_message(chat_id=call.message.chat.id,
                            text=f"NFT активирована",
-                           parse_mode=ParseMode.HTML,
                            reply_markup=keyboard)
     await bot.delete_message(chat_id=call.message.chat.id,
                              message_id=call.message.message_id)
