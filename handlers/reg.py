@@ -1,6 +1,6 @@
 from aiogram import Dispatcher
 
-from handlers.handlers_auth import choose_wallet, connect_wallet
+from handlers.handlers_wallet import choose_wallet, connect_wallet
 from handlers.handlers_game import invite, arena_yes, search_game, nft_yes, fight_yes, exit_game
 from handlers.handlers_menu import start, inline_handler, wallet, search, top_callback, disconnect
 from handlers.handlers_nft import add_nft, select_to_add_nft, select_to_activate_nft, pay_fee, get_nft_on_arena, \

@@ -1,10 +1,12 @@
+from io import BytesIO
+
+import qrcode
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, ParseMode
 from TonTools import *
-from aiogram.utils.markdown import hlink
 from pytonconnect import TonConnect
 
-from create_bot import dp
+from create_bot import dp, bot
 from handlers.handlers_menu import main_menu
 from storage.dao.users_dao import UserDAO
 from storage.driver import async_session, get_redis_async_client
@@ -19,8 +21,7 @@ async def choose_wallet(call: types.CallbackQuery):
         walet_button = InlineKeyboardButton(text=w['name'], callback_data=f'connect:{w["name"]}')
         keyboard.add(walet_button)
     await call.message.answer(text='Выбери кошелек для авторизации',
-                              # \n\n<i>Для отмены напиши</i>"<code>Отмена</code>"
-                              reply_markup=keyboard)  # TODO fix отмена
+                              reply_markup=keyboard)
 
 
 @dp.throttled(anti_flood, rate=3)
@@ -54,11 +55,19 @@ async def connect_wallet(call: types.CallbackQuery):
 
     generated_url = await connector.connect(wlt)
 
+    img = qrcode.make(generated_url)
+    stream = BytesIO()
+    img.save(stream)
+
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     url_button = InlineKeyboardButton(text='Подключить', url=generated_url)
     keyboard.add(url_button)
-    await call.message.edit_text(text='У тебя есть 5 минут на подключение кошелька',
-                                 reply_markup=keyboard)
+    await bot.delete_message(chat_id=call.message.chat.id,
+                             message_id=call.message.message_id)
+    wait_msg = await call.message.answer_photo(photo=stream.getvalue(),
+                                               caption="Отсканируй QR код или нажми Подключить, чтобы начать авторизацию\n"
+                                                       "У тебя есть 5 минут на подключение кошелька",
+                                               reply_markup=keyboard)
 
     for i in range(1, 300):
         await asyncio.sleep(1)
@@ -70,7 +79,9 @@ async def connect_wallet(call: types.CallbackQuery):
                 await user_dao.edit_by_telegram_id(telegram_id=call.from_user.id, address=wallet_address, active=True)
                 await db_session.commit()
                 keyboard = await main_menu()
-                await call.message.edit_text(
+                await bot.delete_message(chat_id=wait_msg.chat.id,
+                                         message_id=wait_msg.message_id)
+                await call.message.answer(
                     text=f'Успешная авторизация!\nАдрес кошелька:\n\n<code>{wallet_address}</code>\n\nГлавное меню:',
                     reply_markup=keyboard)
 
@@ -82,8 +93,10 @@ async def connect_wallet(call: types.CallbackQuery):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_retry = InlineKeyboardButton(text="Повторить", callback_data="choose_wallet")
     keyboard.add(kb_retry)
-    await call.message.edit_text(f'Истекло время авторизации',
-                                 parse_mode=ParseMode.HTML,
-                                 reply_markup=keyboard)
+    await bot.delete_message(chat_id=wait_msg.chat.id,
+                             message_id=wait_msg.message_id)
+    await call.message.answer(f'Истекло время авторизации',
+                              parse_mode=ParseMode.HTML,
+                              reply_markup=keyboard)
     connector.pause_connection()
     await redis.close()
