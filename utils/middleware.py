@@ -39,7 +39,7 @@ class WalletConnectedMiddleware(BaseMiddleware):
             connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
             connected = await connector.restore_connection()
             if connected:
-                await call.answer("Для подключения нового кошелька необходимо отвязать текущий в разделе Wallet",
+                await call.answer("Для подключения нового кошелька необходимо отвязать текущий в разделе Кошелек",
                                   show_alert=True)
                 await redis.close()
                 raise CancelHandler

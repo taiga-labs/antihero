@@ -105,7 +105,7 @@ async def wallet(call: types.CallbackQuery):
     kb_pay_fee = InlineKeyboardButton(text="Активировать NFT", callback_data="activate_nft")
     kb_disconnect = InlineKeyboardButton(text="Отвязать кошелёк", callback_data="disconnect")
     keyboard.add(kb_arena, kb_pay_fee, kb_disconnect, kb_main_menu)
-    text_address = f"Адрес кошелька: `{user.address}`\n\n"
+    text_address = f"Адрес кошелька: <code>{user.address}</code>\n\n"
     text_nft = "Ваши NFT:\n{}"
     await call.message.edit_text(
         text_address + text_nft.format(
