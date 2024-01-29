@@ -13,6 +13,7 @@ async def anti_flood(*args, **kwargs):
 
 class WalletConnectionMiddleware(BaseMiddleware):
     SKIP_ROUTERS = ['choose_wallet', 'connect:']
+
     async def on_process_callback_query(self, call: CallbackQuery, data: dict):
         if any(sr in call.data for sr in self.SKIP_ROUTERS):
             return
@@ -25,4 +26,5 @@ class WalletConnectionMiddleware(BaseMiddleware):
                               show_alert=True)
             await redis.close()
             raise CancelHandler
+        connector.pause_connection()
         await redis.close()

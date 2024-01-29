@@ -1,6 +1,7 @@
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, ParseMode
 from TonTools import *
+from pytonconnect import TonConnect
 
 from create_bot import dp
 from handlers.handlers_menu import main_menu
@@ -11,10 +12,7 @@ from utils.wallet import get_connector
 
 
 async def choose_wallet(call: types.CallbackQuery):
-    redis = await get_redis_async_client()
-    connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
-    wallets_list = connector.get_wallets()
-    await redis.close()
+    wallets_list = TonConnect.get_wallets()
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for w in wallets_list:
         walet_button = InlineKeyboardButton(text=w['name'], callback_data=f'connect:{w["name"]}')
@@ -43,6 +41,16 @@ async def connect_wallet(call: types.CallbackQuery):
     if wlt is None:
         raise Exception(f'Unknown wallet: {wlt}')
 
+    if wlt not in ['tonkeeper']:
+        keyboard = types.InlineKeyboardMarkup(row_width=1)
+        kb_retry = InlineKeyboardButton(text="Повторить", callback_data="choose_wallet")
+        keyboard.add(kb_retry)
+        await call.message.answer(f'На данный момент поддерживаюся только подключения через Tonkeeper\nПовторите попытку подключения',
+                                  parse_mode=ParseMode.HTML,
+                                  reply_markup=keyboard)
+        await redis.close()
+        return
+
     generated_url = await connector.connect(wlt)
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -67,6 +75,7 @@ async def connect_wallet(call: types.CallbackQuery):
                     parse_mode=ParseMode.HTML)
 
                 # logger.info(f'Connected with address: {wallet_address}')  # TODO logger
+            connector.pause_connection()
             await redis.close()
             return
 
@@ -76,4 +85,5 @@ async def connect_wallet(call: types.CallbackQuery):
     await call.message.answer(f'Истекло время авторизации',
                               parse_mode=ParseMode.HTML,
                               reply_markup=keyboard)
+    connector.pause_connection()
     await redis.close()

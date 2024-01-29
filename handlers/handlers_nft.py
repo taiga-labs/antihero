@@ -83,18 +83,21 @@ async def add_nft(call: types.CallbackQuery):
                                      parse_mode=ParseMode.HTML,
                                      reply_markup=keyboard)
         await redis.close()
+        connector.pause_connection()
         return
     except UserRejectsError:
         await call.message.edit_text(text='Вы отменили перевод',
                                      parse_mode=ParseMode.HTML,
                                      reply_markup=keyboard)
         await redis.close()
+        connector.pause_connection()
         return
     except Exception as e:
         await call.message.edit_text(text=f'Неизвестная ошибка: {e}',
                                      parse_mode=ParseMode.HTML,
                                      reply_markup=keyboard)
         await redis.close()
+        connector.pause_connection()
         return
 
     nft_model = NftModel(user_id=user.id,
@@ -118,6 +121,7 @@ async def add_nft(call: types.CallbackQuery):
     await bot.delete_message(chat_id=call.message.chat.id,
                              message_id=call.message.message_id)
     await db_session.close()
+    connector.pause_connection()
     await redis.close()
 
 
@@ -195,6 +199,7 @@ async def pay_fee(call: types.CallbackQuery):
             parse_mode=ParseMode.HTML,
             reply_markup=keyboard)  # TODO отмена
         await redis.close()
+        connector.pause_connection()
         return
     except UserRejectsError:
         await call.message.edit_caption(
@@ -202,6 +207,7 @@ async def pay_fee(call: types.CallbackQuery):
             parse_mode=ParseMode.HTML,
             reply_markup=keyboard)
         await redis.close()
+        connector.pause_connection()
         return
     except Exception as e:
         await call.message.edit_caption(
@@ -209,6 +215,7 @@ async def pay_fee(call: types.CallbackQuery):
             parse_mode=ParseMode.HTML,
             reply_markup=keyboard)
         await redis.close()
+        connector.pause_connection()
         return
 
     await nft_dao.edit_by_address(address=nft_address, activated=True)
@@ -222,6 +229,7 @@ async def pay_fee(call: types.CallbackQuery):
                              message_id=call.message.message_id)
 
     await db_session.close()
+    connector.pause_connection()
     await redis.close()
 
 
