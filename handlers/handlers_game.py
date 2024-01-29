@@ -51,7 +51,7 @@ async def search_game(call: types.CallbackQuery):
     user = user_data[0]
 
     nft_dao = NftDAO(session=db_session)
-    nft_data = await nft_dao.get_by_params(user_id=user.id, activated=True, arena=False)
+    nft_data = await nft_dao.get_by_params(user_id=user.id, activated=True, arena=False, duel=False)
 
     buttons = []
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -121,9 +121,31 @@ async def fight_yes(call: types.CallbackQuery):
     nft = nft_data[0]
 
     nft_data = await nft_dao.get_by_params(id=opponent_nft_id)
+    if not nft_data:
+        keyboard = types.InlineKeyboardMarkup(row_width=1)
+        kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
+        keyboard.add(kb_main)
+        await call.message.edit_text(text="Ты не успел! Истек срок приглашения",
+                                     reply_markup=keyboard)
+        return
     nft_opponent = nft_data[0]
+    if nft_opponent.duel:
+        keyboard = types.InlineKeyboardMarkup(row_width=1)
+        kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
+        keyboard.add(kb_main)
+        await call.message.edit_text(text="Ты не успел! Соперник уже в бою",
+                                     reply_markup=keyboard)
+        return
+    if nft_opponent.user.id == nft.user.id:
+        keyboard = types.InlineKeyboardMarkup(row_width=1)
+        kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
+        keyboard.add(kb_main)
+        await call.message.edit_text(text="Нельзя сражаться с самим собой!",
+                                     reply_markup=keyboard)
+        return
 
-    await nft_dao.edit_by_address(address=nft.address, arena=True)
+    await nft_dao.edit_by_address(address=nft.address, arena=True, duel=True)
+    await nft_dao.edit_by_address(address=nft_opponent.address, duel=True)
     await db_session.commit()
 
     game_outcome = await determine_winner(nft_opponent.rare * 10, nft.rare * 10, nft_opponent.user.bonus,

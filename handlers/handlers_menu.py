@@ -56,7 +56,7 @@ async def start(message: types.Message):
             user = user_data[0]
             if len(message.get_args()) > 0:
                 opponent_nft_id = message.get_args()
-                nfts = await nft_dao.get_by_params(user_id=user.id)
+                nfts = await nft_dao.get_by_params(user_id=user.id, activated=True)
                 keyboard = types.InlineKeyboardMarkup(row_width=1)
                 for nft in nfts:
                     button = InlineKeyboardButton(text=f"{nft.name_nft}",
