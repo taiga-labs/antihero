@@ -1,3 +1,3 @@
 #!/bin/sh -e
 
-alembic revision -m "rare int" --autogenerate
+alembic revision -m "tgid bigint" --autogenerate

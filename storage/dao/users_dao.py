@@ -19,6 +19,11 @@ class UserDAO(BaseDAO):
         sql = update(self.model).where(self.model.telegram_id == telegram_id).values(**params)
         await self.session.execute(sql)
 
+    async def edit_active_by_telegram_id(self, telegram_id: int, **params) -> None:
+        sql = update(self.model).where(self.model.telegram_id == telegram_id,
+                                       self.model.active == True).values(**params)
+        await self.session.execute(sql)
+
     async def get_top(self) -> list:
         sql = select(self.model).order_by(User.win.desc()).limit(10)
         data = await self.session.execute(sql)
