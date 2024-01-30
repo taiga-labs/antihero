@@ -15,7 +15,7 @@ from utils.wallet import get_connector
 
 async def main_menu() -> InlineKeyboardMarkup:
     keyboard = types.InlineKeyboardMarkup()
-    li = InlineKeyboardButton(text="Кошелёк", callback_data="wallet")
+    li = InlineKeyboardButton(text="Мои Герои", callback_data="wallet")
     bt = InlineKeyboardButton(text="Добавить NFT", callback_data="select_nft")
     top = InlineKeyboardButton(text="ТОП", callback_data="top")
     game = InlineKeyboardButton(text="Игра", callback_data="Search")
@@ -109,8 +109,8 @@ async def wallet(call: types.CallbackQuery, db_session: AsyncSession):
             "".join(["\n" + str(f"Name: %s\nAddress: %s\nLevel: %d\nActivated: %s\n" % (nft.name_nft,
                                                                                         f"<code>{nft.address}</code>",
                                                                                         nft.rare,
-                                                                                        "True" if nft.activated
-                                                                                        else "False"))
+                                                                                        "✅" if nft.activated
+                                                                                        else "❌"))
                      for nft in nft_data])),
         reply_markup=keyboard)
 

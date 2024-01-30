@@ -136,6 +136,8 @@ async def show_nft(call: types.CallbackQuery):
     keyboard.add(kb_nft_prov)
     kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main_menu)
+    await bot.delete_message(chat_id=call.message.chat.id,
+                             message_id=call.message.message_id)
     await bot.send_photo(chat_id=call.from_user.id,
                          photo=open(f'images/{call.from_user.id}.png', 'rb'),
                          caption=f"Для активации NFT необходимо заплатить комиссию 0.01 TON",
