@@ -23,6 +23,7 @@ class NftDAO(BaseDAO):
 
     async def get_opponent(self, user_id: int) -> Nft | None:
         sql = select(self.model).order_by(func.random()).where(self.model.duel == True,
+                                                               self.model.arena == False,
                                                                not_(self.model.user_id.in_([user_id])))
         data = await self.session.execute(sql)
         return data.scalar()

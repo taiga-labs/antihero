@@ -1,12 +1,13 @@
 import hashlib
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from aioredis import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.settings import settings
-from create_bot import dp, bot
+from create_bot import dp, bot, logger
 from storage.dao.nfts_dao import NftDAO
 from storage.dao.users_dao import UserDAO
-from storage.driver import async_session, get_redis_async_client
 from storage.schemas import UserModel
 from utils.middleware import anti_flood
 from utils.wallet import get_connector
@@ -39,8 +40,7 @@ async def main(call: types.CallbackQuery):
 
 
 @dp.throttled(anti_flood, rate=10)
-async def start(message: types.Message):
-    db_session = async_session()
+async def start(message: types.Message, db_session: AsyncSession):
     user_dao = UserDAO(session=db_session)
     nft_dao = NftDAO(session=db_session)
 
@@ -85,13 +85,10 @@ async def start(message: types.Message):
                                      reply_markup=keyboard)
     await bot.delete_message(chat_id=message.chat.id,
                              message_id=message.message_id)
-    await db_session.close()
 
 
 @dp.throttled(anti_flood, rate=3)
-async def wallet(call: types.CallbackQuery):
-    db_session = async_session()
-
+async def wallet(call: types.CallbackQuery, db_session: AsyncSession):
     user_dao = UserDAO(session=db_session)
     user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
     user = user_data[0]
@@ -116,7 +113,6 @@ async def wallet(call: types.CallbackQuery):
                                                                                         else "False"))
                      for nft in nft_data])),
         reply_markup=keyboard)
-    await db_session.close()
 
 
 @dp.throttled(anti_flood, rate=3)
@@ -130,8 +126,7 @@ async def search(call: types.CallbackQuery):
 
 
 @dp.throttled(anti_flood, rate=3)
-async def top_callback(call: types.CallbackQuery):
-    db_session = async_session()
+async def top_callback(call: types.CallbackQuery, db_session: AsyncSession):
     user_dao = UserDAO(session=db_session)
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -144,25 +139,21 @@ async def top_callback(call: types.CallbackQuery):
     await call.message.edit_text(
         "Топ пользователей:{}".format("".join(["\n" + str(f"<b>%s</b> %s" % (user.name, user.win)) for user in top])),
         reply_markup=keyboard)
-    await db_session.close()
 
 
-async def disconnect(call: types.CallbackQuery):
-    db_session = async_session()
+async def disconnect(call: types.CallbackQuery, db_session: AsyncSession, redis_session: Redis):
     user_dao = UserDAO(session=db_session)
     await user_dao.edit_active_by_telegram_id(telegram_id=call.from_user.id, active=False)
     await db_session.commit()
 
-    redis = await get_redis_async_client()
-    connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
+    connector = await get_connector(chat_id=call.message.chat.id, broker=redis_session)
     await connector.restore_connection()
     await connector.disconnect()
     await call.message.edit_text(text='Адрес отвязан\n\n/start чтобы добавить адрес')
-    await redis.close()
+    logger.info(f"disconnect | User {call.from_user.id} is disconnected")
 
 
-async def inline_handler(query: types.InlineQuery):
-    db_session = async_session()
+async def inline_handler(query: types.InlineQuery, db_session: AsyncSession):
     nft_dao = NftDAO(session=db_session)
 
     nft_id = int(query.query)
@@ -188,5 +179,4 @@ async def inline_handler(query: types.InlineQuery):
         input_message_content=types.InputTextMessageContent(message_text=text, parse_mode=ParseMode.HTML),
         reply_markup=keyboard
     )]
-
     await query.answer(articles, cache_time=2, is_personal=True)

@@ -4,12 +4,13 @@ import qrcode
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, ParseMode
 from TonTools import *
+from aioredis import Redis
 from pytonconnect import TonConnect
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from create_bot import dp, bot
+from create_bot import dp, bot, logger
 from handlers.handlers_menu import main_menu
 from storage.dao.users_dao import UserDAO
-from storage.driver import async_session, get_redis_async_client
 from utils.middleware import anti_flood
 from utils.wallet import get_connector
 
@@ -25,12 +26,10 @@ async def choose_wallet(call: types.CallbackQuery):
 
 
 @dp.throttled(anti_flood, rate=3)
-async def connect_wallet(call: types.CallbackQuery):
-    db_session = async_session()
+async def connect_wallet(call: types.CallbackQuery, db_session: AsyncSession, redis_session: Redis):
     user_dao = UserDAO(session=db_session)
 
-    redis = await get_redis_async_client()
-    connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
+    connector = await get_connector(chat_id=call.message.chat.id, broker=redis_session)
     wallets_list = connector.get_wallets()
     wallet_name = call.data[8:]
     wlt = None
@@ -50,7 +49,6 @@ async def connect_wallet(call: types.CallbackQuery):
                                      f"<a href='https://tonkeeper.com/'>Tonkeeper</a>\n\n"
                                      f"Повторите попытку подключения",
                                      reply_markup=keyboard)
-        await redis.close()
         return
 
     generated_url = await connector.connect(wlt)
@@ -84,10 +82,8 @@ async def connect_wallet(call: types.CallbackQuery):
                 await call.message.answer(
                     text=f'Успешная авторизация!\nАдрес кошелька:\n\n<code>{wallet_address}</code>\n\nГлавное меню:',
                     reply_markup=keyboard)
-
-                # logger.info(f'Connected with address: {wallet_address}')  # TODO logger
+                logger.info(f"connect_wallet | User {call.from_user.id} connected with address: {wallet_address}")
             connector.pause_connection()
-            await redis.close()
             return
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -99,4 +95,4 @@ async def connect_wallet(call: types.CallbackQuery):
                               parse_mode=ParseMode.HTML,
                               reply_markup=keyboard)
     connector.pause_connection()
-    await redis.close()
+    logger.info(f"connect_wallet | User {call.from_user.id} connection timeout")

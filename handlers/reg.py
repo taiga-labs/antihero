@@ -5,14 +5,16 @@ from handlers.handlers_game import invite, arena_yes, search_game, nft_yes, figh
 from handlers.handlers_menu import start, inline_handler, wallet, search, top_callback, disconnect
 from handlers.handlers_nft import add_nft, select_to_add_nft, select_to_activate_nft, pay_fee, get_nft_on_arena, \
     remove_nft_from_arena, show_nft
-from utils.middleware import WalletNotConnectedMiddleware, WalletConnectedMiddleware
+from storage.driver import async_session
+from utils.middleware import WalletNotConnectedMiddleware, WalletConnectedMiddleware, DbSessionMiddleware, \
+    RedisSessionMiddleware
 
 
 # bot handlers
 def register_handlers_client(dp: Dispatcher) -> None:
     # menu
     dp.register_message_handler(start, commands=["start"])
-    # dp.register_callback_query_handler(main, text='main')
+    # dp.register_callback_query_handler(main, text='main')  # registered by decorator
     dp.register_callback_query_handler(wallet, text='wallet')
     dp.register_callback_query_handler(search, text='Search')
     dp.register_callback_query_handler(top_callback, text='top')
@@ -43,3 +45,5 @@ def register_handlers_client(dp: Dispatcher) -> None:
     # mw
     dp.middleware.setup(WalletNotConnectedMiddleware())
     dp.middleware.setup(WalletConnectedMiddleware())
+    dp.middleware.setup(DbSessionMiddleware(session_pool=async_session))
+    dp.middleware.setup(RedisSessionMiddleware())

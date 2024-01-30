@@ -14,4 +14,7 @@ if not settings.DEV:
 storage = MemoryStorage()
 bot = Bot(token=settings.TELEGRAM_API_KEY, parse_mode=ParseMode.HTML)
 dp = Dispatcher(bot, storage=storage)
-logging.getLogger('poull_log').setLevel(logging.DEBUG)
+# logging.getLogger('poull_log').setLevel(logging.DEBUG)
+logging.basicConfig()
+logger = logging.getLogger('ANTIHERO')
+logger.setLevel(logging.INFO)

@@ -1,6 +1,7 @@
 from aiogram.dispatcher.handler import CancelHandler
-from aiogram.dispatcher.middlewares import BaseMiddleware
+from aiogram.dispatcher.middlewares import BaseMiddleware, LifetimeControllerMiddleware
 from aiogram.types import CallbackQuery
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from storage.driver import get_redis_async_client
 from utils.wallet import get_connector
@@ -45,3 +46,27 @@ class WalletConnectedMiddleware(BaseMiddleware):
                 raise CancelHandler
             connector.pause_connection()
             await redis.close()
+
+
+class DbSessionMiddleware(LifetimeControllerMiddleware):
+    def __init__(self, session_pool: async_sessionmaker):
+        super().__init__()
+        self.session_pool = session_pool
+
+    async def pre_process(self, obj, data, *args):
+        async with self.session_pool() as session:
+            data["db_session"] = session
+
+    async def post_process(self, obj, data, *args):
+        await data['db_session'].close()
+
+
+class RedisSessionMiddleware(LifetimeControllerMiddleware):
+    def __init__(self):
+        super().__init__()
+
+    async def pre_process(self, obj, data, *args):
+        data["redis_session"] = await get_redis_async_client()
+
+    async def post_process(self, obj, data, *args):
+        await data["redis_session"].close()
