@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+    antihero-bot:
+        working_dir: /antihero_bot
+        build:
+            context: ../
+            dockerfile: ./build/Dockerfile
+        command: python bot_runner.py
+        depends_on:
+            - antihero-redis
+        user: "1000:1000"
+        restart: unless-stopped
+        container_name: antihero-bot
+        env_file: ../.env
+        networks:
+            antihero:
+                aliases:
+                    - antihero-bot
+
+    antihero-redis:
+        image: "redis"
+        container_name: antihero-redis
+        restart: unless-stopped
+        user: "1000:1000"
+        expose:
+            - "6379"
+        networks:
+            antihero:
+                aliases:
+                    - antihero-redis
+
+networks:
+    antihero:
+        external: true
