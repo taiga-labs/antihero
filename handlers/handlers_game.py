@@ -67,9 +67,9 @@ async def nft_yes(call: types.CallbackQuery, db_session: AsyncSession):
     nft_dao = NftDAO(session=db_session)
     await nft_dao.edit_by_id(id=nft_id, duel=True)
     await db_session.commit()
+    logger.info(f"nft_yes | User {call.from_user.id} search game")
 
     nft_opponent = await nft_dao.get_opponent(user_id=user.id)
-
     if nft_opponent:
         nft_data = await nft_dao.get_by_params(id=nft_id)
         nft = nft_data[0]
@@ -105,6 +105,8 @@ async def fight_yes(call: types.CallbackQuery, db_session: AsyncSession):
 
     nft_data = await nft_dao.get_by_params(id=nft_id)
     nft = nft_data[0]
+    logger.info(f"fight_yes | User {call.from_user.id} accept fight")
+    logger.info(f"fight_yes | User {call.from_user.id} choose {nft.name_nft}:{nft.address}")
 
     nft_data = await nft_dao.get_by_params(id=opponent_nft_id)
     if not nft_data:

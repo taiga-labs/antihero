@@ -45,6 +45,7 @@ async def start(message: types.Message, db_session: AsyncSession):
     nft_dao = NftDAO(session=db_session)
 
     if message.chat.type == 'private':
+        logger.info(f"start | User {message.from_user.id} is welcome")
         if not await user_dao.is_exists(telegram_id=message.from_user.id):
             user_model = UserModel(telegram_id=message.from_user.id,
                                    name=message.from_user.first_name)
@@ -180,3 +181,4 @@ async def inline_handler(query: types.InlineQuery, db_session: AsyncSession):
         reply_markup=keyboard
     )]
     await query.answer(articles, cache_time=2, is_personal=True)
+    logger.info(f"inline_handler | User {nft.user.telegram_id} set his {nft.name_nft}:{nft.address} on arena")
