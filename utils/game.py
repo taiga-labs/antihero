@@ -44,7 +44,7 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft):
     keyboard.add(kb_main)
 
     vs = f"{w_nft.user.name}'s {w_nft.name_nft} ⚔️ {l_nft.user.name}'s {l_nft.name_nft}"
-    logger.info(f"{w_nft.user.name}'s {w_nft.name_nft} > {l_nft.user.name}'s {l_nft.name_nft}")
+    logger.info(f"game_winner_determined | {w_nft.user.name}'s {w_nft.name_nft} > {l_nft.user.name}'s {l_nft.name_nft}")
     await bot.send_message(chat_id=w_nft.user.telegram_id,
                            text=f"Вы выиграли!\n\nСкоро NFT придёт на ваш адрес\n\n{vs}",
                            reply_markup=keyboard)
@@ -61,9 +61,21 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft):
     wallet = Wallet(mnemonics=wallet_mnemonics, version='v4r2', provider=provider)
 
     # TODO добавить в бд проверку, что nft возвращена
-    await wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=l_nft.address, fee=0.015)
+    logger.info(f"game_winner_determined | set withdraw pending nft:{w_nft.address} -> user:{w_nft.user.address}")
+    withdraw_resp = await wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=w_nft.address, fee=0.015)
+    if withdraw_resp == 200:
+        logger.info(f"game_winner_determined | successful withdraw nft:{w_nft.address} -> user:{w_nft.user.address}")
+    else:
+        logger.info(f"game_winner_determined | failed withdraw nft:{w_nft.address} -> user:{w_nft.user.address} | error {withdraw_resp}")
+
     await asyncio.sleep(25)
-    await wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=w_nft.address, fee=0.015)
+
+    logger.info(f"game_winner_determined | set withdraw pending nft:{l_nft.address} -> user:{w_nft.user.address}")
+    withdraw_resp = await wallet.transfer_nft(destination_address=w_nft.user.address, nft_address=l_nft.address, fee=0.015)
+    if withdraw_resp == 200:
+        logger.info(f"game_winner_determined | successful withdraw nft:{l_nft.address} -> user:{w_nft.user.address}")
+    else:
+        logger.info(f"game_winner_determined | failed withdraw nft:{l_nft.address} -> user:{w_nft.user.address} | error {withdraw_resp}")
 
 
 async def game_draw(nft_d1: Nft, nft_d2: Nft):
@@ -77,7 +89,7 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft):
 
     vs = f"{nft_d1.user.name}'s {nft_d1.name_nft} ⚔️ {nft_d2.user.name}'s {nft_d2.name_nft}"
 
-    logger.info(f"{nft_d1.user.name}'s {nft_d1.name_nft} = {nft_d2.user.name}'s {nft_d2.name_nft}")
+    logger.info(f"game_draw | {nft_d1.user.name}'s {nft_d1.name_nft} = {nft_d2.user.name}'s {nft_d2.name_nft}")
     await bot.send_message(chat_id=nft_d1.user.telegram_id,
                            text=f"Ничья!\n\n{vs}",
                            reply_markup=keyboard)
@@ -92,6 +104,18 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft):
     provider = TonCenterClient(key=settings.TONCENTER_API_KEY)
     wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS)
     wallet = Wallet(mnemonics=wallet_mnemonics, version='v4r2', provider=provider)
-    await wallet.transfer_nft(destination_address=nft_d1.user.address, nft_address=nft_d1.address, fee=0.015)
+    logger.info(f"game_draw | set withdraw pending nft:{nft_d1.address} -> user:{nft_d1.user.address}")
+    withdraw_resp = await wallet.transfer_nft(destination_address=nft_d1.user.address, nft_address=nft_d1.address, fee=0.015)
+    if withdraw_resp == 200:
+        logger.info(f"game_draw | successful withdraw nft:{nft_d1.address} -> user:{nft_d1.user.address}")
+    else:
+        logger.info(f"game_draw | failed withdraw nft:{nft_d1.address} -> user:{nft_d1.user.address} | error {withdraw_resp}")
+
     await asyncio.sleep(25)
-    await wallet.transfer_nft(destination_address=nft_d2.user.address, nft_address=nft_d2.address, fee=0.015)
+
+    logger.info(f"game_draw | set withdraw pending nft:{nft_d2.address} -> user:{nft_d2.user.address}")
+    withdraw_resp = await wallet.transfer_nft(destination_address=nft_d2.user.address, nft_address=nft_d2.address, fee=0.015)
+    if withdraw_resp == 200:
+        logger.info(f"game_draw | successful withdraw nft:{nft_d2.address} -> user:{nft_d2.user.address}")
+    else:
+        logger.info(f"game_draw | failed withdraw nft:{nft_d2.address} -> user:{nft_d2.user.address} | error {withdraw_resp}")
