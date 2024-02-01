@@ -23,6 +23,10 @@ async def main_menu() -> InlineKeyboardMarkup:
     return keyboard
 
 
+async def ping(message: types.Message):
+    await message.answer("pong")
+
+
 @dp.callback_query_handler(lambda c: c.message.content_type == "text", text='main')
 async def main(call: types.CallbackQuery):
     keyboard = await main_menu()
@@ -78,7 +82,8 @@ async def start(message: types.Message, db_session: AsyncSession):
             kb_transfer = InlineKeyboardButton(text="Подключить кошелёк", callback_data="choose_wallet")
             keyboard.add(kb_transfer)
             await bot.send_animation(chat_id=message.chat.id,
-                                     animation='CgACAgIAAxkBAAIBS2WuL2bgRduEAAHGoMzH7nZEVdG2GwACIjwAAj5zcUl-Y3Gi5gNp8zQE',
+                                     # animation='CgACAgIAAxkBAAIBS2WuL2bgRduEAAHGoMzH7nZEVdG2GwACIjwAAj5zcUl-Y3Gi5gNp8zQE',
+                                     animation=open(f'images/ah.mp4', 'rb'),
                                      caption=F"Приветствуем в боте коллекции "
                                              F"<a href='https://getgems.io/collection/{settings.MAIN_COLLECTION_ADDRESS}'>TON ANTIHERO!</a>\n"
                                              F"Наш <a href='https://t.me/TON_ANTIHERO_NFT'>ТЕЛЕГРАМ КАНАЛ☢️</a>\n"
