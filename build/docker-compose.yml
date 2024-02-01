@@ -18,6 +18,21 @@ services:
                 aliases:
                     - antihero-bot
 
+     antihero-migrations:
+        build:
+          context: ../
+          dockerfile: ./build/Dockerfile
+        command: alembic upgrade head
+        user: "1000:1000"
+        restart: "no"
+        container_name: antihero-migrations
+        env_file: ../.env
+        networks:
+            antihero:
+                aliases:
+                    - antihero-migrations
+
+
     antihero-redis:
         image: "redis"
         container_name: antihero-redis
