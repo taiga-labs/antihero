@@ -89,7 +89,7 @@ async def nft_yes(call: types.CallbackQuery, db_session: AsyncSession):
         await db_session.commit()
     else:
         keyboard = types.InlineKeyboardMarkup(row_width=1)
-        kb_main = InlineKeyboardButton(text="Выйти", callback_data="exit")
+        kb_main = InlineKeyboardButton(text="Выйти", callback_data=f"exit_{nft_id}")
         keyboard.add(kb_main)
         await call.message.edit_text("Начинаю поиск", reply_markup=keyboard)
 
@@ -151,8 +151,9 @@ async def fight_yes(call: types.CallbackQuery, db_session: AsyncSession):
 
 
 async def exit_game(call: types.CallbackQuery, db_session: AsyncSession):
+    nft_id = int(call.data[5:])
     nft_dao = NftDAO(session=db_session)
-    await nft_dao.edit_by_user_id(user_id=call.from_user.id, duel=False)
+    await nft_dao.edit_by_id(id=nft_id, duel=False)
     await db_session.commit()
 
     keyboard = await main_menu()

@@ -43,7 +43,7 @@ def register_handlers_client(dp: Dispatcher) -> None:
     dp.register_callback_query_handler(search_game, text='search_game')
     dp.register_callback_query_handler(nft_yes, text_contains='nft_')
     dp.register_callback_query_handler(fight_yes, text_contains='fight_')
-    dp.register_callback_query_handler(exit_game, text='exit')
+    dp.register_callback_query_handler(exit_game, text_contains='exit_')
 
     # mw
     dp.middleware.setup(WalletNotConnectedMiddleware())
