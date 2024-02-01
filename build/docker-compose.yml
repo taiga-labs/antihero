@@ -18,7 +18,7 @@ services:
                 aliases:
                     - antihero-bot
 
-     antihero-migrations:
+    antihero-migrations:
         build:
           context: ../
           dockerfile: ./build/Dockerfile
