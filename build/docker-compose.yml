@@ -36,6 +36,8 @@ services:
     antihero-redis:
         image: "redis"
         container_name: antihero-redis
+        volumes:
+          - ./redis-data:/data:rw
         restart: unless-stopped
         user: "1000:1000"
         expose:
