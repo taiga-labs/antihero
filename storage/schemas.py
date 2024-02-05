@@ -11,3 +11,8 @@ class NftModel(BaseModel):
     address: str
     name_nft: str
     rare: int
+
+
+class WithdrawModel(BaseModel):
+    nft_address: int
+    dst_address: str

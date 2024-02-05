@@ -1,3 +1,3 @@
 #!/bin/sh -e
 
-alembic revision -m "tgid bigint" --autogenerate
+alembic revision -m "Withdrawals" --autogenerate

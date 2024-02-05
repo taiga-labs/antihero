@@ -30,3 +30,10 @@ class Nft(Base):
 
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     user: Mapped[User] = relationship(User, lazy="joined")
+
+
+class Withdrawal(Base):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    nft_address: Mapped[str] = mapped_column(String, nullable=False)
+    dst_address: Mapped[str] = mapped_column(String, nullable=False)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="t")
