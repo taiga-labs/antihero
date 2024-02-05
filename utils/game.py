@@ -36,13 +36,13 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft) -> None:
     keyboard.add(kb_main)
 
     await user_dao.edit_active_by_telegram_id(telegram_id=w_nft.user.telegram_id, win=w_nft.user.win + 1)
-    logger.info(f"game_winner_determined | {w_nft.user.name}'s {w_nft.name_nft} > {l_nft.user.name}'s {l_nft.name_nft}")
+    logger.info(f"game_winner_determined | {w_nft.user.name}'s {w_nft.name_nft} [LVL {w_nft.rare}] > {l_nft.user.name}'s {l_nft.name_nft} [LVL {l_nft.rare}]")
 
-    vs = f"{w_nft.user.name}'s {w_nft.name_nft} ⚔️ {l_nft.user.name}'s {l_nft.name_nft}"
+    vs = f"{w_nft.user.name}'s {w_nft.name_nft} [LVL {w_nft.rare}] ⚔️ {l_nft.user.name}'s {l_nft.name_nft} [LVL {l_nft.rare}]"
 
     media = types.MediaGroup()
     media.attach_photo(photo=InputFile(f'images/{w_nft.address}.png'),
-                       caption=f"Вы выиграли!\n\nСкоро NFT придёт на ваш адрес\n\n{vs}")
+                       caption=f"🏆 Вы выиграли!\n\nСкоро NFT придут на ваш адрес\n\n{vs}")
     media.attach_photo(photo=InputFile(f'images/{l_nft.address}.png'))
     await bot.send_media_group(chat_id=w_nft.user.telegram_id,
                                media=media)
@@ -52,7 +52,7 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft) -> None:
 
     media = types.MediaGroup()
     media.attach_photo(photo=InputFile(f'images/{w_nft.address}.png'),
-                       caption=f"Вы проиграли!\n\n{vs}")
+                       caption=f"🫡 Вы проиграли!\n\n{vs}")
     media.attach_photo(photo=InputFile(f'images/{l_nft.address}.png'))
     await bot.send_media_group(chat_id=l_nft.user.telegram_id,
                                media=media)
@@ -85,13 +85,13 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft) -> None:
     kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main)
 
-    logger.info(f"game_draw | {nft_d1.user.name}'s {nft_d1.name_nft} = {nft_d2.user.name}'s {nft_d2.name_nft}")
+    logger.info(f"game_draw | {nft_d1.user.name}'s {nft_d1.name_nft} [LVL {nft_d1.rare}] = {nft_d2.user.name}'s {nft_d2.name_nft} [LVL {nft_d2.rare}]")
 
-    vs = f"{nft_d1.user.name}'s {nft_d1.name_nft} ⚔️ {nft_d2.user.name}'s {nft_d2.name_nft}"
+    vs = f"{nft_d1.user.name}'s {nft_d1.name_nft} [LVL {nft_d1.rare}] ⚔️ {nft_d2.user.name}'s {nft_d2.name_nft} [LVL {nft_d2.rare}]"
 
     media = types.MediaGroup()
     media.attach_photo(photo=InputFile(f'images/{nft_d1.address}.png'),
-                       caption=f"Ничья!\n\n{vs}")
+                       caption=f"🤝 Ничья!\n\n{vs}")
     media.attach_photo(photo=InputFile(f'images/{nft_d2.address}.png'))
 
     await bot.send_media_group(chat_id=nft_d1.user.telegram_id,
