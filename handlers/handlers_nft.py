@@ -104,7 +104,7 @@ async def add_nft(call: types.CallbackQuery, db_session: AsyncSession, redis_ses
     await bot.send_photo(chat_id=call.from_user.id,
                          photo=open(f'images/{nft_address}.png', 'rb'),
                          caption=f"Твоя NFT добавлена во внутренний кошелёк\n"
-                                 f"Для активации NFT необходимо заплатить комиссию 0.01 TON",
+                                 f"Для активации NFT необходимо заплатить комиссию 0.1 TON",
                          reply_markup=keyboard)
     await bot.delete_message(chat_id=call.message.chat.id,
                              message_id=call.message.message_id)
@@ -140,7 +140,7 @@ async def show_nft(call: types.CallbackQuery):
                              message_id=call.message.message_id)
     await bot.send_photo(chat_id=call.from_user.id,
                          photo=open(f'images/{nft_address}.png', 'rb'),
-                         caption=f"Для активации NFT необходимо заплатить комиссию 0.01 TON",
+                         caption=f"Для активации NFT необходимо заплатить комиссию 0.1 TON",
                          reply_markup=keyboard)
 
 

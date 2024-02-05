@@ -100,6 +100,11 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft) -> None:
                            text="Вернуться в Главное меню",
                            reply_markup=keyboard)
 
+    media = types.MediaGroup()
+    media.attach_photo(photo=InputFile(f'images/{nft_d1.address}.png'),
+                       caption=f"🤝 Ничья!\n\n{vs}")
+    media.attach_photo(photo=InputFile(f'images/{nft_d2.address}.png'))
+
     await bot.send_media_group(chat_id=nft_d2.user.telegram_id,
                                media=media)
     await bot.send_message(chat_id=nft_d2.user.telegram_id,
