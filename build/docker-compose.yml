@@ -32,6 +32,19 @@ services:
                 aliases:
                     - antihero-migrations
 
+    antihero-withdrawal_processor:
+        build:
+            context: ../
+            dockerfile: ./build/Dockerfile
+        command: python -m services.withdrawal_processor
+        user: "1000:1000"
+        restart: unless-stopped
+        container_name: antihero-withdrawal_processor
+        env_file: ../.env
+        networks:
+            antihero:
+                aliases:
+                    - antihero-withdrawal_processor
 
     antihero-redis:
         image: "redis"
