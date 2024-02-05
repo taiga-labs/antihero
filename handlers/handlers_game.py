@@ -76,11 +76,11 @@ async def nft_yes(call: types.CallbackQuery, db_session: AsyncSession):
 
         logger.info(
             f"nft_yes | {nft.user.telegram_id}:{nft.address} vs {nft_opponent.user.telegram_id}:{nft_opponent.address}")
-        game_outcome = determine_winner(nft_opponent.rare * 10, nft.rare * 10, nft_opponent.user.bonus, nft.user.bonus)
+        game_outcome = await determine_winner(nft_lvl_l=nft.rare, nft_lvl_r=nft_opponent.rare)
         if game_outcome == 1:
-            await game_winner_determined(w_nft=nft_opponent, l_nft=nft)
-        elif game_outcome == 2:
             await game_winner_determined(w_nft=nft, l_nft=nft_opponent)
+        elif game_outcome == 2:
+            await game_winner_determined(w_nft=nft_opponent, l_nft=nft)
         else:
             await game_draw(nft_d1=nft, nft_d2=nft_opponent)
 
@@ -136,12 +136,11 @@ async def fight_yes(call: types.CallbackQuery, db_session: AsyncSession):
     await nft_dao.edit_by_address(address=nft_opponent.address, duel=True)
     await db_session.commit()
 
-    game_outcome = await determine_winner(nft_opponent.rare * 10, nft.rare * 10, nft_opponent.user.bonus,
-                                          nft.user.bonus)
+    game_outcome = await determine_winner(nft_lvl_l=nft.rare, nft_lvl_r=nft_opponent.rare)
     if game_outcome == 1:
-        await game_winner_determined(w_nft=nft_opponent, l_nft=nft)
-    elif game_outcome == 2:
         await game_winner_determined(w_nft=nft, l_nft=nft_opponent)
+    elif game_outcome == 2:
+        await game_winner_determined(w_nft=nft_opponent, l_nft=nft)
     else:
         await game_draw(nft_d1=nft, nft_d2=nft_opponent)
 

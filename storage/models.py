@@ -14,9 +14,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     address: Mapped[str] = mapped_column(String, nullable=True, unique=True)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="f")
-    count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     win: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
-    bonus: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
 
 class Nft(Base):
@@ -30,3 +28,10 @@ class Nft(Base):
 
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     user: Mapped[User] = relationship(User, lazy="joined")
+
+
+class Withdrawal(Base):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    nft_address: Mapped[str] = mapped_column(String, nullable=False)
+    dst_address: Mapped[str] = mapped_column(String, nullable=False)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="t")

@@ -16,7 +16,7 @@ from storage.dao.nfts_dao import NftDAO
 from storage.dao.users_dao import UserDAO
 from storage.schemas import NftModel
 from utils.middleware import anti_flood
-from utils.ton import get_nft_by_account, get_nft_by_name
+from utils.ton import get_nft_by_account, fetch_nft_by_address
 from utils.wallet import get_connector
 
 
@@ -31,8 +31,9 @@ async def select_to_add_nft(call: types.CallbackQuery, db_session: AsyncSession)
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for nft in user_nfts:
         name = nft.metadata.get('name')
+        nft_address = nft.address.to_userfriendly()
         button = InlineKeyboardButton(text=f"{name}",
-                                      callback_data=f"add_nft_{name}")
+                                      callback_data=f"add_nft_{nft_address}")
         keyboard.add(button)
     kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main_menu)
@@ -47,10 +48,8 @@ async def add_nft(call: types.CallbackQuery, db_session: AsyncSession, redis_ses
     await connector.restore_connection()
     user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
     user = user_data[0]
-    name = call.data[8:]
-    nft_address, nft_name, nft_rare = await get_nft_by_name(address=user.address,
-                                                            name=name,
-                                                            user_id=call.from_user.id)
+    nft_address = call.data[8:]
+    nft_name, nft_rare = await fetch_nft_by_address(nft_address=nft_address)
     body = bytes_to_b64str(NFTItem().create_transfer_body(new_owner_address=Address(settings.MAIN_WALLET_ADDRESS),
                                                           response_address=Address(
                                                               user.address)).to_boc())
@@ -95,20 +94,21 @@ async def add_nft(call: types.CallbackQuery, db_session: AsyncSession, redis_ses
                          rare=nft_rare)
     await nft_dao.add(data=nft_model.model_dump())
     await db_session.commit()
+    logger.info(f"add_nft | User {call.from_user.id} added nft {nft_address}")
+
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_nft_prov = InlineKeyboardButton(text="Оплатить комиссию", callback_data=f"pay_fee_{nft_address}")
     keyboard.add(kb_nft_prov)
     kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main_menu)
     await bot.send_photo(chat_id=call.from_user.id,
-                         photo=open(f'images/{call.from_user.id}.png', 'rb'),
+                         photo=open(f'images/{nft_address}.png', 'rb'),
                          caption=f"Твоя NFT добавлена во внутренний кошелёк\n"
                                  f"Для активации NFT необходимо заплатить комиссию 0.01 TON",
                          reply_markup=keyboard)
     await bot.delete_message(chat_id=call.message.chat.id,
                              message_id=call.message.message_id)
     connector.pause_connection()
-    logger.info(f"add_nft | User {call.from_user.id} added nft {nft_address}")
 
 
 async def select_to_activate_nft(call: types.CallbackQuery, db_session: AsyncSession):
@@ -139,7 +139,7 @@ async def show_nft(call: types.CallbackQuery):
     await bot.delete_message(chat_id=call.message.chat.id,
                              message_id=call.message.message_id)
     await bot.send_photo(chat_id=call.from_user.id,
-                         photo=open(f'images/{call.from_user.id}.png', 'rb'),
+                         photo=open(f'images/{nft_address}.png', 'rb'),
                          caption=f"Для активации NFT необходимо заплатить комиссию 0.01 TON",
                          reply_markup=keyboard)
 

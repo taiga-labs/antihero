@@ -33,7 +33,7 @@ async def main(call: types.CallbackQuery):
     await call.message.edit_text("Главное меню:", reply_markup=keyboard)
 
 
-@dp.callback_query_handler(lambda c: c.message.content_type == "photo", text='main')
+@dp.callback_query_handler(lambda c: c.message.content_type != "text", text='main')
 async def main(call: types.CallbackQuery):
     keyboard = await main_menu()
     await bot.send_message(chat_id=call.message.chat.id,
@@ -109,7 +109,7 @@ async def wallet(call: types.CallbackQuery, db_session: AsyncSession):
     kb_disconnect = InlineKeyboardButton(text="Отвязать кошелёк", callback_data="disconnect")
     keyboard.add(kb_arena, kb_pay_fee, kb_disconnect, kb_main_menu)
     text_address = f"Адрес кошелька: <code>{user.address}</code>\n\n"
-    text_nft = "Ваши NFT:\n{}"
+    text_nft = "Ваши герои:\n{}"
     await call.message.edit_text(
         text_address + text_nft.format(
             "".join(["\n" + str(f"Name: %s\nAddress: %s\nLevel: %d\nActivated: %s\n" % (nft.name_nft,
@@ -147,7 +147,17 @@ async def top_callback(call: types.CallbackQuery, db_session: AsyncSession):
         reply_markup=keyboard)
 
 
-async def disconnect(call: types.CallbackQuery, db_session: AsyncSession, redis_session: Redis):
+async def disconnect(call: types.CallbackQuery):
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    kb_yes = InlineKeyboardButton(text="Да", callback_data="disconnect_confirm")
+    kb_no = InlineKeyboardButton(text="Нет", callback_data="main")
+    keyboard.add(kb_yes)
+    keyboard.add(kb_no)
+    await call.message.edit_text(text='Вы уверены, что хотите отвязать текущий кошелек?',
+                                 reply_markup=keyboard)
+
+
+async def disconnect_confirm(call: types.CallbackQuery, db_session: AsyncSession, redis_session: Redis):
     user_dao = UserDAO(session=db_session)
     await user_dao.edit_active_by_telegram_id(telegram_id=call.from_user.id, active=False)
     await db_session.commit()
