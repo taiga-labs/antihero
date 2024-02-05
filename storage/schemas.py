@@ -14,5 +14,5 @@ class NftModel(BaseModel):
 
 
 class WithdrawModel(BaseModel):
-    nft_address: int
+    nft_address: str
     dst_address: str

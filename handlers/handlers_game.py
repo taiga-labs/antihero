@@ -76,7 +76,7 @@ async def nft_yes(call: types.CallbackQuery, db_session: AsyncSession):
 
         logger.info(
             f"nft_yes | {nft.user.telegram_id}:{nft.address} vs {nft_opponent.user.telegram_id}:{nft_opponent.address}")
-        game_outcome = determine_winner(nft_lvl_l=nft.rare, nft_lvl_r=nft_opponent.rare)
+        game_outcome = await determine_winner(nft_lvl_l=nft.rare, nft_lvl_r=nft_opponent.rare)
         if game_outcome == 1:
             await game_winner_determined(w_nft=nft, l_nft=nft_opponent)
         elif game_outcome == 2:

@@ -21,7 +21,7 @@ async def process_withdrawals():
         wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS)
         wallet = Wallet(mnemonics=wallet_mnemonics, version='v4r2', provider=provider)
         while True:
-            await asyncio.sleep(25)
+            await asyncio.sleep(2)
 
             unprocessed_withdrawals = await withdrawal_dao.get_active()
 
@@ -31,7 +31,7 @@ async def process_withdrawals():
             withdrawal = unprocessed_withdrawals[0]
 
             nft_owner = await provider.get_nft_owner(nft_address=withdrawal.nft_address)
-            nft_owner_address = Address(nft_owner).to_string(is_user_friendly=True, is_bounceable=True)
+            nft_owner_address = Address(nft_owner.address).to_string(is_user_friendly=True, is_bounceable=True)
             dst_address = Address(withdrawal.dst_address).to_string(is_user_friendly=True, is_bounceable=True)
 
             if nft_owner_address == dst_address:
@@ -48,6 +48,8 @@ async def process_withdrawals():
             else:
                 logger.error(
                     f"process_withdrawals | provider bid declined:{withdrawal.nft_address} -> user:{withdrawal.dst_address} | error {withdraw_resp}")
+
+            await asyncio.sleep(13)
     finally:
         await db_session.close()
 
