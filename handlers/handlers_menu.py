@@ -1,7 +1,5 @@
 import hashlib
 from aiogram import types
-from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from aioredis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
