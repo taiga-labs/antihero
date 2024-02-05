@@ -1,5 +1,7 @@
 import hashlib
 from aiogram import types
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from aioredis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -147,7 +149,17 @@ async def top_callback(call: types.CallbackQuery, db_session: AsyncSession):
         reply_markup=keyboard)
 
 
-async def disconnect(call: types.CallbackQuery, db_session: AsyncSession, redis_session: Redis):
+async def disconnect(call: types.CallbackQuery):
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    kb_yes = InlineKeyboardButton(text="Да", callback_data="disconnect_confirm")
+    kb_no = InlineKeyboardButton(text="Нет", callback_data="main")
+    keyboard.add(kb_yes)
+    keyboard.add(kb_no)
+    await call.message.edit_text(text='Вы уверены, что хотите отвязать текущий кошелек?',
+                                 reply_markup=keyboard)
+
+
+async def disconnect_confirm(call: types.CallbackQuery, db_session: AsyncSession, redis_session: Redis):
     user_dao = UserDAO(session=db_session)
     await user_dao.edit_active_by_telegram_id(telegram_id=call.from_user.id, active=False)
     await db_session.commit()
