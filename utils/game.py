@@ -12,30 +12,19 @@ from storage.models import Nft
 from storage.schemas import WithdrawModel
 
 
-async def determine_winner(chance1, chance2, bonus1, bonus2):
-    if bonus1 > 0:
-        user_one = chance1 + bonus1
-    else:
-        user_one = chance1
-
-    if bonus2 > 0:
-        user_two = chance2 + bonus2
-    else:
-        user_two = chance2
-
-    maximum = user_one + user_two
-    r = maximum + 25
-    random_number = random.randint(0, r)
-
-    if random_number < user_one:
+async def determine_winner(nft_lvl_l: int, nft_lvl_r: int) -> int:
+    if nft_lvl_l - nft_lvl_r > 2:
         return 1
-    elif random_number < user_two:
+    if nft_lvl_r - nft_lvl_l > 2:
         return 2
-    else:
-        return 0
+    outcomes = [nft_lvl_l, nft_lvl_r, -1]
+    res = random.choice(outcomes)
+    if res == nft_lvl_l: return 1
+    if res == nft_lvl_r: return 2
+    if res == -1: return 0
 
 
-async def game_winner_determined(w_nft: Nft, l_nft: Nft):
+async def game_winner_determined(w_nft: Nft, l_nft: Nft) -> None:
     db_session = async_session()
     user_dao = UserDAO(session=db_session)
     withdrawal_dao = WithdrawalDAO(db_session)
@@ -45,17 +34,16 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft):
     kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main)
 
-    vs = f"{w_nft.user.name}'s {w_nft.name_nft} ⚔️ {l_nft.user.name}'s {l_nft.name_nft}"
+    await user_dao.edit_active_by_telegram_id(telegram_id=w_nft.user.telegram_id, win=w_nft.user.win + 1)
     logger.info(f"game_winner_determined | {w_nft.user.name}'s {w_nft.name_nft} > {l_nft.user.name}'s {l_nft.name_nft}")
+
+    vs = f"{w_nft.user.name}'s {w_nft.name_nft} ⚔️ {l_nft.user.name}'s {l_nft.name_nft}"
     await bot.send_message(chat_id=w_nft.user.telegram_id,
                            text=f"Вы выиграли!\n\nСкоро NFT придёт на ваш адрес\n\n{vs}",
                            reply_markup=keyboard)
     await bot.send_message(chat_id=l_nft.user.telegram_id,
                            text=f"Вы проиграли!\n\n{vs}",
                            reply_markup=keyboard)
-
-    await user_dao.edit_active_by_telegram_id(telegram_id=w_nft.user.telegram_id, win=w_nft.user.win + 1)
-    await user_dao.edit_active_by_telegram_id(telegram_id=l_nft.user.telegram_id, bonus=l_nft.user.bonus - 1)
 
     withdrawal_model = WithdrawModel(nft_address=w_nft.address,
                                      dst_address=w_nft.user.address)
@@ -70,9 +58,8 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft):
     await db_session.commit()
 
 
-async def game_draw(nft_d1: Nft, nft_d2: Nft):
+async def game_draw(nft_d1: Nft, nft_d2: Nft) -> None:
     db_session = async_session()
-    user_dao = UserDAO(session=db_session)
     withdrawal_dao = WithdrawalDAO(db_session)
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -89,9 +76,6 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft):
     await bot.send_message(chat_id=nft_d2.user.telegram_id,
                            text=f"Ничья!\n\n{vs}",
                            reply_markup=keyboard)
-
-    await user_dao.edit_active_by_telegram_id(telegram_id=nft_d1.user.telegram_id, bonus=nft_d1.user.bonus - 1)
-    await user_dao.edit_active_by_telegram_id(telegram_id=nft_d2.user.telegram_id, bonus=nft_d2.user.bonus - 1)
 
     withdrawal_model = WithdrawModel(nft_address=nft_d1.address,
                                      dst_address=nft_d1.user.address)

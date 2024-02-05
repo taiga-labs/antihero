@@ -14,9 +14,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     address: Mapped[str] = mapped_column(String, nullable=True, unique=True)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="f")
-    count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     win: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
-    bonus: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
 
 class Nft(Base):

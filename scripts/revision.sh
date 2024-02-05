@@ -1,3 +1,3 @@
 #!/bin/sh -e
 
-alembic revision -m "Withdrawals" --autogenerate
+alembic revision -m "remove bonus,count" --autogenerate
