@@ -31,23 +31,6 @@ class WalletNotConnectedMiddleware(BaseMiddleware):
         await redis.close()
 
 
-class WalletConnectedMiddleware(BaseMiddleware):
-    SKIP_ROUTERS = ['choose_wallet', 'connect:']
-
-    async def on_process_callback_query(self, call: CallbackQuery, data: dict):
-        if any(sr in call.data for sr in self.SKIP_ROUTERS):
-            redis = await get_redis_async_client()
-            connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
-            connected = await connector.restore_connection()
-            if connected:
-                await call.answer("Для подключения нового кошелька необходимо отвязать текущий в разделе Кошелек",
-                                  show_alert=True)
-                await redis.close()
-                raise CancelHandler
-            connector.pause_connection()
-            await redis.close()
-
-
 class DbSessionMiddleware(LifetimeControllerMiddleware):
     def __init__(self, session_pool: async_sessionmaker):
         super().__init__()

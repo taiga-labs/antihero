@@ -7,8 +7,7 @@ from handlers.handlers_menu import start, inline_handler, wallet, search, top_ca
 from handlers.handlers_nft import add_nft, select_to_add_nft, select_to_activate_nft, pay_fee, get_nft_on_arena, \
     remove_nft_from_arena, show_nft
 from storage.driver import async_session
-from utils.middleware import WalletNotConnectedMiddleware, WalletConnectedMiddleware, DbSessionMiddleware, \
-    RedisSessionMiddleware
+from utils.middleware import WalletNotConnectedMiddleware, DbSessionMiddleware, RedisSessionMiddleware
 
 
 # bot handlers
@@ -49,6 +48,5 @@ def register_handlers_client(dp: Dispatcher) -> None:
 
     # mw
     dp.middleware.setup(WalletNotConnectedMiddleware())
-    dp.middleware.setup(WalletConnectedMiddleware())
     dp.middleware.setup(DbSessionMiddleware(session_pool=async_session))
     dp.middleware.setup(RedisSessionMiddleware())
