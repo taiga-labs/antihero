@@ -1,7 +1,7 @@
 from aiogram import Dispatcher
 
 from handlers.handlers_wallet import choose_wallet, connect_wallet
-from handlers.handlers_game import invite, arena_yes, search_game, nft_yes, fight_yes, exit_game
+from handlers.handlers_game import invite, arena_yes, search_game, duel_yes, fight_yes, exit_game
 from handlers.handlers_menu import start, inline_handler, wallet, search, top_callback, disconnect, ping, \
     disconnect_confirm
 from handlers.handlers_nft import add_nft, select_to_add_nft, select_to_activate_nft, pay_fee, get_nft_on_arena, \
@@ -42,7 +42,7 @@ def register_handlers_client(dp: Dispatcher) -> None:
     dp.register_callback_query_handler(invite, text='invite')
     dp.register_callback_query_handler(arena_yes, text_contains='arena_')
     dp.register_callback_query_handler(search_game, text='search_game')
-    dp.register_callback_query_handler(nft_yes, text_contains='nft_')
+    dp.register_callback_query_handler(duel_yes, text_contains='nft_')
     dp.register_callback_query_handler(fight_yes, text_contains='fight_')
     dp.register_callback_query_handler(exit_game, text_contains='exit_')
 

@@ -1,5 +1,4 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from typing import AsyncGenerator, Coroutine, Any
 import aioredis
 from aioredis import Redis
 
@@ -7,7 +6,7 @@ from config.settings import settings
 
 db_engine = create_async_engine(
     str(settings.DATABASE_URL),
-    echo=True
+    # echo=True
 )
 
 async_session = async_sessionmaker(db_engine,

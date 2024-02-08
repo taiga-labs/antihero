@@ -58,7 +58,7 @@ async def search_game(call: types.CallbackQuery, db_session: AsyncSession):
 
 
 @dp.throttled(anti_flood)
-async def nft_yes(call: types.CallbackQuery, db_session: AsyncSession):
+async def duel_yes(call: types.CallbackQuery, db_session: AsyncSession):
     user_dao = UserDAO(session=db_session)
     user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
     user = user_data[0]
@@ -67,15 +67,14 @@ async def nft_yes(call: types.CallbackQuery, db_session: AsyncSession):
     nft_dao = NftDAO(session=db_session)
     await nft_dao.edit_by_id(id=nft_id, duel=True)
     await db_session.commit()
-    logger.info(f"nft_yes | User {call.from_user.id} search game")
+    nft_data = await nft_dao.get_by_params(id=nft_id)
+    nft = nft_data[0]
+    logger.info(f"duel_yes | User {call.from_user.first_name}:{call.from_user.id} search game with nft {nft.name_nft}:{nft.address}")
 
     nft_opponent = await nft_dao.get_opponent(user_id=user.id)
     if nft_opponent:
-        nft_data = await nft_dao.get_by_params(id=nft_id)
-        nft = nft_data[0]
-
         logger.info(
-            f"nft_yes | {nft.user.telegram_id}:{nft.address} vs {nft_opponent.user.telegram_id}:{nft_opponent.address}")
+            f"duel_yes | {nft.user.name}:{nft.user.telegram_id}:{nft.address} vs {nft_opponent.user.name}{nft_opponent.user.telegram_id}:{nft_opponent.address}")
         game_outcome = await determine_winner(nft_lvl_l=nft.rare, nft_lvl_r=nft_opponent.rare)
         if game_outcome == 1:
             await game_winner_determined(w_nft=nft, l_nft=nft_opponent)
@@ -88,6 +87,7 @@ async def nft_yes(call: types.CallbackQuery, db_session: AsyncSession):
         await nft_dao.delete_by_address(address=nft_opponent.address)
         await db_session.commit()
     else:
+        logger.info(f"duel_yes | User {call.from_user.first_name}:{call.from_user.id} waiting for opponent")
         keyboard = types.InlineKeyboardMarkup(row_width=1)
         kb_main = InlineKeyboardButton(text="Выйти", callback_data=f"exit_{nft_id}")
         keyboard.add(kb_main)
@@ -105,8 +105,8 @@ async def fight_yes(call: types.CallbackQuery, db_session: AsyncSession):
 
     nft_data = await nft_dao.get_by_params(id=nft_id)
     nft = nft_data[0]
-    logger.info(f"fight_yes | User {call.from_user.id} accept fight")
-    logger.info(f"fight_yes | User {call.from_user.id} choose {nft.name_nft}:{nft.address}")
+    logger.info(f"fight_yes | User {call.from_user.first_name}:{call.from_user.id} accept fight")
+    logger.info(f"fight_yes | User {call.from_user.first_name}:{call.from_user.id} choose {nft.name_nft}:{nft.address}")
 
     nft_data = await nft_dao.get_by_params(id=opponent_nft_id)
     if not nft_data:
@@ -154,6 +154,6 @@ async def exit_game(call: types.CallbackQuery, db_session: AsyncSession):
     nft_dao = NftDAO(session=db_session)
     await nft_dao.edit_by_id(id=nft_id, duel=False)
     await db_session.commit()
-
+    logger.info(f"exit_game | User {call.from_user.first_name}:{call.from_user.id} exit game")
     keyboard = await main_menu()
     await call.message.edit_text("Главное меню:", reply_markup=keyboard)

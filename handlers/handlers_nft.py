@@ -74,19 +74,19 @@ async def add_nft(call: types.CallbackQuery, db_session: AsyncSession, redis_ses
         await call.message.edit_text(text='Время подтверждения истекло',
                                      reply_markup=keyboard)
         connector.pause_connection()
-        logger.info(f"add_nft | User {call.from_user.id} nft transfer timeout")
+        logger.info(f"add_nft | User {call.from_user.first_name}:{call.from_user.id} nft transfer timeout")
         return
     except UserRejectsError:
         await call.message.edit_text(text='Вы отменили перевод',
                                      reply_markup=keyboard)
         connector.pause_connection()
-        logger.info(f"add_nft | User {call.from_user.id} nft transfer declined")
+        logger.info(f"add_nft | User {call.from_user.first_name}:{call.from_user.id} nft transfer declined")
         return
     except Exception as e:
         await call.message.edit_text(text=f'Неизвестная ошибка! Обратитесь к администратору',
                                      reply_markup=keyboard)
         connector.pause_connection()
-        logger.error(f"add_nft | User {call.from_user.id} error: {e}")
+        logger.error(f"add_nft | User {call.from_user.first_name}:{call.from_user.id} error: {e}")
         return
     nft_model = NftModel(user_id=user.id,
                          address=nft_address,
@@ -94,7 +94,7 @@ async def add_nft(call: types.CallbackQuery, db_session: AsyncSession, redis_ses
                          rare=nft_rare)
     await nft_dao.add(data=nft_model.model_dump())
     await db_session.commit()
-    logger.info(f"add_nft | User {call.from_user.id} added nft {nft_address}")
+    logger.info(f"add_nft | User {call.from_user.first_name}:{call.from_user.id} added nft {nft_name}:{nft_address}")
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_nft_prov = InlineKeyboardButton(text="Оплатить комиссию", callback_data=f"pay_fee_{nft_address}")
@@ -182,21 +182,21 @@ async def pay_fee(call: types.CallbackQuery, db_session: AsyncSession, redis_ses
             caption='Время подтверждения истекло\n Повторно активировать NFT можно в разделе Кошелек',
             reply_markup=keyboard)
         connector.pause_connection()
-        logger.info(f"pay_fee | User {call.from_user.id} nft activate timeout")
+        logger.info(f"pay_fee | User {call.from_user.first_name}:{call.from_user.id} nft {nft_address} activate timeout")
         return
     except UserRejectsError:
         await call.message.edit_caption(
             caption='Вы отменили перевод\n Повторно активировать NFT можно в разделе Кошелек',
             reply_markup=keyboard)
         connector.pause_connection()
-        logger.info(f"pay_fee | User {call.from_user.id} nft activate declined")
+        logger.info(f"pay_fee | User {call.from_user.first_name}:{call.from_user.id} nft {nft_address} activate declined")
         return
     except Exception as e:
         await call.message.edit_caption(
             caption=f'Неизвестная ошибка!\n Повторно активировать NFT можно в разделе Кошелек',
             reply_markup=keyboard)
         connector.pause_connection()
-        logger.error(f"pay_fee | User {call.from_user.id} error: {e}")
+        logger.error(f"pay_fee | User {call.from_user.first_name}:{call.from_user.id} error: {e}")
         return
 
     await nft_dao.edit_by_address(address=nft_address, activated=True)
@@ -209,7 +209,7 @@ async def pay_fee(call: types.CallbackQuery, db_session: AsyncSession, redis_ses
                              message_id=call.message.message_id)
 
     connector.pause_connection()
-    logger.info(f"pay_fee | User {call.from_user.id} has activated nft {nft_address}")
+    logger.info(f"pay_fee | User {call.from_user.first_name}:{call.from_user.id} has activated nft {nft_address}")
 
 
 @dp.throttled(anti_flood)
@@ -245,6 +245,8 @@ async def remove_nft_from_arena(call: types.CallbackQuery, db_session: AsyncSess
 
     await nft_dao.edit_by_address(address=address, arena=False)
     await db_session.commit()
+
+    logger.info(f"remove_nft_from_arena | User {call.from_user.first_name}:{call.from_user.id} remove nft {nft.name_nft}:{nft.address} from arena")
 
     keyboard = types.InlineKeyboardMarkup(row_width=2)
     kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")

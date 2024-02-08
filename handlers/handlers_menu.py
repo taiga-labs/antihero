@@ -49,7 +49,7 @@ async def start(message: types.Message, db_session: AsyncSession):
     nft_dao = NftDAO(session=db_session)
 
     if message.chat.type == 'private':
-        logger.info(f"start | User {message.from_user.id} is welcome")
+        logger.info(f"start | User {message.from_user.first_name}:{message.from_user.id} is welcome")
         if not await user_dao.is_exists(telegram_id=message.from_user.id):
             user_model = UserModel(telegram_id=message.from_user.id,
                                    name=message.from_user.first_name)
@@ -82,7 +82,6 @@ async def start(message: types.Message, db_session: AsyncSession):
             kb_transfer = InlineKeyboardButton(text="Подключить кошелёк", callback_data="choose_wallet")
             keyboard.add(kb_transfer)
             await bot.send_animation(chat_id=message.chat.id,
-                                     # animation='CgACAgIAAxkBAAIBS2WuL2bgRduEAAHGoMzH7nZEVdG2GwACIjwAAj5zcUl-Y3Gi5gNp8zQE',
                                      animation=open(f'images/ah.mp4', 'rb'),
                                      caption=F"Приветствуем в боте коллекции "
                                              F"<a href='https://getgems.io/collection/{settings.MAIN_COLLECTION_ADDRESS}'>TON ANTIHERO!</a>\n"
@@ -166,7 +165,7 @@ async def disconnect_confirm(call: types.CallbackQuery, db_session: AsyncSession
     await connector.restore_connection()
     await connector.disconnect()
     await call.message.edit_text(text='Адрес отвязан\n\n/start чтобы добавить адрес')
-    logger.info(f"disconnect | User {call.from_user.id} is disconnected")
+    logger.info(f"disconnect | User {call.from_user.first_name}:{call.from_user.id} is disconnected")
 
 
 async def inline_handler(query: types.InlineQuery, db_session: AsyncSession):
@@ -196,4 +195,4 @@ async def inline_handler(query: types.InlineQuery, db_session: AsyncSession):
         reply_markup=keyboard
     )]
     await query.answer(articles, cache_time=2, is_personal=True)
-    logger.info(f"inline_handler | User {nft.user.telegram_id} set his {nft.name_nft}:{nft.address} on arena")
+    logger.info(f"inline_handler | User {nft.user.name}:{nft.user.telegram_id} set his {nft.name_nft}:{nft.address} on arena")

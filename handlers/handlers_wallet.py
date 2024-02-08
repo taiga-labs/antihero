@@ -82,7 +82,7 @@ async def connect_wallet(call: types.CallbackQuery, db_session: AsyncSession, re
                 await call.message.answer(
                     text=f'Успешная авторизация!\nАдрес кошелька:\n\n<code>{wallet_address}</code>\n\nГлавное меню:',
                     reply_markup=keyboard)
-                logger.info(f"connect_wallet | User {call.from_user.id} connected with address: {wallet_address}")
+                logger.info(f"connect_wallet | User {call.from_user.first_name}:{call.from_user.id} connected with address: {wallet_address}")
             connector.pause_connection()
             return
 
@@ -95,4 +95,4 @@ async def connect_wallet(call: types.CallbackQuery, db_session: AsyncSession, re
                               parse_mode=ParseMode.HTML,
                               reply_markup=keyboard)
     connector.pause_connection()
-    logger.info(f"connect_wallet | User {call.from_user.id} connection timeout")
+    logger.info(f"connect_wallet | User {call.from_user.first_name}:{call.from_user.id} connection timeout")
