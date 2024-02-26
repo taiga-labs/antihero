@@ -6,7 +6,7 @@ services:
         build:
             context: ../
             dockerfile: ./build/Dockerfile
-        command: python bot_runner.py
+        command: python runner.py
         depends_on:
             - antihero-redis
         user: "1000:1000"

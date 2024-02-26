@@ -10,4 +10,4 @@ RUN chown -R 1000:1000 ./
 
 RUN pip install -r ./requirements.txt --no-cache-dir --no-deps
 
-# ENTRYPOINT python bot_runner.py
+# ENTRYPOINT python runner.py

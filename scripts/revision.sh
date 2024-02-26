@@ -1,3 +1,3 @@
 #!/bin/sh -e
 
-alembic revision -m "remove bonus,count" --autogenerate
+alembic revision -m "nft withdraw" --autogenerate

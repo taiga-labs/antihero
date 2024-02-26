@@ -1,4 +1,4 @@
-from pydantic import PostgresDsn
+from pydantic import PostgresDsn, model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -14,6 +14,9 @@ class Config(BaseSettings):
     WEBHOOK_PORT: str
     PATH_CERT: str
     TELEGRAM_BOT_URL: str
+
+    WEBAPP_HOST: str
+    WEBAPP_PORT: str
 
     TON_API_KEY: str
     TONCENTER_API_KEY: str

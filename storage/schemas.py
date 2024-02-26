@@ -13,6 +13,17 @@ class NftModel(BaseModel):
     rare: int
 
 
+class PlayerModel(BaseModel):
+    nft_id: int
+
+
+class GameModel(BaseModel):
+    uuid: str
+    player_l_id: int
+    player_r_id: int
+    exp_time: int
+
+
 class WithdrawModel(BaseModel):
     nft_address: str
     dst_address: str

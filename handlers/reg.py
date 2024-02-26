@@ -5,7 +5,7 @@ from handlers.handlers_game import invite, arena_yes, search_game, duel_yes, fig
 from handlers.handlers_menu import start, inline_handler, wallet, search, top_callback, disconnect, ping, \
     disconnect_confirm
 from handlers.handlers_nft import add_nft, select_to_add_nft, select_to_activate_nft, pay_fee, get_nft_on_arena, \
-    remove_nft_from_arena, show_nft
+    remove_nft_from_arena, show_nft, get_nft_withdrawable, withdraw_nft
 from storage.driver import async_session
 from utils.middleware import WalletNotConnectedMiddleware, DbSessionMiddleware, RedisSessionMiddleware
 
@@ -37,6 +37,8 @@ def register_handlers_client(dp: Dispatcher) -> None:
     dp.register_callback_query_handler(pay_fee, text_contains='pay_fee_')
     dp.register_callback_query_handler(get_nft_on_arena, text='nft_arena')
     dp.register_callback_query_handler(remove_nft_from_arena, text_contains='remove_')
+    dp.register_callback_query_handler(get_nft_withdrawable, text='nft_withdrawable')
+    dp.register_callback_query_handler(withdraw_nft, text_contains='withdraw_')
 
     # game
     dp.register_callback_query_handler(invite, text='invite')

@@ -25,9 +25,30 @@ class Nft(Base):
     rare: Mapped[int] = mapped_column(Integer, nullable=False)
     duel: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="f")
     arena: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="f")
+    withdraw: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="f")
 
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     user: Mapped[User] = relationship(User, lazy="joined")
+
+
+class Player(Base):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    nft_id: Mapped[int] = mapped_column(Integer, ForeignKey("nfts.id"), nullable=False)
+    nft: Mapped[User] = relationship(Nft, lazy="joined")
+    score: Mapped[int] = mapped_column(Integer, nullable=True)
+
+
+class Game(Base):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    uuid: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+
+    player_l_id: Mapped[int] = mapped_column(Integer, ForeignKey("players.id"), nullable=False)
+    player_l: Mapped[User] = relationship(Player, foreign_keys="[Game.player_l_id]", lazy="joined")
+    player_r_id: Mapped[int] = mapped_column(Integer, ForeignKey("players.id"), nullable=False)
+    player_r: Mapped[User] = relationship(Player, foreign_keys="[Game.player_r_id]", lazy="joined")
+
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="t")
+    exp_time: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class Withdrawal(Base):

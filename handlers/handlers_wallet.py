@@ -8,7 +8,7 @@ from aioredis import Redis
 from pytonconnect import TonConnect
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from create_bot import dp, bot, logger
+from factories import dp, bot, logger
 from handlers.handlers_menu import main_menu
 from storage.dao.users_dao import UserDAO
 from utils.middleware import anti_flood

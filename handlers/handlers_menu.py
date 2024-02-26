@@ -5,9 +5,10 @@ from aioredis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config.settings import settings
-from create_bot import dp, bot, logger
+from factories import dp, bot, logger
 from storage.dao.nfts_dao import NftDAO
 from storage.dao.users_dao import UserDAO
+from storage.models import Nft
 from storage.schemas import UserModel
 from utils.middleware import anti_flood
 from utils.wallet import get_connector
@@ -92,6 +93,21 @@ async def start(message: types.Message, db_session: AsyncSession):
                              message_id=message.message_id)
 
 
+def nft_status(nft: Nft):
+    if nft.withdraw:
+        return "ожидает вывода из игры 📩"
+    if not nft.activated:
+        return "не активирована ❌"
+    if nft.duel:
+        return "в битве ⚔"
+    if nft.arena:
+        return "ожидает соперника на арене 🛡"
+    if nft.activated:
+        return "активирована ✅"
+    else:
+        return "в обработке..."
+
+
 @dp.throttled(anti_flood, rate=3)
 async def wallet(call: types.CallbackQuery, db_session: AsyncSession):
     user_dao = UserDAO(session=db_session)
@@ -104,18 +120,18 @@ async def wallet(call: types.CallbackQuery, db_session: AsyncSession):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
     kb_arena = InlineKeyboardButton(text="NFT на арене", callback_data="nft_arena")
-    kb_pay_fee = InlineKeyboardButton(text="Активировать NFT", callback_data="activate_nft")
+    kb_withdraw = InlineKeyboardButton(text="Активировать NFT", callback_data="activate_nft")
+    kb_pay_fee = InlineKeyboardButton(text="Вывести NFT", callback_data="nft_withdrawable")
     kb_disconnect = InlineKeyboardButton(text="Отвязать кошелёк", callback_data="disconnect")
-    keyboard.add(kb_arena, kb_pay_fee, kb_disconnect, kb_main_menu)
+    keyboard.add(kb_arena, kb_withdraw, kb_pay_fee, kb_disconnect, kb_main_menu)
     text_address = f"Адрес кошелька: <code>{user.address}</code>\n\n"
     text_nft = "Ваши герои:\n{}"
     await call.message.edit_text(
         text_address + text_nft.format(
-            "".join(["\n" + str(f"Name: %s\nAddress: %s\nLevel: %d\nActivated: %s\n" % (nft.name_nft,
+            "".join(["\n" + str(f"Имя: %s\nАдрес: %s\nУровень: %d\nСтатус: %s\n" % (nft.name_nft,
                                                                                         f"<code>{nft.address}</code>",
                                                                                         nft.rare,
-                                                                                        "✅" if nft.activated
-                                                                                        else "❌"))
+                                                                                        nft_status(nft)))
                      for nft in nft_data])),
         reply_markup=keyboard)
 
@@ -180,7 +196,7 @@ async def inline_handler(query: types.InlineQuery, db_session: AsyncSession):
 
     result_id: str = hashlib.md5(nft.address.encode()).hexdigest()
 
-    text = f"<a href='{settings.TELEGRAM_BOT_URL}'>TON ANTIHERO☢️</a>\nСразись с моим {nft.name_nft}\nНА АРЕНЕ."
+    text = f"<a href='{settings.TELEGRAM_BOT_URL}'>TON ANTIHERO☢️</a>\nСразись с моим {nft.name_nft} [LVL {nft.rare}]\nНА АРЕНЕ"
     title = 'Пригласить на бой'
     description = "Пригласи друга в бой"
 
@@ -195,4 +211,5 @@ async def inline_handler(query: types.InlineQuery, db_session: AsyncSession):
         reply_markup=keyboard
     )]
     await query.answer(articles, cache_time=2, is_personal=True)
-    logger.info(f"inline_handler | User {nft.user.name}:{nft.user.telegram_id} set his {nft.name_nft}:{nft.address} on arena")
+    logger.info(
+        f"inline_handler | User {nft.user.name}:{nft.user.telegram_id} set his {nft.name_nft}:{nft.address} on arena")

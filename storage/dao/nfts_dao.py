@@ -9,12 +9,14 @@ class NftDAO(BaseDAO):
     def __init__(self, session: AsyncSession, model=Nft):
         super().__init__(model, session)
 
+    async def is_exists(self, address: str) -> bool:
+        data = await self.get_by_params(address=address)
+        if data:
+            return True
+        return False
+
     async def edit_by_address(self, address: str, **params) -> None:
         sql = update(self.model).where(self.model.address == address).values(**params)
-        await self.session.execute(sql)
-
-    async def delete_by_address(self, address: str) -> None:
-        sql = delete(self.model).where(self.model.address == address)
         await self.session.execute(sql)
 
     async def get_opponent(self, user_id: int) -> Nft | None:
