@@ -6,12 +6,9 @@ import logging
 from aiogram.types import ParseMode
 from aiohttp import web
 
-from web.web_app import routes as webapp_routes
+from web.routes import routes as webapp_routes
 from config.settings import settings
 
-if not settings.DEV:
-    logging.error("Application has no file .env")
-    exit(0)
 
 storage = MemoryStorage()
 bot = Bot(token=settings.TELEGRAM_API_KEY, parse_mode=ParseMode.HTML)

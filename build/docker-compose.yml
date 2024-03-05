@@ -46,6 +46,20 @@ services:
                 aliases:
                     - antihero-withdrawal_processor
 
+    antihero-game_processor:
+        build:
+            context: ../
+            dockerfile: ./build/Dockerfile
+        command: python -m services.game_processor
+        user: "1000:1000"
+        restart: unless-stopped
+        container_name: antihero-game_processor
+        env_file: ../.env
+        networks:
+            antihero:
+                aliases:
+                    - antihero-game_processor
+
     antihero-redis:
         image: "redis"
         container_name: antihero-redis
@@ -60,6 +74,19 @@ services:
                 aliases:
                     - antihero-redis
 
+    antihero-web:
+        build:
+            context: ../
+            dockerfile: ./build/Dockerfile
+        command: python -m web
+        user: "1000:1000"
+        restart: unless-stopped
+        container_name: antihero-web
+        env_file: ../.env
+        networks:
+            antihero:
+                aliases:
+                    - antihero-web
 networks:
     antihero:
         external: true

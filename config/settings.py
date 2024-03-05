@@ -12,7 +12,7 @@ class Config(BaseSettings):
     WEBHOOK_HOST: str
     WEBHOOK_PATH: str
     WEBHOOK_PORT: str
-    PATH_CERT: str
+
     TELEGRAM_BOT_URL: str
 
     WEBAPP_HOST: str

@@ -45,6 +45,18 @@ async def arena_yes(call: types.CallbackQuery):
 
 
 async def search_game(call: types.CallbackQuery, db_session: AsyncSession):
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    kb_webapp = InlineKeyboardButton(text="ИГРАТЬ",
+                                     web_app=WebAppInfo(url=f"https://{settings.WEBAPP_HOST}:{settings.WEBAPP_PORT}?"
+                                                            f"uuid={1}&"
+                                                            f"nft_id={2}"))
+    keyboard.add(kb_webapp)
+    await bot.send_message(chat_id=call.from_user.id,
+                           text=f"Твой соперник:\n\n"
+                                f"Игра будет активна в течение 24 часов\n"
+                                f"     😈ОБРАТНОГО ПУТИ НЕТ😈",
+                           reply_markup=keyboard)
+    return
     user_dao = UserDAO(session=db_session)
     user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
     user = user_data[0]
