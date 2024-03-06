@@ -2,7 +2,7 @@ from aioredis import Redis
 from pytonconnect import TonConnect
 from pytonconnect.storage import IStorage
 
-from config.settings import settings
+from settings import settings
 
 
 class TcStorage(IStorage):

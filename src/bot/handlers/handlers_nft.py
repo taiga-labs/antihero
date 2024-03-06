@@ -15,8 +15,8 @@ from TonTools.Providers.TonCenterClient import TonCenterClient
 from pytonconnect.exceptions import UserRejectsError
 # from TonTools import *
 
-from config.settings import settings
-from factories import dp, bot, logger
+from settings import settings
+from bot.factories import dp, bot, logger
 from storage.dao.nfts_dao import NftDAO
 from storage.dao.users_dao import UserDAO
 from storage.dao.withdrawals_dao import WithdrawalDAO
@@ -309,8 +309,8 @@ async def withdraw_nft(call: types.CallbackQuery, db_session: AsyncSession):
         return await call.message.edit_text(f"⛔ Вывод NFT {nft.name_nft} отклонен\n"
                                             f"NFT уже ожидает вывода из игры", reply_markup=keyboard)
 
-    provider = TonCenterClient(key=settings.TONCENTER_API_KEY)
-    wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS)
+    provider = TonCenterClient(key=settings.TONCENTER_API_KEY.get_secret_value())
+    wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS.get_secret_value())
     wallet = Wallet(mnemonics=wallet_mnemonics, version='v4r2', provider=provider)
 
     try:

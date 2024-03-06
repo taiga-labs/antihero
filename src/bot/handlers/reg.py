@@ -1,10 +1,10 @@
 from aiogram import Dispatcher
 
-from handlers.handlers_wallet import choose_wallet, connect_wallet
-from handlers.handlers_game import invite, arena_yes, search_game, duel_yes, fight_yes, exit_game
-from handlers.handlers_menu import start, inline_handler, wallet, search, top_callback, disconnect, ping, \
+from bot.handlers.handlers_wallet import choose_wallet, connect_wallet
+from bot.handlers.handlers_game import invite, arena_yes, search_game, duel_yes, fight_yes, exit_game
+from bot.handlers.handlers_menu import start, inline_handler, wallet, search, top_callback, disconnect, ping, \
     disconnect_confirm
-from handlers.handlers_nft import add_nft, select_to_add_nft, select_to_activate_nft, pay_fee, get_nft_on_arena, \
+from bot.handlers.handlers_nft import add_nft, select_to_add_nft, select_to_activate_nft, pay_fee, get_nft_on_arena, \
     remove_nft_from_arena, show_nft, get_nft_withdrawable, withdraw_nft
 from storage.driver import async_session
 from utils.middleware import WalletNotConnectedMiddleware, DbSessionMiddleware, RedisSessionMiddleware

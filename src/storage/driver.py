@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 import aioredis
 from aioredis import Redis
 
-from config.settings import settings
+from settings import settings
 
 db_engine = create_async_engine(
     str(settings.DATABASE_URL),

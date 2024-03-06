@@ -2,11 +2,11 @@ import requests
 from pytonapi import AsyncTonapi
 from pytonapi.schema.nft import NftItem
 
-from config.settings import settings
+from settings import settings
 
 
 async def get_nft_by_account(address: str) -> list[NftItem]:
-    tonapi = AsyncTonapi(api_key=settings.TON_API_KEY)
+    tonapi = AsyncTonapi(api_key=settings.TON_API_KEY.get_secret_value())
     search = await tonapi.accounts.get_nfts(account_id=address,
                                             collection=settings.MAIN_COLLECTION_ADDRESS,
                                             limit=200,
@@ -15,7 +15,7 @@ async def get_nft_by_account(address: str) -> list[NftItem]:
 
 
 async def fetch_nft_by_address(nft_address: str) -> tuple[str | None, int]:
-    tonapi = AsyncTonapi(api_key=settings.TON_API_KEY)
+    tonapi = AsyncTonapi(api_key=settings.TON_API_KEY.get_secret_value())
     nft = await tonapi.nft.get_item_by_address(account_id=nft_address)
     name = nft.metadata.get('name', None)
     rare = nft.metadata.get('attributes')[0].get('value', None)

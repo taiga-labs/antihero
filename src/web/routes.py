@@ -7,7 +7,7 @@ from aiohttp import web
 from aiohttp.web_fileresponse import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config.settings import settings
+from settings import settings
 from storage.dao.games_dao import GameDAO
 from storage.dao.players_dao import PlayerDAO
 from storage.driver import async_session
@@ -27,7 +27,7 @@ async def auth(request):
     hash = data['hash']
 
     secret_key = hmac.new(key="WebAppData".encode(),
-                          msg=settings.TELEGRAM_API_KEY.encode(),
+                          msg=settings.TELEGRAM_API_KEY.get_secret_value().encode(),
                           digestmod=hashlib.sha256)
 
     hash_check = hmac.new(key=secret_key.digest(),

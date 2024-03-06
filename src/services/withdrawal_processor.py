@@ -4,8 +4,8 @@ from TonTools.Providers.TonCenterClient import TonCenterClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from tonsdk.utils import Address
 
-from config.settings import settings
-from factories import logger
+from settings import settings
+from bot.factories import logger
 from storage.dao.nfts_dao import NftDAO
 from storage.dao.withdrawals_dao import WithdrawalDAO
 from storage.driver import async_session
@@ -17,7 +17,7 @@ async def process_withdrawals():
     try:
         withdrawal_dao = WithdrawalDAO(db_session)
         nft_dao = NftDAO(db_session)
-        provider = TonCenterClient(key=settings.TONCENTER_API_KEY)
+        provider = TonCenterClient(key=settings.TONCENTER_API_KEY.get_secret_value())
         while True:
             await asyncio.sleep(1)
 

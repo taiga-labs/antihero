@@ -4,8 +4,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from aioredis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config.settings import settings
-from factories import dp, bot, logger
+from settings import settings
+from bot.factories import dp, bot, logger
 from storage.dao.nfts_dao import NftDAO
 from storage.dao.users_dao import UserDAO
 from storage.models import Nft

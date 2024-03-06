@@ -5,15 +5,15 @@ from aiogram import types
 from aiogram.types import InlineKeyboardButton, WebAppInfo
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from factories import dp, logger, bot
-from handlers.handlers_menu import main_menu
+from bot.factories import dp, logger, bot
+from bot.handlers.handlers_menu import main_menu
 from storage.dao.games_dao import GameDAO
 from storage.dao.nfts_dao import NftDAO
 from storage.dao.players_dao import PlayerDAO
 from storage.dao.users_dao import UserDAO
 from storage.schemas import GameModel, PlayerModel
 from utils.middleware import anti_flood
-from config.settings import settings
+from settings import settings
 
 
 async def invite(call: types.CallbackQuery, db_session: AsyncSession):
@@ -100,7 +100,7 @@ async def duel_yes(call: types.CallbackQuery, db_session: AsyncSession):
 
         keyboard = types.InlineKeyboardMarkup(row_width=1)
         kb_webapp = InlineKeyboardButton(text="ИГРАТЬ",
-                                         web_app=WebAppInfo(url=f"https://{settings.WEBAPP_HOST}:{settings.WEBAPP_PORT}?"
+                                         web_app=WebAppInfo(url=f"https://{settings.MINIAPP_HOST}:{settings.MINIAPP_PORT}?"
                                                                 f"uuid={game_uuid}&"
                                                                 f"nft_id={nft.id}"))
         keyboard.add(kb_webapp)
@@ -112,7 +112,7 @@ async def duel_yes(call: types.CallbackQuery, db_session: AsyncSession):
 
         keyboard = types.InlineKeyboardMarkup(row_width=1)
         kb_webapp = InlineKeyboardButton(text="ИГРАТЬ",
-                                         web_app=WebAppInfo(url=f"https://{settings.WEBAPP_HOST}:{settings.WEBAPP_PORT}?"
+                                         web_app=WebAppInfo(url=f"https://{settings.MINIAPP_HOST}:{settings.MINIAPP_PORT}?"
                                                                 f"uuid={game_uuid}&"
                                                                 f"nft_id={nft_opponent.id}"))
         keyboard.add(kb_webapp)
@@ -195,7 +195,7 @@ async def fight_yes(call: types.CallbackQuery, db_session: AsyncSession):
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_webapp = InlineKeyboardButton(text="ИГРАТЬ",
-                                     web_app=WebAppInfo(url=f"https://{settings.WEBAPP_HOST}:{settings.WEBAPP_PORT}?"
+                                     web_app=WebAppInfo(url=f"https://{settings.MINIAPP_HOST}:{settings.MINIAPP_PORT}?"
                                                             f"uuid={game_uuid}&"
                                                             f"nft_id={nft.id}"))
     keyboard.add(kb_webapp)
@@ -207,7 +207,7 @@ async def fight_yes(call: types.CallbackQuery, db_session: AsyncSession):
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_webapp = InlineKeyboardButton(text="ИГРАТЬ",
-                                     web_app=WebAppInfo(url=f"https://{settings.WEBAPP_HOST}:{settings.WEBAPP_PORT}?"
+                                     web_app=WebAppInfo(url=f"https://{settings.MINIAPP_HOST}:{settings.MINIAPP_PORT}?"
                                                             f"uuid={game_uuid}&"
                                                             f"nft_id={nft_opponent.id}"))
     keyboard.add(kb_webapp)

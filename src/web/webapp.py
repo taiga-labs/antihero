@@ -1,6 +1,6 @@
 from aiohttp import web
 
-from factories import bot
+from bot.factories import bot
 from web.routes import routes
 
 app = web.Application()

@@ -1,11 +1,11 @@
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InputFile
 
-from factories import bot, logger
-from storage.dao.nfts_dao import NftDAO
-from storage.dao.users_dao import UserDAO
-from storage.driver import async_session
-from storage.models import Nft
+from bot.factories import bot, logger
+from storage import NftDAO
+from storage import UserDAO
+from storage import async_session
+from storage import Nft
 
 
 async def game_winner_determined(w_nft: Nft, l_nft: Nft) -> None:
