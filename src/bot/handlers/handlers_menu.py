@@ -5,13 +5,13 @@ from aioredis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from settings import settings
-from bot.factories import dp, bot, logger
-from storage.dao.nfts_dao import NftDAO
-from storage.dao.users_dao import UserDAO
-from storage.models import Nft
-from storage.schemas import UserModel
-from utils.middleware import anti_flood
-from utils.wallet import get_connector
+from src.bot.factories import dp, bot, logger
+from src.storage.dao.nfts_dao import NftDAO
+from src.storage.dao.users_dao import UserDAO
+from src.storage.models import Nft
+from src.storage.schemas import UserModel
+from src.utils.middleware import anti_flood
+from src.utils.wallet import get_connector
 
 
 async def main_menu() -> InlineKeyboardMarkup:

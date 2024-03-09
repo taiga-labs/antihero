@@ -1,8 +1,8 @@
 from sqlalchemy import update, select, delete, func, not_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from storage.dao.base import BaseDAO
-from storage.models import Nft
+from src.storage.dao.base import BaseDAO
+from src.storage.models import Nft
 
 
 class NftDAO(BaseDAO):

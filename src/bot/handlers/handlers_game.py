@@ -5,14 +5,14 @@ from aiogram import types
 from aiogram.types import InlineKeyboardButton, WebAppInfo
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.factories import dp, logger, bot
-from bot.handlers.handlers_menu import main_menu
-from storage.dao.games_dao import GameDAO
-from storage.dao.nfts_dao import NftDAO
-from storage.dao.players_dao import PlayerDAO
-from storage.dao.users_dao import UserDAO
-from storage.schemas import GameModel, PlayerModel
-from utils.middleware import anti_flood
+from src.bot.factories import dp, logger, bot
+from src.bot.handlers.handlers_menu import main_menu
+from src.storage.dao.games_dao import GameDAO
+from src.storage.dao.nfts_dao import NftDAO
+from src.storage.dao.players_dao import PlayerDAO
+from src.storage.dao.users_dao import UserDAO
+from src.storage.schemas import GameModel, PlayerModel
+from src.utils.middleware import anti_flood
 from settings import settings
 
 

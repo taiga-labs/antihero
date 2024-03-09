@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tonsdk.utils import Address
 
 from settings import settings
-from bot.factories import logger
-from storage.dao.nfts_dao import NftDAO
-from storage.dao.withdrawals_dao import WithdrawalDAO
-from storage.driver import async_session
+from src.bot.factories import logger
+from src.storage.dao.nfts_dao import NftDAO
+from src.storage.dao.withdrawals_dao import WithdrawalDAO
+from src.storage.driver import async_session
 
 
 async def process_withdrawals():

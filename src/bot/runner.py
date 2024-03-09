@@ -3,15 +3,12 @@ from aiogram.utils import executor
 from aiogram.utils.executor import start_webhook
 
 from settings import settings
-
-from bot.factories import dp, bot, logger
-
-
+from src.bot.factories import dp, bot, logger
+from src.bot.handlers.reg import register_handlers_client
 
 # register middleware
 dp.middleware.setup(LoggingMiddleware())
 # register command
-from bot.handlers.reg import register_handlers_client
 
 register_handlers_client(dp)
 

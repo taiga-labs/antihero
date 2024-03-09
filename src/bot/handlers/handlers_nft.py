@@ -16,15 +16,15 @@ from pytonconnect.exceptions import UserRejectsError
 # from TonTools import *
 
 from settings import settings
-from bot.factories import dp, bot, logger
-from storage.dao.nfts_dao import NftDAO
-from storage.dao.users_dao import UserDAO
-from storage.dao.withdrawals_dao import WithdrawalDAO
-from storage.schemas import NftModel, WithdrawModel
-from utils.exceptions import ProviderFailed
-from utils.middleware import anti_flood
-from utils.ton import get_nft_by_account, fetch_nft_by_address
-from utils.wallet import get_connector
+from src.bot.factories import dp, bot, logger
+from src.storage.dao.nfts_dao import NftDAO
+from src.storage.dao.users_dao import UserDAO
+from src.storage.dao.withdrawals_dao import WithdrawalDAO
+from src.storage.schemas import NftModel, WithdrawModel
+from src.utils.exceptions import ProviderFailed
+from src.utils.middleware import anti_flood
+from src.utils.ton import get_nft_by_account, fetch_nft_by_address
+from src.utils.wallet import get_connector
 
 
 async def select_to_add_nft(call: types.CallbackQuery, db_session: AsyncSession):

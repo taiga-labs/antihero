@@ -3,9 +3,9 @@ import time
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from storage.dao.games_dao import GameDAO
-from storage.driver import async_session
-from utils.game import game_winner_determined, game_draw
+from src.storage.dao.games_dao import GameDAO
+from src.storage.driver import async_session
+from src.utils.game import game_winner_determined, game_draw
 
 
 async def process_games():

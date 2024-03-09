@@ -4,20 +4,14 @@ from urllib import parse
 
 from aiogram import Bot, types
 from aiohttp import web
-from aiohttp.web_fileresponse import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from settings import settings
-from storage.dao.games_dao import GameDAO
-from storage.dao.players_dao import PlayerDAO
-from storage.driver import async_session
+from src.storage.dao.games_dao import GameDAO
+from src.storage.dao.players_dao import PlayerDAO
+from src.storage.driver import async_session
 
 routes = web.RouteTableDef()
-
-
-@routes.get("/")
-async def index(request):
-    return FileResponse("web/static/index.html")
 
 
 @routes.post("/auth")

@@ -3,8 +3,8 @@ from aiogram.dispatcher.middlewares import BaseMiddleware, LifetimeControllerMid
 from aiogram.types import CallbackQuery
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from storage.driver import get_redis_async_client
-from utils.wallet import get_connector
+from src.storage.driver import get_redis_async_client
+from src.utils.wallet import get_connector
 
 
 async def anti_flood(*args, **kwargs):

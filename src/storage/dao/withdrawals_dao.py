@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from storage.dao.base import BaseDAO
-from storage.models import Withdrawal
+from src.storage.dao.base import BaseDAO
+from src.storage.models import Withdrawal
 
 
 class WithdrawalDAO(BaseDAO):

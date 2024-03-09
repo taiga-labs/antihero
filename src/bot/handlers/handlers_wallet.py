@@ -8,11 +8,11 @@ from aioredis import Redis
 from pytonconnect import TonConnect
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from bot.factories import dp, bot, logger
-from bot.handlers.handlers_menu import main_menu
-from storage.dao.users_dao import UserDAO
-from utils.middleware import anti_flood
-from utils.wallet import get_connector
+from src.bot.factories import dp, bot, logger
+from src.bot.handlers.handlers_menu import main_menu
+from src.storage.dao.users_dao import UserDAO
+from src.utils.middleware import anti_flood
+from src.utils.wallet import get_connector
 
 
 async def choose_wallet(call: types.CallbackQuery):

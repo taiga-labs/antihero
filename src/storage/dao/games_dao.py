@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from storage.dao.base import BaseDAO
-from storage.models import Game
+from src.storage.dao.base import BaseDAO
+from src.storage.models import Game
 
 
 class GameDAO(BaseDAO):

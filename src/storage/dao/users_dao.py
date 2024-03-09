@@ -1,8 +1,8 @@
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from storage.dao.base import BaseDAO
-from storage.models import User
+from src.storage.dao.base import BaseDAO
+from src.storage.models import User
 
 
 class UserDAO(BaseDAO):

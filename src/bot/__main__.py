@@ -1,4 +1,4 @@
-from bot.runner import bot_start_polling, bot_start_webhook
+from .runner import bot_start_polling, bot_start_webhook
 from settings import settings
 
 if settings.DEV:
