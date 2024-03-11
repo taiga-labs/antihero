@@ -1,20 +1,20 @@
 from aiohttp import web
-from aiohttp.web_fileresponse import FileResponse
+import aiohttp_cors
 
-from settings import settings
 from src.bot.factories import bot
 from src.web.routes import routes
 
 app = web.Application()
 app["bot"] = bot
-
-if settings.DEV:
-    @routes.get("/")
-    async def index(request):
-        return FileResponse("web/static/index.html")
-
-    app.router.add_static(prefix='/static', path='web/static')
-
 app.add_routes(routes)
 
+cors = aiohttp_cors.setup(app, defaults={
+    "*": aiohttp_cors.ResourceOptions(
+        allow_credentials=True,
+        expose_headers="*",
+        allow_headers="*"
+    )
+})
 
+for route in list(app.router.routes()):
+    cors.add(route)
