@@ -10,6 +10,7 @@ from settings import settings
 from src.storage.dao.games_dao import GameDAO
 from src.storage.dao.players_dao import PlayerDAO
 from src.storage.driver import async_session
+from src.web import web_logger
 
 routes = web.RouteTableDef()
 
@@ -51,6 +52,9 @@ async def start(request):
     game = game_data[0]
     if not game.active:
         await db_session.close()
+        web_logger.info(
+            f"start | nft ({nft_id}) - game ({game_uuid}) | access denied | game disactive"
+        )
         return web.Response(text="Срок действия игры истек")
 
     player = (
@@ -60,12 +64,19 @@ async def start(request):
     )
     if not player:
         await db_session.close()
+        web_logger.info(
+            f"start | nft ({nft_id}) - game ({game_uuid}) | access denied | unknown player"
+        )
         return web.Response(text="Неизвестный игрок")
 
     if player.score:
         await db_session.close()
+        web_logger.info(
+            f"start | nft ({nft_id}) - game ({game_uuid}) | access denied | player already scored"
+        )
         return web.Response(text="Игра была завершена")
 
+    web_logger.info(f"start | nft ({nft_id}) start game ({game_uuid})")
     await player_dao.edit_by_id(id=player.id, score=0)
     await db_session.commit()
     await db_session.close()
@@ -90,6 +101,9 @@ async def score(request):
     game = game_data[0]
     if not game.active:
         await db_session.close()
+        web_logger.info(
+            f"score | nft ({nft_id}) - game ({game_uuid}) | access denied | game disactive"
+        )
         return web.Response(text="Срок действия игры истек")
 
     player = (
@@ -99,10 +113,17 @@ async def score(request):
     )
     if not player:
         await db_session.close()
+        web_logger.info(
+            f"score | nft ({nft_id}) - game ({game_uuid}) | access denied | unknown player"
+        )
         return web.Response(text="Неизвестный игрок")
 
     await player_dao.edit_by_id(id=player.id, score=game_score)
     await db_session.commit()
+
+    web_logger.info(
+        f"score | nft ({nft_id}) - game ({game_uuid}) | score: ({game_score})"
+    )
 
     result_text = (
         f"Твой счет: {game_score} очков\n" f"Ожидание результатов соперника..."
