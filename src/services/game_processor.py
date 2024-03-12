@@ -22,8 +22,8 @@ async def process_games():
                 continue
 
             for game in active_games:
-                processor_logger.info(f"process_games | processing game: {game.uuid}")
                 if game.player_l.score is not None and game.player_r.score is not None:
+                    processor_logger.info(f"process_games | game over: {game.uuid}")
                     if game.player_l.score > game.player_r.score:
                         await game_winner_determined(
                             w_nft=game.player_l.nft, l_nft=game.player_r.nft
@@ -40,6 +40,7 @@ async def process_games():
                     await db_session.commit()
 
                 if game.exp_time < int(time.time()):
+                    processor_logger.info(f"process_games | game expired: {game.uuid}")
                     if game.player_l.score is not None:
                         await game_winner_determined(
                             w_nft=game.player_l.nft, l_nft=game.player_r.nft

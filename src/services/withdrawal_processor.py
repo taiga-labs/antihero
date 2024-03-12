@@ -28,9 +28,6 @@ async def process_withdrawals():
                 continue
 
             for withdrawal in unprocessed_withdrawals:
-                processor_logger.info(
-                    f"process_withdrawals | processing: nft ({withdrawal.nft_address}) -> user ({withdrawal.dst_address})"
-                )
                 nft_owner = await provider.get_nft_owner(
                     nft_address=withdrawal.nft_address
                 )
