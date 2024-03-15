@@ -256,7 +256,7 @@ async def fight_yes(
         web_app=WebAppInfo(
             url=f"https://{settings.MINIAPP_HOST}/{settings.MINIAPP_PATH}?"
             f"uuid={game_uuid}&"
-            f"nft_id={nft.id}"
+            f"player_id={player_id}"
         ),
     )
     keyboard.add(kb_webapp)
@@ -274,7 +274,7 @@ async def fight_yes(
         web_app=WebAppInfo(
             url=f"https://{settings.MINIAPP_HOST}/{settings.MINIAPP_PATH}?"
             f"uuid={game_uuid}&"
-            f"nft_id={nft_opponent.id}"
+            f"player_id={player_opponent_id}"
         ),
     )
     keyboard.add(kb_webapp)

@@ -61,7 +61,7 @@ async def preinfo(request):
     )
 
     body = {
-        "score": player.score if player.score else 0,
+        "score": player.score,
         "attempts": player.attempts,
     }
 
