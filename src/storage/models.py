@@ -1,5 +1,11 @@
-from sqlalchemy import String, BIGINT, Integer, ForeignKey, Boolean, JSON, func
-from sqlalchemy.orm import mapped_column, Mapped, relationship, DeclarativeBase, declared_attr
+from sqlalchemy import String, BIGINT, Integer, ForeignKey, Boolean
+from sqlalchemy.orm import (
+    mapped_column,
+    Mapped,
+    relationship,
+    DeclarativeBase,
+    declared_attr,
+)
 
 
 class Base(DeclarativeBase):
@@ -13,7 +19,6 @@ class User(Base):
     telegram_id: Mapped[int] = mapped_column(BIGINT, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     address: Mapped[str] = mapped_column(String, nullable=True, unique=True)
-    active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="f")
     win: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
 
@@ -35,20 +40,26 @@ class Player(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     nft_id: Mapped[int] = mapped_column(Integer, ForeignKey("nfts.id"), nullable=False)
     nft: Mapped[User] = relationship(Nft, lazy="joined")
-    score: Mapped[int] = mapped_column(Integer, nullable=True)
+    score: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
 
 class Game(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     uuid: Mapped[str] = mapped_column(String, nullable=False, unique=True)
 
-    player_l_id: Mapped[int] = mapped_column(Integer, ForeignKey("players.id"), nullable=False)
-    player_l: Mapped[User] = relationship(Player, foreign_keys="[Game.player_l_id]", lazy="joined")
-    player_r_id: Mapped[int] = mapped_column(Integer, ForeignKey("players.id"), nullable=False)
-    player_r: Mapped[User] = relationship(Player, foreign_keys="[Game.player_r_id]", lazy="joined")
-
-    active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="t")
-    exp_time: Mapped[int] = mapped_column(Integer, nullable=False)
+    player_l_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("players.id"), nullable=False
+    )
+    player_l: Mapped[User] = relationship(
+        Player, foreign_keys="[Game.player_l_id]", lazy="joined"
+    )
+    player_r_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("players.id"), nullable=False
+    )
+    player_r: Mapped[User] = relationship(
+        Player, foreign_keys="[Game.player_r_id]", lazy="joined"
+    )
+    start_time: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 class Withdrawal(Base):

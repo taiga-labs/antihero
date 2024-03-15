@@ -1,8 +1,11 @@
+import json
+import pickle
 import time
 import uuid
 
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, WebAppInfo
+from aioredis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.factories import dp, logger, bot
@@ -11,7 +14,7 @@ from src.storage.dao.games_dao import GameDAO
 from src.storage.dao.nfts_dao import NftDAO
 from src.storage.dao.players_dao import PlayerDAO
 from src.storage.dao.users_dao import UserDAO
-from src.storage.schemas import GameModel, PlayerModel
+from src.storage.schemas import GameModel, PlayerModel, PlayerState, GameState
 from src.utils.middleware import anti_flood
 from settings import settings
 
@@ -76,7 +79,9 @@ async def search_game(call: types.CallbackQuery, db_session: AsyncSession):
 
 
 @dp.throttled(anti_flood)
-async def duel_yes(call: types.CallbackQuery, db_session: AsyncSession):
+async def duel_yes(
+    call: types.CallbackQuery, db_session: AsyncSession, redis_session: Redis
+):
     user_dao = UserDAO(session=db_session)
     player_dao = PlayerDAO(session=db_session)
     game_dao = GameDAO(session=db_session)
@@ -110,10 +115,19 @@ async def duel_yes(call: types.CallbackQuery, db_session: AsyncSession):
             uuid=game_uuid,
             player_l_id=player_id,
             player_r_id=player_opponent_id,
-            exp_time=int(time.time()) + 86400,  # expiration after 24 hours
+            start_time=int(time.time()),
         )
         await game_dao.add(data=game_model.model_dump())
         await db_session.commit()
+
+        player_l_state = PlayerState(player_id=player_id)
+        player_r_state = PlayerState(player_id=player_opponent_id)
+        game_state = GameState(
+            player_l=player_l_state,
+            player_r=player_r_state,
+            start_time=int(time.time()),
+        )
+        await redis_session.set(name=game_uuid, value=pickle.dumps(game_state))
 
         keyboard = types.InlineKeyboardMarkup(row_width=1)
         kb_webapp = InlineKeyboardButton(
@@ -121,7 +135,7 @@ async def duel_yes(call: types.CallbackQuery, db_session: AsyncSession):
             web_app=WebAppInfo(
                 url=f"https://{settings.MINIAPP_HOST}/{settings.MINIAPP_PATH}?"
                 f"uuid={game_uuid}&"
-                f"nft_id={nft.id}"
+                f"player_id={player_id}"
             ),
         )
         keyboard.add(kb_webapp)
@@ -139,7 +153,7 @@ async def duel_yes(call: types.CallbackQuery, db_session: AsyncSession):
             web_app=WebAppInfo(
                 url=f"https://{settings.MINIAPP_HOST}/{settings.MINIAPP_PATH}?"
                 f"uuid={game_uuid}&"
-                f"nft_id={nft_opponent.id}"
+                f"player_id={player_opponent_id}"
             ),
         )
         keyboard.add(kb_webapp)
@@ -161,7 +175,9 @@ async def duel_yes(call: types.CallbackQuery, db_session: AsyncSession):
 
 
 @dp.throttled(anti_flood)
-async def fight_yes(call: types.CallbackQuery, db_session: AsyncSession):
+async def fight_yes(
+    call: types.CallbackQuery, db_session: AsyncSession, redis_session: Redis
+):
     nft_dao = NftDAO(session=db_session)
     player_dao = PlayerDAO(session=db_session)
     game_dao = GameDAO(session=db_session)
@@ -230,7 +246,7 @@ async def fight_yes(call: types.CallbackQuery, db_session: AsyncSession):
         uuid=game_uuid,
         player_l_id=player_id,
         player_r_id=player_opponent_id,
-        exp_time=int(time.time()) + 86400,  # expiration after 24 hours
+        start_time=int(time.time()),
     )
     await game_dao.add(data=game_model.model_dump())
     await db_session.commit()
@@ -248,7 +264,7 @@ async def fight_yes(call: types.CallbackQuery, db_session: AsyncSession):
     await bot.send_message(
         chat_id=nft.user.telegram_id,
         text=f"Твой соперник: {nft_opponent.user.name}'s {nft_opponent.name_nft} [LVL {nft_opponent.rare}]\n\n"
-        f"Игра будет активна в течение 24 часов\n"
+        f"Игра будет активна в течение 15 минут\n"
         f"     😈ОБРАТНОГО ПУТИ НЕТ😈",
         reply_markup=keyboard,
     )
@@ -266,7 +282,7 @@ async def fight_yes(call: types.CallbackQuery, db_session: AsyncSession):
     await bot.send_message(
         chat_id=nft_opponent.user.telegram_id,
         text=f"Твой соперник: {nft.user.name}'s {nft.name_nft} [LVL {nft.rare}]\n\n"
-        f"Игра будет активна в течение 24 часов\n"
+        f"Игра будет активна в течение 15 минут\n"
         f"     😈ОБРАТНОГО ПУТИ НЕТ😈",
         reply_markup=keyboard,
     )

@@ -1,7 +1,6 @@
 import hashlib
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
-from aioredis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from settings import settings
@@ -11,7 +10,6 @@ from src.storage.dao.users_dao import UserDAO
 from src.storage.models import Nft
 from src.storage.schemas import UserModel
 from src.utils.middleware import anti_flood
-from src.utils.wallet import get_connector
 
 
 async def main_menu() -> InlineKeyboardMarkup:
@@ -61,48 +59,38 @@ async def start(message: types.Message, db_session: AsyncSession):
             await user_dao.add(data=user_model.model_dump())
             await db_session.commit()
 
-        user_data = await user_dao.get_by_params(
-            telegram_id=message.from_user.id, active=True
-        )
-        if user_data:
+        user_data = await user_dao.get_by_params(telegram_id=message.from_user.id)
+        if user_data and len(message.get_args()) > 0:
             user = user_data[0]
-            if len(message.get_args()) > 0:
-                opponent_nft_id = message.get_args()
-                nfts = await nft_dao.get_by_params(user_id=user.id, activated=True)
-                keyboard = types.InlineKeyboardMarkup(row_width=1)
-                for nft in nfts:
-                    button = InlineKeyboardButton(
-                        text=f"{nft.name_nft}",
-                        callback_data=f"fight_{nft.id}:{opponent_nft_id}",
-                    )
-                    keyboard.add(button)
-                kb_main = InlineKeyboardButton(
-                    text="Главное меню", callback_data="main"
+            opponent_nft_id = message.get_args()
+            nfts = await nft_dao.get_by_params(user_id=user.id, activated=True)
+            keyboard = types.InlineKeyboardMarkup(row_width=1)
+            for nft in nfts:
+                button = InlineKeyboardButton(
+                    text=f"{nft.name_nft}",
+                    callback_data=f"fight_{nft.id}:{opponent_nft_id}",
                 )
-                keyboard.add(kb_main)
-                await bot.send_message(
-                    chat_id=message.chat.id,
-                    text="Выберите NFT для игры",
-                    reply_markup=keyboard,
-                )
-            else:
-                keyboard = await main_menu()
-                await bot.send_message(
-                    chat_id=message.chat.id, text="Главное меню:", reply_markup=keyboard
-                )
+                keyboard.add(button)
+            kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
+            keyboard.add(kb_main)
+            await bot.send_message(
+                chat_id=message.chat.id,
+                text="Выберите NFT для игры",
+                reply_markup=keyboard,
+            )
         else:
             keyboard = types.InlineKeyboardMarkup(row_width=1)
-            kb_transfer = InlineKeyboardButton(
+            kb_wallet = InlineKeyboardButton(
                 text="Подключить кошелёк", callback_data="choose_wallet"
             )
-            keyboard.add(kb_transfer)
+            kb_main_menu = InlineKeyboardButton(text="Меню", callback_data="main")
+            keyboard.add(kb_wallet, kb_main_menu)
             await bot.send_animation(
                 chat_id=message.chat.id,
                 animation=open(f"images/ah.mp4", "rb"),
                 caption=f"Приветствуем в боте коллекции "
                 f"<a href='https://getgems.io/collection/{settings.MAIN_COLLECTION_ADDRESS}'>TON ANTIHERO!</a>\n"
-                f"Наш <a href='https://t.me/TON_ANTIHERO_NFT'>ТЕЛЕГРАМ КАНАЛ☢️</a>\n"
-                f"Для начала игры нужно пройти авторизацию через TON кошелёк",
+                f"Наш <a href='https://t.me/TON_ANTIHERO_NFT'>ТЕЛЕГРАМ КАНАЛ☢️</a>\n",
                 reply_markup=keyboard,
             )
     await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -141,10 +129,7 @@ async def wallet(call: types.CallbackQuery, db_session: AsyncSession):
     kb_pay_fee = InlineKeyboardButton(
         text="Вывести NFT", callback_data="nft_withdrawable"
     )
-    kb_disconnect = InlineKeyboardButton(
-        text="Отвязать кошелёк", callback_data="disconnect"
-    )
-    keyboard.add(kb_arena, kb_withdraw, kb_pay_fee, kb_disconnect, kb_main_menu)
+    keyboard.add(kb_arena, kb_withdraw, kb_pay_fee, kb_main_menu)
     text_address = f"Адрес кошелька: <code>{user.address}</code>\n\n"
     text_nft = "Ваши герои:\n{}"
     await call.message.edit_text(
@@ -200,35 +185,6 @@ async def top_callback(call: types.CallbackQuery, db_session: AsyncSession):
             )
         ),
         reply_markup=keyboard,
-    )
-
-
-async def disconnect(call: types.CallbackQuery):
-    keyboard = types.InlineKeyboardMarkup(row_width=1)
-    kb_yes = InlineKeyboardButton(text="Да", callback_data="disconnect_confirm")
-    kb_no = InlineKeyboardButton(text="Нет", callback_data="main")
-    keyboard.add(kb_yes)
-    keyboard.add(kb_no)
-    await call.message.edit_text(
-        text="Вы уверены, что хотите отвязать текущий кошелек?", reply_markup=keyboard
-    )
-
-
-async def disconnect_confirm(
-    call: types.CallbackQuery, db_session: AsyncSession, redis_session: Redis
-):
-    user_dao = UserDAO(session=db_session)
-    await user_dao.edit_active_by_telegram_id(
-        telegram_id=call.from_user.id, active=False
-    )
-    await db_session.commit()
-
-    connector = await get_connector(chat_id=call.message.chat.id, broker=redis_session)
-    await connector.restore_connection()
-    await connector.disconnect()
-    await call.message.edit_text(text="Адрес отвязан\n\n/start чтобы добавить адрес")
-    logger.info(
-        f"disconnect | User {call.from_user.first_name}:{call.from_user.id} is disconnected"
     )
 
 

@@ -9,12 +9,12 @@ db_engine = create_async_engine(
     # echo=True
 )
 
-async_session = async_sessionmaker(db_engine,
-                                   class_=AsyncSession,
-                                   expire_on_commit=False,
-                                   )
+async_session = async_sessionmaker(
+    db_engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
 
 
-async def get_redis_async_client() -> Redis:
-    return aioredis.from_url(settings.REDIS_URL, decode_responses=True)
-
+async def get_redis_async_client(url: str) -> Redis:
+    return aioredis.from_url(url=url, decode_responses=True)
