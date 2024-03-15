@@ -43,7 +43,6 @@ async def preinfo(request):
 
     data = await request.json()
     game_uuid = data["uuid"]
-    # TODO change nft_id to player_id
     player_id = int(data["player_id"])
 
     if not await redis_session.exists(game_uuid):
@@ -52,7 +51,7 @@ async def preinfo(request):
         )
         return web.Response(status=403, text="Игра завершена")
 
-    game_state_raw = await redis_session.get(name=game_uuid)  # TODO check if exist
+    game_state_raw = await redis_session.get(name=game_uuid)
     game_state: GameState = pickle.loads(game_state_raw)
 
     player = (
@@ -83,7 +82,7 @@ async def start(request):
         )
         return web.Response(status=403, text="Игра завершена")
 
-    game_state_raw = await redis_session.get(name=game_uuid)  # TODO check if exist
+    game_state_raw = await redis_session.get(name=game_uuid)
     game_state: GameState = pickle.loads(game_state_raw)
 
     player = (
@@ -123,7 +122,13 @@ async def score(request):
     player_id = int(data["player_id"])
     score = int(data["score"])
 
-    game_state_raw = await redis_session.get(name=game_uuid)  # TODO check if exist
+    if not await redis_session.exists(game_uuid):
+        web_logger.info(
+            f"preinfo | game ({game_uuid}) : player ({player_id}) | access denied | game closed"
+        )
+        return web.Response(status=403, text="Игра завершена")
+
+    game_state_raw = await redis_session.get(name=game_uuid)
     game_state: GameState = pickle.loads(game_state_raw)
 
     if player_id == game_state.player_l.player_id:
