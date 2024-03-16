@@ -54,15 +54,13 @@ class RedisSessionMiddleware(LifetimeControllerMiddleware):
         super().__init__()
 
     async def pre_process(self, obj, data, *args):
-        if any(sr in data for sr in self.TONCONNECT_ROUTERS):
-            data["redis_session"] = await get_redis_async_client(
-                url=settings.TONCONNECT_BROKER_URL
-            )
-        if any(sr in data for sr in self.GAME_ROUTERS):
-            data["redis_session"] = await get_redis_async_client(
-                url=settings.GAME_BROKER_URL
-            )
+        data["tonconnect_redis_session"] = await get_redis_async_client(
+            url=settings.TONCONNECT_BROKER_URL
+        )
+        data["game_redis_session"] = await get_redis_async_client(
+            url=settings.GAME_BROKER_URL
+        )
 
     async def post_process(self, obj, data, *args):
-        if "redis_session" in data:
-            await data["redis_session"].close()
+        await data["tonconnect_redis_session"].close()
+        await data["game_redis_session"].close()

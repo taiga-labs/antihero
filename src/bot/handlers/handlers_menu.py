@@ -1,6 +1,7 @@
 import hashlib
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from aiogram.utils.exceptions import MessageNotModified
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from settings import settings
@@ -29,7 +30,10 @@ async def ping(message: types.Message):
 @dp.callback_query_handler(lambda c: c.message.content_type == "text", text="main")
 async def main(call: types.CallbackQuery):
     keyboard = await main_menu()
-    await call.message.edit_text("Главное меню:", reply_markup=keyboard)
+    try:
+        await call.message.edit_text("Главное меню:", reply_markup=keyboard)
+    except MessageNotModified:
+        pass
 
 
 @dp.callback_query_handler(lambda c: c.message.content_type != "text", text="main")
@@ -52,15 +56,9 @@ async def start(message: types.Message, db_session: AsyncSession):
         logger.info(
             f"start | User {message.from_user.first_name}:{message.from_user.id} is welcome"
         )
-        if not await user_dao.is_exists(telegram_id=message.from_user.id):
-            user_model = UserModel(
-                telegram_id=message.from_user.id, name=message.from_user.first_name
-            )
-            await user_dao.add(data=user_model.model_dump())
-            await db_session.commit()
 
         user_data = await user_dao.get_by_params(telegram_id=message.from_user.id)
-        if user_data and len(message.get_args()) > 0:
+        if message.get_args() and user_data:
             user = user_data[0]
             opponent_nft_id = message.get_args()
             nfts = await nft_dao.get_by_params(user_id=user.id, activated=True)
@@ -79,6 +77,12 @@ async def start(message: types.Message, db_session: AsyncSession):
                 reply_markup=keyboard,
             )
         else:
+            if not user_data:
+                user_model = UserModel(
+                    telegram_id=message.from_user.id, name=message.from_user.first_name
+                )
+                await user_dao.add(data=user_model.model_dump())
+                await db_session.commit()
             keyboard = types.InlineKeyboardMarkup(row_width=1)
             kb_wallet = InlineKeyboardButton(
                 text="Подключить кошелёк", callback_data="choose_wallet"
@@ -114,7 +118,7 @@ def nft_status(nft: Nft):
 @dp.throttled(anti_flood, rate=3)
 async def wallet(call: types.CallbackQuery, db_session: AsyncSession):
     user_dao = UserDAO(session=db_session)
-    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
+    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id)
     user = user_data[0]
 
     nft_dao = NftDAO(session=db_session)

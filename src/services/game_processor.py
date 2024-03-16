@@ -1,5 +1,4 @@
 import asyncio
-import pickle
 import time
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,15 +28,21 @@ async def process_games():
             game_uuid_keys = await redis_session.keys("*")
             for game_uuid in game_uuid_keys:
                 game_state_raw = await redis_session.get(name=game_uuid)
-                game_state: GameState = pickle.loads(game_state_raw)
+                game_state = GameState.model_validate_json(game_state_raw)
 
-                if game_state.player_l.active or game_state.player_r.active:
+                if game_state.player_l.in_game or game_state.player_r.in_game:
                     continue
 
                 if (
                     game_state.player_l.attempts == 0
                     and game_state.player_r.attempts == 0
-                ) or (int(time.time()) - game_state.start_time <= 0):
+                ) or (
+                    int(time.time()) - game_state.start_time >= 900
+                ):  # 15 min left
+                    processor_logger.info(
+                        f"process_games | game over | game: {game_uuid}"
+                    )
+
                     await redis_session.delete(game_uuid)
                     game_data = await game_dao.get_by_params(uuid=game_uuid)
                     game = game_data[0]
@@ -62,15 +67,16 @@ async def process_games():
                         await game_draw(
                             nft_d1=game.player_l.nft, nft_d2=game.player_r.nft
                         )
-
-                if 0 < int(time.time()) - game_state.start_time <= 300:
+                elif (
+                    0 < int(time.time()) - game_state.start_time >= 600
+                ):  # warning on 10 min left
                     game_data = await game_dao.get_by_params(uuid=game_uuid)
                     game = game_data[0]
 
                     if game_state.player_l.attempts > 0:
                         await bot.send_message(
                             chat_id=game.player_l.nft.user.telegram_id,
-                            text=f"    ⚠️ Предупреждение ⚠️"
+                            text=f"    ⚠️ Предупреждение ⚠️\n"
                             f"Игра завершится через 5 минут.\n"
                             f"{game.player_l.nft.name_nft} [LVL {game.player_l.nft.rare}] vs {game.player_r.nft.name_nft} [LVL {game.player_r.nft.rare}]\n\n"
                             f"Осталось попыток: {game_state.player_l.attempts}",

@@ -1,4 +1,4 @@
-import pickle
+import json
 import time
 import uuid
 
@@ -20,7 +20,7 @@ from settings import settings
 
 async def invite(call: types.CallbackQuery, db_session: AsyncSession):
     user_dao = UserDAO(session=db_session)
-    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
+    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id)
     user = user_data[0]
 
     nft_dao = NftDAO(session=db_session)
@@ -56,7 +56,7 @@ async def arena_yes(call: types.CallbackQuery):
 
 async def search_game(call: types.CallbackQuery, db_session: AsyncSession):
     user_dao = UserDAO(session=db_session)
-    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
+    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id)
     user = user_data[0]
 
     nft_dao = NftDAO(session=db_session)
@@ -79,13 +79,13 @@ async def search_game(call: types.CallbackQuery, db_session: AsyncSession):
 
 @dp.throttled(anti_flood)
 async def duel_yes(
-    call: types.CallbackQuery, db_session: AsyncSession, redis_session: Redis
+    call: types.CallbackQuery, db_session: AsyncSession, game_redis_session: Redis
 ):
     user_dao = UserDAO(session=db_session)
     player_dao = PlayerDAO(session=db_session)
     game_dao = GameDAO(session=db_session)
 
-    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id, active=True)
+    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id)
     user = user_data[0]
 
     nft_id = int(call.data[4:])
@@ -126,7 +126,9 @@ async def duel_yes(
             player_r=player_r_state,
             start_time=int(time.time()),
         )
-        await redis_session.set(name=game_uuid, value=pickle.dumps(game_state))
+        await game_redis_session.set(
+            name=game_uuid, value=json.dumps(game_state.model_dump())
+        )
 
         keyboard = types.InlineKeyboardMarkup(row_width=1)
         kb_webapp = InlineKeyboardButton(
@@ -175,7 +177,7 @@ async def duel_yes(
 
 @dp.throttled(anti_flood)
 async def fight_yes(
-    call: types.CallbackQuery, db_session: AsyncSession, redis_session: Redis
+    call: types.CallbackQuery, db_session: AsyncSession, game_redis_session: Redis
 ):
     nft_dao = NftDAO(session=db_session)
     player_dao = PlayerDAO(session=db_session)
@@ -249,6 +251,17 @@ async def fight_yes(
     )
     await game_dao.add(data=game_model.model_dump())
     await db_session.commit()
+
+    player_l_state = PlayerState(player_id=player_id)
+    player_r_state = PlayerState(player_id=player_opponent_id)
+    game_state = GameState(
+        player_l=player_l_state,
+        player_r=player_r_state,
+        start_time=int(time.time()),
+    )
+    await game_redis_session.set(
+        name=game_uuid, value=json.dumps(game_state.model_dump())
+    )
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_webapp = InlineKeyboardButton(

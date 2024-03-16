@@ -55,7 +55,7 @@ async def process_withdrawals():
                         user_id=None,
                     )
                     await db_session.commit()
-                    logger.info(
+                    processor_logger.info(
                         f"process_withdrawals | successful withdrawal nft:{withdrawal.nft_address} -> user:{withdrawal.dst_address}"
                     )
 

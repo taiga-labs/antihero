@@ -21,7 +21,7 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft) -> None:
         f"game_winner_determined | {w_nft.user.name}'s {w_nft.name_nft} [LVL {w_nft.rare}] > {l_nft.user.name}'s {l_nft.name_nft} [LVL {l_nft.rare}]"
     )
 
-    await user_dao.edit_active_by_telegram_id(
+    await user_dao.edit_by_telegram_id(
         telegram_id=w_nft.user.telegram_id, win=w_nft.user.win + 1
     )
     await nft_dao.edit_by_address(
