@@ -1,15 +1,15 @@
 import hmac
 import hashlib
+import json
 from urllib import parse
 
 from aiogram import Bot, types
 from aiohttp import web
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from settings import settings
-from src.storage.dao.games_dao import GameDAO
-from src.storage.dao.players_dao import PlayerDAO
-from src.storage.driver import async_session
+from src.storage.driver import get_redis_async_client
+from src.storage.schemas import GameState
+from src.web import web_logger
 
 routes = web.RouteTableDef()
 
@@ -37,76 +37,119 @@ async def auth(request):
     return web.Response(status=403)
 
 
+@routes.post("/preinfo")
+async def preinfo(request):
+    redis_session = await get_redis_async_client(url=settings.GAME_BROKER_URL)
+
+    data = await request.json()
+    game_uuid = data["uuid"]  # TODO check if exists
+    player_id = int(data["player_id"])
+
+    if not await redis_session.exists(game_uuid):
+        web_logger.info(
+            f"preinfo | game ({game_uuid}) : player ({player_id}) | access denied | game closed"
+        )
+        return web.Response(status=403, text="Игра завершена")
+
+    game_state_raw = await redis_session.get(name=game_uuid)
+    game_state = GameState.model_validate_json(game_state_raw)
+
+    player = (
+        game_state.player_l
+        if player_id == game_state.player_l.player_id
+        else game_state.player_r
+    )
+
+    body = {
+        "score": player.score,
+        "attempts": player.attempts,
+    }
+
+    return web.json_response(body)
+
+
 @routes.post("/start")
 async def start(request):
-    db_session: AsyncSession = async_session()
-    game_dao = GameDAO(session=db_session)
-    player_dao = PlayerDAO(session=db_session)
+    redis_session = await get_redis_async_client(url=settings.GAME_BROKER_URL)
 
     data = await request.json()
     game_uuid = data["uuid"]
-    nft_id = int(data["nft_id"])
+    player_id = int(data["player_id"])
 
-    game_data = await game_dao.get_by_params(uuid=game_uuid)
-    game = game_data[0]
-    if not game.active:
-        await db_session.close()
-        return web.Response(text="Срок действия игры истек")
+    if not await redis_session.exists(game_uuid):
+        web_logger.info(
+            f"preinfo | game ({game_uuid}) : player ({player_id}) | access denied | game closed"
+        )
+        return web.Response(status=403, text="Игра завершена")
+
+    game_state_raw = await redis_session.get(name=game_uuid)
+    game_state = GameState.model_validate_json(game_state_raw)
 
     player = (
-        game.player_l
-        if game.player_l.nft_id == nft_id
-        else game.player_r if game.player_r.nft_id == nft_id else None
+        game_state.player_l
+        if player_id == game_state.player_l.player_id
+        else game_state.player_r
     )
-    if not player:
-        await db_session.close()
-        return web.Response(text="Неизвестный игрок")
 
-    if player.score:
-        await db_session.close()
-        return web.Response(text="Игра была завершена")
+    if player.attempts == 0:
+        web_logger.info(
+            f"start | game ({game_uuid}) : player ({player_id}) | access denied | attemption limit"
+        )
+        return web.Response(status=403, text="Исчерпано количество попыток")
 
-    await player_dao.edit_by_id(id=player.id, score=0)
-    await db_session.commit()
-    await db_session.close()
-    return web.Response(text="allow")
+    web_logger.info(f"start | game ({game_uuid}) : player ({player_id}) | start game")
+
+    if player_id == game_state.player_l.player_id:
+        game_state.player_l.attempts = game_state.player_l.attempts - 1
+        game_state.player_l.in_game = True
+    else:
+        game_state.player_r.attempts = game_state.player_r.attempts - 1
+        game_state.player_r.in_game = True
+    await redis_session.set(name=game_uuid, value=json.dumps(game_state.model_dump()))
+
+    return web.Response(status=200)
 
 
 @routes.post("/score")
 async def score(request):
-    db_session: AsyncSession = async_session()
-    game_dao = GameDAO(session=db_session)
-    player_dao = PlayerDAO(session=db_session)
+    redis_session = await get_redis_async_client(url=settings.GAME_BROKER_URL)
 
     bot: Bot = request.app["bot"]
 
     data = await request.json()
     query_id = data["query_id"]
-    game_score = int(data["score"])
     game_uuid = data["uuid"]
-    nft_id = int(data["nft_id"])
+    player_id = int(data["player_id"])
+    score = int(data["score"])
 
-    game_data = await game_dao.get_by_params(uuid=game_uuid)
-    game = game_data[0]
-    if not game.active:
-        await db_session.close()
-        return web.Response(text="Срок действия игры истек")
+    if not await redis_session.exists(game_uuid):
+        web_logger.info(
+            f"preinfo | game ({game_uuid}) : player ({player_id}) | access denied | game closed"
+        )
+        return web.Response(status=403, text="Игра завершена")
 
-    player = (
-        game.player_l
-        if game.player_l.nft_id == nft_id
-        else game.player_r if game.player_r.nft_id == nft_id else None
-    )
-    if not player:
-        await db_session.close()
-        return web.Response(text="Неизвестный игрок")
+    game_state_raw = await redis_session.get(name=game_uuid)
+    game_state = GameState.model_validate_json(game_state_raw)
 
-    await player_dao.edit_by_id(id=player.id, score=game_score)
-    await db_session.commit()
+    if player_id == game_state.player_l.player_id:
+        game_state.player_l.score = score
+        game_state.player_l.in_game = False
+        attempts = game_state.player_l.attempts
+    else:
+        game_state.player_r.score = score
+        game_state.player_r.in_game = False
+        attempts = game_state.player_r.attempts
 
-    result_text = (
-        f"Твой счет: {game_score} очков\n" f"Ожидание результатов соперника..."
-    )
+    await redis_session.set(name=game_uuid, value=json.dumps(game_state.model_dump()))
+
+    if not attempts:
+        result_text = (
+            f"Игра: {game_uuid}\nТвой счет: {score} очков\n\n"
+            f"Ожидание результатов соперника..."
+        )
+    else:
+        result_text = f"Игра: {game_uuid}\nТвой счет: {score} очков\n"
+
     result = types.InlineQueryResultArticle(
         id=query_id,
         title="Score",

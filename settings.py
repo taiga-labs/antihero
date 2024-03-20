@@ -10,7 +10,8 @@ class Config(_BaseSettings, extra="allow"):
     DEV: bool
 
     DATABASE_URL: PostgresDsn
-    REDIS_URL: str
+    TONCONNECT_BROKER_URL: str
+    GAME_BROKER_URL: str
 
     TELEGRAM_API_KEY: SecretStr
 

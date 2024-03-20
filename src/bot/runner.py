@@ -40,4 +40,4 @@ def bot_start_webhook():
 
 def bot_start_polling():
     logger.info(f"bot_start_polling: start bot {bot.id}")
-    executor.start_polling(dp, skip_updates=True)
+    executor.start_polling(dp, skip_updates=False)

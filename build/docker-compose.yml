@@ -8,7 +8,8 @@ services:
             dockerfile: ./build/Dockerfile
         command: python -m src.bot
         depends_on:
-            - antihero-redis
+            - antihero-tonconnect_broker
+            - antihero-game_broker
         user: "1000:1000"
         restart: unless-stopped
         container_name: antihero-bot
@@ -62,19 +63,36 @@ services:
                 aliases:
                     - antihero-game_processor
 
-    antihero-redis:
+    antihero-tonconnect_broker:
         image: redis:latest
-        container_name: antihero-redis
-        volumes:
-          - ./redis-data:/data:rw
+        container_name: antihero-tonconnect_broker
+        command: redis-server --save "" --appendonly no
         restart: unless-stopped
         user: "1000:1000"
         expose:
             - "6379"
+        # ports:
+        #     - "172.17.0.1:6379:6379"
         networks:
             antihero:
                 aliases:
-                    - antihero-redis
+                    - antihero-tonconnect_broker
+
+    antihero-game_broker:
+        image: redis:latest
+        container_name: antihero-game_broker
+        volumes:
+            - ./redis-data:/data:rw
+        restart: unless-stopped
+        user: "1000:1000"
+        expose:
+            - "6379"
+        # ports:
+        #     - "172.17.0.1:6380:6379"
+        networks:
+            antihero:
+                aliases:
+                    - antihero-game_broker
 
     antihero-web:
         build:
@@ -91,7 +109,6 @@ services:
             antihero:
                 aliases:
                     - antihero-web
-                ipv4_address: 10.0.1.3
 networks:
     antihero:
         driver: bridge
