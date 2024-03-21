@@ -77,7 +77,7 @@ async def process_games():
                             await bot.send_message(
                                 chat_id=game.player_l.nft.user.telegram_id,
                                 text=f"    ⚠️ Предупреждение ⚠️\n"
-                                f"Игра завершится через 5 минут.\n"
+                                f"Игра #{game.uuid.rsplit('-', 1)[-1]} завершится через 5 минут.\n"
                                 f"{game.player_l.nft.name_nft} [LVL {game.player_l.nft.rare}] vs {game.player_r.nft.name_nft} [LVL {game.player_r.nft.rare}]\n\n"
                                 f"Осталось попыток: {game_state.player_l.attempts}",
                             )
@@ -90,8 +90,8 @@ async def process_games():
                         if not game.player_r.notified:
                             await bot.send_message(
                                 chat_id=game.player_r.nft.user.telegram_id,
-                                text=f"    ⚠️ Предупреждение ⚠️"
-                                f"Игра завершится через 5 минут.\n"
+                                text=f"    ⚠️ Предупреждение ⚠️\n"
+                                f"Игра #{game.uuid.rsplit('-', 1)[-1]} завершится через 5 минут.\n"
                                 f"{game.player_l.nft.name_nft} [LVL {game.player_l.nft.rare}] vs {game.player_r.nft.name_nft} [LVL {game.player_r.nft.rare}]\n\n"
                                 f"Осталось попыток: {game_state.player_r.attempts}",
                             )

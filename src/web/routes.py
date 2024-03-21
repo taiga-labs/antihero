@@ -144,7 +144,7 @@ async def score(request):
 
     if not attempts:
         exit_text = (
-            f"Игра: {game_uuid}\nОбщий счет: {total_score}\n\n"
+            f"Игра #{game_uuid.rsplit('-', 1)[-1]}\nОбщий счет: {total_score}\n\n"
             f"Ожидание результатов соперника..."
         )
         result = types.InlineQueryResultArticle(
