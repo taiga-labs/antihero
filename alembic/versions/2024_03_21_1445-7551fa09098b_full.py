@@ -1,8 +1,8 @@
 """full
 
-Revision ID: 3d42a896888b
+Revision ID: 7551fa09098b
 Revises: 
-Create Date: 2024-03-15 23:16:42.736782
+Create Date: 2024-03-21 14:45:52.890056
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '3d42a896888b'
+revision: str = '7551fa09098b'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -56,6 +56,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('nft_id', sa.Integer(), nullable=False),
     sa.Column('score', sa.Integer(), server_default='0', nullable=False),
+    sa.Column('notified', sa.Boolean(), server_default='f', nullable=False),
     sa.ForeignKeyConstraint(['nft_id'], ['nfts.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
