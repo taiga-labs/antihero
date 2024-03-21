@@ -41,6 +41,7 @@ class Player(Base):
     nft_id: Mapped[int] = mapped_column(Integer, ForeignKey("nfts.id"), nullable=False)
     nft: Mapped[User] = relationship(Nft, lazy="joined")
     score: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    notified: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="f")
 
 
 class Game(Base):

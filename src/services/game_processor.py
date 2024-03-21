@@ -68,27 +68,36 @@ async def process_games():
                             nft_d1=game.player_l.nft, nft_d2=game.player_r.nft
                         )
                 elif (
-                    int(time.time()) - game_state.start_time == 600
+                    600 <= int(time.time()) - game_state.start_time <= 630
                 ):  # warning on 10 min left
-                    game_data = await game_dao.get_by_params(uuid=game_uuid)
-                    game = game_data[0]
-
                     if game_state.player_l.attempts > 0:
-                        await bot.send_message(
-                            chat_id=game.player_l.nft.user.telegram_id,
-                            text=f"    ⚠️ Предупреждение ⚠️\n"
-                            f"Игра завершится через 5 минут.\n"
-                            f"{game.player_l.nft.name_nft} [LVL {game.player_l.nft.rare}] vs {game.player_r.nft.name_nft} [LVL {game.player_r.nft.rare}]\n\n"
-                            f"Осталось попыток: {game_state.player_l.attempts}",
-                        )
+                        game_data = await game_dao.get_by_params(uuid=game_uuid)
+                        game = game_data[0]
+                        if not game.player_l.notified:
+                            await bot.send_message(
+                                chat_id=game.player_l.nft.user.telegram_id,
+                                text=f"    ⚠️ Предупреждение ⚠️\n"
+                                f"Игра завершится через 5 минут.\n"
+                                f"{game.player_l.nft.name_nft} [LVL {game.player_l.nft.rare}] vs {game.player_r.nft.name_nft} [LVL {game.player_r.nft.rare}]\n\n"
+                                f"Осталось попыток: {game_state.player_l.attempts}",
+                            )
+                            await player_dao.edit_by_id(
+                                id=game.player_l_id, notified=True
+                            )
                     if game_state.player_r.attempts > 0:
-                        await bot.send_message(
-                            chat_id=game.player_r.nft.user.telegram_id,
-                            text=f"    ⚠️ Предупреждение ⚠️"
-                            f"Игра завершится через 5 минут.\n"
-                            f"{game.player_l.nft.name_nft} [LVL {game.player_l.nft.rare}] vs {game.player_r.nft.name_nft} [LVL {game.player_r.nft.rare}]\n\n"
-                            f"Осталось попыток: {game_state.player_r.attempts}",
-                        )
+                        game_data = await game_dao.get_by_params(uuid=game_uuid)
+                        game = game_data[0]
+                        if not game.player_r.notified:
+                            await bot.send_message(
+                                chat_id=game.player_r.nft.user.telegram_id,
+                                text=f"    ⚠️ Предупреждение ⚠️"
+                                f"Игра завершится через 5 минут.\n"
+                                f"{game.player_l.nft.name_nft} [LVL {game.player_l.nft.rare}] vs {game.player_r.nft.name_nft} [LVL {game.player_r.nft.rare}]\n\n"
+                                f"Осталось попыток: {game_state.player_r.attempts}",
+                            )
+                            await player_dao.edit_by_id(
+                                id=game.player_r_id, notified=True
+                            )
     finally:
         processor_logger.info("process_games | close game processor")
         await db_session.close()
