@@ -59,6 +59,8 @@ services:
         user: "1000:1000"
         restart: unless-stopped
         container_name: antihero-game_processor
+        volumes:
+            - ../images:/antihero_bot/images:rw
         env_file: ../.env
         networks:
             antihero:
