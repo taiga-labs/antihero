@@ -34,7 +34,7 @@ async def auth(request):
 
     if hash_check.hexdigest() == hash:
         return web.Response(status=200)
-    return web.Response(status=200)
+    return web.Response(status=403)
 
 
 @routes.post("/preinfo")
