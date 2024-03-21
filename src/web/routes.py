@@ -49,7 +49,7 @@ async def preinfo(request):
         web_logger.info(
             f"preinfo | game ({game_uuid}) : player ({player_id}) | access denied | game closed"
         )
-        return web.Response(status=403, text="Игра завершена")
+        return web.Response(status=403, body=json.dumps({"message": "Игра завершена"}))
 
     game_state_raw = await redis_session.get(name=game_uuid)
     game_state = GameState.model_validate_json(game_state_raw)
@@ -79,7 +79,7 @@ async def start(request):
         web_logger.info(
             f"start | game ({game_uuid}) : player ({player_id}) | access denied | game closed"
         )
-        return web.Response(status=403, text="Игра завершена")
+        return web.Response(status=403, body=json.dumps({"message": "Игра завершена"}))
 
     game_state_raw = await redis_session.get(name=game_uuid)
     game_state = GameState.model_validate_json(game_state_raw)
