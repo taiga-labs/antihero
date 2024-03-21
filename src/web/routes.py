@@ -34,7 +34,7 @@ async def auth(request):
 
     if hash_check.hexdigest() == hash:
         return web.Response(status=200)
-    return web.Response(status=403)
+    return web.Response(status=200)
 
 
 @routes.post("/preinfo")
@@ -64,7 +64,6 @@ async def preinfo(request):
         "score": player.score,
         "attempts": player.attempts,
     }
-
     return web.json_response(body)
 
 
@@ -78,7 +77,7 @@ async def start(request):
 
     if not await redis_session.exists(game_uuid):
         web_logger.info(
-            f"preinfo | game ({game_uuid}) : player ({player_id}) | access denied | game closed"
+            f"start | game ({game_uuid}) : player ({player_id}) | access denied | game closed"
         )
         return web.Response(status=403, text="Игра завершена")
 
@@ -106,7 +105,6 @@ async def start(request):
         game_state.player_r.attempts = game_state.player_r.attempts - 1
         game_state.player_r.in_game = True
     await redis_session.set(name=game_uuid, value=json.dumps(game_state.model_dump()))
-
     return web.Response(status=200)
 
 
@@ -124,7 +122,7 @@ async def score(request):
 
     if not await redis_session.exists(game_uuid):
         web_logger.info(
-            f"preinfo | game ({game_uuid}) : player ({player_id}) | access denied | game closed"
+            f"score | game ({game_uuid}) : player ({player_id}) | access denied | game closed"
         )
         return web.Response(status=403, text="Игра завершена")
 
@@ -132,27 +130,28 @@ async def score(request):
     game_state = GameState.model_validate_json(game_state_raw)
 
     if player_id == game_state.player_l.player_id:
-        game_state.player_l.score = score
+        game_state.player_l.score += score
+        total_score = game_state.player_l.score
         game_state.player_l.in_game = False
         attempts = game_state.player_l.attempts
     else:
-        game_state.player_r.score = score
+        game_state.player_r.score += score
+        total_score = game_state.player_r.score
         game_state.player_r.in_game = False
         attempts = game_state.player_r.attempts
 
     await redis_session.set(name=game_uuid, value=json.dumps(game_state.model_dump()))
 
     if not attempts:
-        result_text = (
-            f"Игра: {game_uuid}\nТвой счет: {score} очков\n\n"
+        exit_text = (
+            f"Игра: {game_uuid}\nОбщий счет: {total_score}\n\n"
             f"Ожидание результатов соперника..."
         )
-    else:
-        result_text = f"Игра: {game_uuid}\nТвой счет: {score} очков\n"
+        result = types.InlineQueryResultArticle(
+            id=query_id,
+            title="Score",
+            input_message_content=types.InputTextMessageContent(message_text=exit_text),
+        )
+        await bot.answer_web_app_query(web_app_query_id=query_id, result=result)
 
-    result = types.InlineQueryResultArticle(
-        id=query_id,
-        title="Score",
-        input_message_content=types.InputTextMessageContent(message_text=result_text),
-    )
-    await bot.answer_web_app_query(query_id, result)
+    return web.Response(status=200)

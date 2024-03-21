@@ -80,12 +80,15 @@ async def add_nft(
             {"address": nft_address, "amount": to_nano(0.05, "ton"), "payload": body}
         ],
     }
-    await call.message.edit_text(
-        text="Подтвердите перевод в приложении своего кошелька в течение 5 минут"
-    )
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main)
+
+    await call.message.edit_text(
+        text="Подтвердите перевод в приложении своего кошелька в течение 5 минут",
+        reply_markup=keyboard,
+    )
+
     try:
         await asyncio.wait_for(
             connector.send_transaction(transaction=transaction), timeout=300
@@ -212,12 +215,16 @@ async def pay_fee(
         ).decode(),
     }
     transaction = {"valid_until": int(time.time() + 3600), "messages": [data]}
-    await call.message.edit_caption(
-        caption="Подтвердите платёж в приложении своего кошелька в течение 5 минут"
-    )
+
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main)
+
+    await call.message.edit_caption(
+        caption="Подтвердите платёж в приложении своего кошелька в течение 5 минут",
+        reply_markup=keyboard,
+    )
+
     try:
         await asyncio.wait_for(
             connector.send_transaction(transaction=transaction), timeout=300
@@ -257,7 +264,9 @@ async def pay_fee(
     await db_session.commit()
 
     await bot.send_message(
-        chat_id=call.message.chat.id, text=f"NFT активирована", reply_markup=keyboard
+        chat_id=call.message.chat.id,
+        text=f"NFT <code>{nft_address}</code> активирована",
+        reply_markup=keyboard,
     )
     await bot.delete_message(
         chat_id=call.message.chat.id, message_id=call.message.message_id

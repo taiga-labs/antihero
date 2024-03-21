@@ -68,7 +68,7 @@ async def process_games():
                             nft_d1=game.player_l.nft, nft_d2=game.player_r.nft
                         )
                 elif (
-                    0 < int(time.time()) - game_state.start_time >= 600
+                    int(time.time()) - game_state.start_time == 600
                 ):  # warning on 10 min left
                     game_data = await game_dao.get_by_params(uuid=game_uuid)
                     game = game_data[0]
