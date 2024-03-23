@@ -11,10 +11,11 @@ from src.storage.driver import get_redis_async_client
 from src.storage.schemas import GameState
 from src.web import web_logger
 
-routes = web.RouteTableDef()
+
+router = web.RouteTableDef()
 
 
-@routes.post("/auth")
+@router.post("/auth")
 async def auth(request):
     data = await request.json()
     data_check_string = parse.unquote(data["data_check_string"])
@@ -37,12 +38,11 @@ async def auth(request):
     return web.Response(status=403)
 
 
-@routes.post("/preinfo")
+@router.post("/preinfo")
 async def preinfo(request):
     redis_session = await get_redis_async_client(url=settings.GAME_BROKER_URL)
-
     data = await request.json()
-    game_uuid = data["uuid"]  # TODO check if exists
+    game_uuid = data["uuid"]
     player_id = int(data["player_id"])
 
     if not await redis_session.exists(game_uuid):
@@ -60,6 +60,7 @@ async def preinfo(request):
         else game_state.player_r
     )
 
+    await redis_session.close()
     body = {
         "score": player.score,
         "attempts": player.attempts,
@@ -67,7 +68,7 @@ async def preinfo(request):
     return web.json_response(body)
 
 
-@routes.post("/start")
+@router.post("/start")
 async def start(request):
     redis_session = await get_redis_async_client(url=settings.GAME_BROKER_URL)
 
@@ -100,15 +101,15 @@ async def start(request):
 
     if player_id == game_state.player_l.player_id:
         game_state.player_l.attempts = game_state.player_l.attempts - 1
-        game_state.player_l.in_game = True
     else:
         game_state.player_r.attempts = game_state.player_r.attempts - 1
-        game_state.player_r.in_game = True
     await redis_session.set(name=game_uuid, value=json.dumps(game_state.model_dump()))
+
+    await redis_session.close()
     return web.Response(status=200)
 
 
-@routes.post("/score")
+@router.post("/score")
 async def score(request):
     redis_session = await get_redis_async_client(url=settings.GAME_BROKER_URL)
 
@@ -132,12 +133,10 @@ async def score(request):
     if player_id == game_state.player_l.player_id:
         game_state.player_l.score += score
         total_score = game_state.player_l.score
-        game_state.player_l.in_game = False
         attempts = game_state.player_l.attempts
     else:
         game_state.player_r.score += score
         total_score = game_state.player_r.score
-        game_state.player_r.in_game = False
         attempts = game_state.player_r.attempts
 
     await redis_session.set(name=game_uuid, value=json.dumps(game_state.model_dump()))
@@ -154,4 +153,5 @@ async def score(request):
         )
         await bot.answer_web_app_query(web_app_query_id=query_id, result=result)
 
+    await redis_session.close()
     return web.Response(status=200)

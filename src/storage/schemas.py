@@ -33,11 +33,15 @@ class PlayerState(BaseModel):
     player_id: int
     score: int = 0
     attempts: int = 3
-    in_game: bool = False
+    sid: str | None = None
 
 
 class GameState(BaseModel):
     player_l: PlayerState
     player_r: PlayerState
     start_time: int
-    active: bool = False
+
+
+class GameConnection(BaseModel):
+    player_id: int
+    uuid: str

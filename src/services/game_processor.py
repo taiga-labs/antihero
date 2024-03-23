@@ -30,8 +30,8 @@ async def process_games():
                 game_state_raw = await redis_session.get(name=game_uuid)
                 game_state = GameState.model_validate_json(game_state_raw)
 
-                # if game_state.player_l.in_game or game_state.player_r.in_game:
-                #     continue
+                if game_state.player_l.sid or game_state.player_r.sid:
+                    continue
 
                 if (
                     game_state.player_l.attempts == 0

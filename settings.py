@@ -12,6 +12,7 @@ class Config(_BaseSettings, extra="allow"):
     DATABASE_URL: PostgresDsn
     TONCONNECT_BROKER_URL: str
     GAME_BROKER_URL: str
+    GAME_CONNECTION_BROKER_URL: str
 
     TELEGRAM_API_KEY: SecretStr
 
