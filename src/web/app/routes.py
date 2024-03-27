@@ -1,11 +1,14 @@
 from aiohttp import web
 
-from src.web import web_logger
+from src.web import web_logger, app
+from flask_cors import cross_origin
 
-router = web.RouteTableDef()
+
+# router = web.RouteTableDef()
 
 
-@router.post("/auth")
+@app.route("/auth")
+@cross_origin()
 async def auth(request):
     web_logger.info("IN AUTH")
     try:
@@ -17,7 +20,8 @@ async def auth(request):
     return web.Response(status=200)
 
 
-@router.post("/preinfo")
+@app.route("/preinfo")
+@cross_origin()
 async def preinfo(request):
     try:
         data = await request.json()
@@ -32,7 +36,8 @@ async def preinfo(request):
     return web.json_response(body)
 
 
-@router.post("/start")
+@app.route("/start")
+@cross_origin()
 async def start(request):
     try:
         data = await request.json()
@@ -43,7 +48,8 @@ async def start(request):
     return web.Response(status=200)
 
 
-@router.post("/score")
+@app.route("/score")
+@cross_origin()
 async def score(request):
     try:
         data = await request.json()
