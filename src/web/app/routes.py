@@ -1,10 +1,7 @@
-from aiohttp import web
+from flask import Response
 
 from src.web import web_logger, app
 from flask_cors import cross_origin
-
-
-# router = web.RouteTableDef()
 
 
 @app.route("/auth")
@@ -16,8 +13,8 @@ async def auth(request):
         d = data["data_check_string"]
         hash = data["hash"]
     except:
-        return web.Response(status=403)
-    return web.Response(status=200)
+        return Response(status=403)
+    return Response(status=200)
 
 
 @app.route("/preinfo")
@@ -28,12 +25,12 @@ async def preinfo(request):
         game_uuid = data["uuid"]
         player_id = int(data["player_id"])
     except:
-        return web.Response(status=403)
+        return Response(status=403)
     body = {
         "score": 0,
         "attempts": 0,
     }
-    return web.json_response(body)
+    return body
 
 
 @app.route("/start")
@@ -44,8 +41,8 @@ async def start(request):
         game_uuid = data["uuid"]
         player_id = int(data["player_id"])
     except:
-        return web.Response(status=403)
-    return web.Response(status=200)
+        return Response(status=403)
+    return Response(status=200)
 
 
 @app.route("/score")
@@ -58,5 +55,5 @@ async def score(request):
         player_id = int(data["player_id"])
         score = int(data["score"])
     except:
-        return web.Response(status=403)
-    return web.Response(status=200)
+        return Response(status=403)
+    return Response(status=200)
