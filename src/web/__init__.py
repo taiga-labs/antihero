@@ -1,5 +1,6 @@
 import logging
-import aiohttp_cors
+
+# import aiohttp_cors
 import socketio
 from aiohttp import web
 
