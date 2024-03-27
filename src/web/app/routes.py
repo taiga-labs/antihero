@@ -1,10 +1,13 @@
 from aiohttp import web
 
+from src.web import web_logger
+
 router = web.RouteTableDef()
 
 
 @router.post("/auth")
 async def auth(request):
+    web_logger.info("IN AUTH")
     try:
         data = await request.json()
         d = data["data_check_string"]
