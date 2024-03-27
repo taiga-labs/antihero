@@ -4,7 +4,7 @@ from src.web import web_logger, app
 from flask_cors import cross_origin
 
 
-@app.route("/auth", methods=["POST"])
+@app.route("/auth", methods=["OPTIONS", "POST"])
 @cross_origin()
 async def auth(request):
     web_logger.info("IN AUTH")
