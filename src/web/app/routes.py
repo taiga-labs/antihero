@@ -1,4 +1,4 @@
-from flask import Response
+from flask import Response, jsonify
 
 from src.web import web_logger, app
 from flask_cors import cross_origin
@@ -12,9 +12,16 @@ async def auth(request):
         data = await request.json()
         d = data["data_check_string"]
         hash = data["hash"]
+        response = Response(status=200)
     except:
-        return Response(status=403)
-    return Response(status=200)
+        response = Response(status=403)
+
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = (
+        "append,delete,entries,foreach,get,has,keys,set,values,Authorization"
+    )
+    response.headers["Access-Control-Allow-Methods"] = "GET,PUT,POST,DELETE,OPTIONS"
+    return response
 
 
 @app.route("/preinfo")
@@ -24,13 +31,17 @@ async def preinfo(request):
         data = await request.json()
         game_uuid = data["uuid"]
         player_id = int(data["player_id"])
+        body = {"score": 0, "attempts": 0}
+        response = jsonify(body)
     except:
-        return Response(status=403)
-    body = {
-        "score": 0,
-        "attempts": 0,
-    }
-    return body
+        response = Response(status=403)
+
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = (
+        "append,delete,entries,foreach,get,has,keys,set,values,Authorization"
+    )
+    response.headers["Access-Control-Allow-Methods"] = "GET,PUT,POST,DELETE,OPTIONS"
+    return response
 
 
 @app.route("/start")
@@ -40,9 +51,16 @@ async def start(request):
         data = await request.json()
         game_uuid = data["uuid"]
         player_id = int(data["player_id"])
+        response = Response(status=200)
     except:
-        return Response(status=403)
-    return Response(status=200)
+        response = Response(status=403)
+
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = (
+        "append,delete,entries,foreach,get,has,keys,set,values,Authorization"
+    )
+    response.headers["Access-Control-Allow-Methods"] = "GET,PUT,POST,DELETE,OPTIONS"
+    return response
 
 
 @app.route("/score")
@@ -54,6 +72,13 @@ async def score(request):
         game_uuid = data["uuid"]
         player_id = int(data["player_id"])
         score = int(data["score"])
+        response = Response(status=200)
     except:
-        return Response(status=403)
-    return Response(status=200)
+        response = Response(status=403)
+
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = (
+        "append,delete,entries,foreach,get,has,keys,set,values,Authorization"
+    )
+    response.headers["Access-Control-Allow-Methods"] = "GET,PUT,POST,DELETE,OPTIONS"
+    return response
