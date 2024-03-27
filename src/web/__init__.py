@@ -20,7 +20,7 @@ cors = aiohttp_cors.setup(
 for route in list(app.router.routes()):
     cors.add(route)
 
-sio = socketio.AsyncServer(async_mode="aiohttp")
+sio = socketio.AsyncServer(async_mode="aiohttp", cors_allowed_origins="*")
 sio.attach(app)
 
 
