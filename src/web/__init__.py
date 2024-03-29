@@ -1,28 +1,24 @@
 import logging
-import aiohttp_cors
-import socketio
-from aiohttp import web
 
-from src.bot.factories import bot
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi_socketio import SocketManager
 
-app = web.Application()
-app["bot"] = bot
+# from src.web.app.routes import router
 
-cors = aiohttp_cors.setup(
-    app,
-    defaults={
-        "*": aiohttp_cors.ResourceOptions(
-            allow_credentials=True, expose_headers="*", allow_headers="*"
-        )
-    },
+fastapp = FastAPI()
+socket_manager = SocketManager(app=fastapp)
+
+
+origins = ["*"]
+
+fastapp.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"),
+    allow_headers=["*"],
 )
-
-for route in list(app.router.routes()):
-    cors.add(route)
-
-sio = socketio.AsyncServer(async_mode="aiohttp")
-sio.attach(app)
-
 
 logging.basicConfig()
 web_logger = logging.getLogger("ANTIHERO_WEB")

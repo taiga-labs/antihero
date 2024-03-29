@@ -1,10 +1,15 @@
-from aiohttp import web
+import uvicorn
 
 from settings import settings
-from src.web import app, web_logger
+from src.web import fastapp
 from src.web.app.routes import router
 
-app.add_routes(router)
+fastapp.include_router(router=router)
 
-web_logger.info(f"Runnings web app | HOST:0.0.0.0 PORT:{settings.MINIAPP_PORT}")
-web.run_app(app=app, host="0.0.0.0", port=settings.MINIAPP_PORT)
+uvicorn.run(
+    app=fastapp,
+    host="0.0.0.0",
+    port=settings.MINIAPP_PORT,
+    proxy_headers=True,
+    forwarded_allow_ips="*",
+)
