@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Response, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException
 from starlette import status
 
 from src.web.app.models import AuthModel, IDsModel, ScoreModel
@@ -18,7 +17,7 @@ async def auth(data: AuthModel):
 
 @router.post("/preinfo")
 async def preinfo(data: IDsModel):
-    if not (data.game_uuid and data.player_id):
+    if not (data.uuid and data.player_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"",
@@ -29,7 +28,7 @@ async def preinfo(data: IDsModel):
 
 @router.post("/start")
 async def start(data: IDsModel):
-    if not (data.game_uuid and data.player_id):
+    if not (data.uuid and data.player_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"",
@@ -38,7 +37,7 @@ async def start(data: IDsModel):
 
 @router.post("/score")
 async def score(data: ScoreModel):
-    if not (data.query_id and data.game_uuid and data.player_id):
+    if not (data.query_id and data.uuid and data.player_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"",

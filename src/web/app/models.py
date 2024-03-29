@@ -7,10 +7,11 @@ class AuthModel(BaseModel):
 
 
 class IDsModel(BaseModel):
-    data_check_string: str
-    hash: str
+    uuid: str
+    player_id: str
 
 
 class ScoreModel(BaseModel):
-    data_check_string: str
-    hash: str
+    query_id: str
+    uuid: str
+    player_id: str
