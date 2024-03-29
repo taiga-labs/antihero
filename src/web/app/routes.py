@@ -34,7 +34,7 @@ async def auth(data: AuthModel):
         digestmod=hashlib.sha256,
     )
 
-    if hash_check.hexdigest() != hash:
+    if hash_check.hexdigest() != data.hash:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Authentication failed",
