@@ -22,6 +22,8 @@ router = APIRouter()
 
 @router.post("/auth")
 async def auth(data: AuthModel):
+    data_check_string = parse.unquote(data.data_check_string)
+
     secret_key = hmac.new(
         key="WebAppData".encode(),
         msg=settings.TELEGRAM_API_KEY.get_secret_value().encode(),
@@ -30,7 +32,7 @@ async def auth(data: AuthModel):
 
     hash_check = hmac.new(
         key=secret_key.digest(),
-        msg=data.data_check_string.encode(),
+        msg=data_check_string.encode(),
         digestmod=hashlib.sha256,
     )
 

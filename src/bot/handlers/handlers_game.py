@@ -244,6 +244,7 @@ async def fight_yes(
     )
 
     game_uuid = str(uuid.uuid4())
+    game_uuid_short = game_uuid.rsplit("-", 1)[-1]
     game_model = GameModel(
         uuid=game_uuid,
         player_l_id=player_id,
@@ -277,7 +278,7 @@ async def fight_yes(
     await bot.send_message(
         chat_id=nft.user.telegram_id,
         text=f"Твой соперник: {nft_opponent.user.name}'s {nft_opponent.name_nft} [LVL {nft_opponent.rare}]\n\n"
-        f"Игра будет активна в течение 15 минут\n"
+        f"Игра #{game_uuid_short} будет активна в течение 15 минут\n"
         f"     😈ОБРАТНОГО ПУТИ НЕТ😈",
         reply_markup=keyboard,
     )
@@ -295,7 +296,7 @@ async def fight_yes(
     await bot.send_message(
         chat_id=nft_opponent.user.telegram_id,
         text=f"Твой соперник: {nft.user.name}'s {nft.name_nft} [LVL {nft.rare}]\n\n"
-        f"Игра будет активна в течение 15 минут\n"
+        f"Игра #{game_uuid_short} будет активна в течение 15 минут\n"
         f"     😈ОБРАТНОГО ПУТИ НЕТ😈",
         reply_markup=keyboard,
     )
