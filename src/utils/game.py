@@ -35,7 +35,6 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft) -> None:
         activated=False,
     )
     await db_session.commit()
-    await db_session.refresh()
 
     vs = f"{w_nft.user.name}'s {w_nft.name_nft} [LVL {w_nft.rare}] ⚔️ {l_nft.user.name}'s {l_nft.name_nft} [LVL {l_nft.rare}]"
 

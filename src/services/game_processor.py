@@ -46,6 +46,7 @@ async def process_games():
                     await redis_session.delete(game_uuid)
                     game_data = await game_dao.get_by_params(uuid=game_uuid)
                     game = game_data[0]
+                    await db_session.refresh(game)
 
                     await player_dao.edit_by_id(
                         id=game.player_l_id, score=game_state.player_l.score
