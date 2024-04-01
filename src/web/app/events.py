@@ -1,16 +1,17 @@
 import json
+
+from socketio import AsyncServer
+
 from settings import settings
 from src.storage.driver import get_redis_async_client
 from src.storage.schemas import GameState, GameConnection
-from src.web import web_logger, fastapp
+from src.web import web_logger
 
 
-@fastapp.sio.on("connect")
 async def connect(sid, data):
     web_logger.info(f"connect | socket connection open | sid: {sid}")
 
 
-@fastapp.sio.on("disconnect")
 async def disconnect(sid):
     web_logger.info(f"disconnect | socket connection closed | sid: {sid}")
     redis_game_session = await get_redis_async_client(url=settings.GAME_BROKER_URL)
@@ -38,7 +39,6 @@ async def disconnect(sid):
     await redis_connection_session.close()
 
 
-@fastapp.sio.on("set_connection")
 async def set_connection(sid, data):
     web_logger.info(f"set_connection | socket set connection data | sid: {sid}")
     redis_game_session = await get_redis_async_client(url=settings.GAME_BROKER_URL)
@@ -67,3 +67,9 @@ async def set_connection(sid, data):
     )
     await redis_game_session.close()
     await redis_connection_session.close()
+
+
+def reg(sio: AsyncServer):
+    sio.on("connect", connect)
+    sio.on("disconnect", disconnect)
+    sio.on("set_connection", set_connection)

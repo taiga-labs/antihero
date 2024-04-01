@@ -104,7 +104,9 @@ async def start(data: IDsModel):
             detail=f"Исчерпано количество попыток",
         )
 
-    web_logger.info(f"start | game ({data.uuid}) : player ({data.player_id}) | start game")
+    web_logger.info(
+        f"start | game ({data.uuid}) : player ({data.player_id}) | start game"
+    )
 
     if data.player_id == game_state.player_l.player_id:
         game_state.player_l.attempts = game_state.player_l.attempts - 1

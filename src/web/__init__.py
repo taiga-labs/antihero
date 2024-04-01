@@ -1,17 +1,12 @@
 import logging
 
+import socketio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_socketio import SocketManager
-
-# from src.web.app.routes import router
 
 fastapp = FastAPI()
-socket_manager = SocketManager(app=fastapp)
-
 
 origins = ["*"]
-
 fastapp.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -19,6 +14,10 @@ fastapp.add_middleware(
     allow_methods=("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"),
     allow_headers=["*"],
 )
+
+sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+socket_app = socketio.ASGIApp(socketio_server=sio)
+
 
 logging.basicConfig()
 web_logger = logging.getLogger("ANTIHERO_WEB")
