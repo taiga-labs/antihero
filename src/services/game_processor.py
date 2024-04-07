@@ -58,15 +58,18 @@ async def process_games():
 
                     if game_state.player_l.score > game_state.player_r.score:
                         await game_winner_determined(
-                            w_nft=game.player_l.nft, l_nft=game.player_r.nft
+                            w_nft=game.player_l.nft, w_score=game_state.player_l.score,
+                            l_nft=game.player_r.nft, l_score=game_state.player_r.score
                         )
                     elif game_state.player_l.score < game_state.player_r.score:
                         await game_winner_determined(
-                            w_nft=game.player_r.nft, l_nft=game.player_l.nft
+                            w_nft=game.player_r.nft, w_score=game_state.player_r.score,
+                            l_nft=game.player_l.nft, l_score=game_state.player_l.score
                         )
                     else:
                         await game_draw(
-                            nft_d1=game.player_l.nft, nft_d2=game.player_r.nft
+                            nft_d1=game.player_l.nft, score_d1=game_state.player_l.score,
+                            nft_d2=game.player_r.nft, score_d2=game_state.player_r.score
                         )
                 elif (
                     600 <= int(time.time()) - game_state.start_time <= 630

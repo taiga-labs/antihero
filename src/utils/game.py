@@ -8,7 +8,7 @@ from src.storage.driver import async_session
 from src.storage.models import Nft
 
 
-async def game_winner_determined(w_nft: Nft, l_nft: Nft) -> None:
+async def game_winner_determined(w_nft: Nft, w_score: int, l_nft: Nft, l_score: int) -> None:
     db_session = async_session()
     user_dao = UserDAO(session=db_session)
     nft_dao = NftDAO(session=db_session)
@@ -18,7 +18,7 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft) -> None:
     keyboard.add(kb_main)
 
     logger.info(
-        f"game_winner_determined | {w_nft.user.name}'s {w_nft.name_nft} [LVL {w_nft.rare}] > {l_nft.user.name}'s {l_nft.name_nft} [LVL {l_nft.rare}]"
+        f"game_winner_determined | {w_nft.user.name}'s {w_nft.name_nft} [LVL {w_nft.rare}]: {w_score} > {l_nft.user.name}'s {l_nft.name_nft} [LVL {l_nft.rare}]: {l_score}"
     )
 
     await user_dao.edit_by_telegram_id(
@@ -36,7 +36,8 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft) -> None:
     )
     await db_session.commit()
 
-    vs = f"{w_nft.user.name}'s {w_nft.name_nft} [LVL {w_nft.rare}] ⚔️ {l_nft.user.name}'s {l_nft.name_nft} [LVL {l_nft.rare}]"
+    vs = (f"{w_nft.user.name}'s {w_nft.name_nft} [LVL {w_nft.rare}]: <b>{w_score}</b>\n"
+          f"{l_nft.user.name}'s {l_nft.name_nft} [LVL {l_nft.rare}]: <b>{l_score}</b>")
 
     media = types.MediaGroup()
     media.attach_photo(
@@ -65,7 +66,7 @@ async def game_winner_determined(w_nft: Nft, l_nft: Nft) -> None:
     )
 
 
-async def game_draw(nft_d1: Nft, nft_d2: Nft) -> None:
+async def game_draw(nft_d1: Nft, score_d1: int, nft_d2: Nft, score_d2: int) -> None:
     db_session = async_session()
     nft_dao = NftDAO(session=db_session)
 
@@ -74,7 +75,7 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft) -> None:
     keyboard.add(kb_main)
 
     logger.info(
-        f"game_draw | {nft_d1.user.name}'s {nft_d1.name_nft} [LVL {nft_d1.rare}] = {nft_d2.user.name}'s {nft_d2.name_nft} [LVL {nft_d2.rare}]"
+        f"game_draw | {nft_d1.user.name}'s {nft_d1.name_nft} [LVL {nft_d1.rare}]: {score_d1} = {nft_d2.user.name}'s {nft_d2.name_nft} [LVL {nft_d2.rare}]: {score_d2}"
     )
 
     await nft_dao.edit_by_address(
@@ -85,7 +86,8 @@ async def game_draw(nft_d1: Nft, nft_d2: Nft) -> None:
     )
     await db_session.commit()
 
-    vs = f"{nft_d1.user.name}'s {nft_d1.name_nft} [LVL {nft_d1.rare}] ⚔️ {nft_d2.user.name}'s {nft_d2.name_nft} [LVL {nft_d2.rare}]"
+    vs = (f"{nft_d1.user.name}'s {nft_d1.name_nft} [LVL {nft_d1.rare}]: <b>{score_d1}</b>\n"
+          f"{nft_d2.user.name}'s {nft_d2.name_nft} [LVL {nft_d2.rare}]:<b>{score_d2}</b>")
 
     media = types.MediaGroup()
     media.attach_photo(
