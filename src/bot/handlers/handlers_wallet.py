@@ -70,7 +70,7 @@ async def connect_wallet(
     url_button = InlineKeyboardButton(text="Подключить", url=generated_url)
     keyboard.add(url_button)
     await bot.delete_message(
-        chat_id=call.message.chat.id, message_id=call.message.message_id
+        chat_id=call.from_user.id, message_id=call.message.message_id
     )
     wait_msg = await call.message.answer_photo(
         photo=stream.getvalue(),

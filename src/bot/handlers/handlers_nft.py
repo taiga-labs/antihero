@@ -147,7 +147,7 @@ async def add_nft(
         reply_markup=keyboard,
     )
     await bot.delete_message(
-        chat_id=call.message.chat.id, message_id=call.message.message_id
+        chat_id=call.from_user.id, message_id=call.message.message_id
     )
     connector.pause_connection()
 
@@ -185,7 +185,7 @@ async def show_nft(call: types.CallbackQuery):
     kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
     keyboard.add(kb_main_menu)
     await bot.delete_message(
-        chat_id=call.message.chat.id, message_id=call.message.message_id
+        chat_id=call.from_user.id, message_id=call.message.message_id
     )
     await bot.send_photo(
         chat_id=call.from_user.id,
@@ -269,7 +269,7 @@ async def pay_fee(
         reply_markup=keyboard,
     )
     await bot.delete_message(
-        chat_id=call.message.chat.id, message_id=call.message.message_id
+        chat_id=call.from_user.id, message_id=call.message.message_id
     )
 
     connector.pause_connection()

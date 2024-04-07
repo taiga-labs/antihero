@@ -43,7 +43,7 @@ async def main(call: types.CallbackQuery):
         chat_id=call.message.chat.id, text="Главное меню:", reply_markup=keyboard
     )
     await bot.delete_message(
-        chat_id=call.message.chat.id, message_id=call.message.message_id
+        chat_id=call.from_user.id, message_id=call.message.message_id
     )
 
 
@@ -97,7 +97,7 @@ async def start(message: types.Message, db_session: AsyncSession):
                 f"Наш <a href='https://t.me/TON_ANTIHERO_NFT'>ТЕЛЕГРАМ КАНАЛ☢️</a>\n",
                 reply_markup=keyboard,
             )
-    await bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
+    await bot.delete_message(chat_id=message.from_user.id, message_id=message.message_id)
 
 
 def nft_status(nft: Nft):
