@@ -3,6 +3,7 @@ version: '3.9'
 services:
     antihero-bot:
         working_dir: /antihero_bot
+        image: antihero
         build:
             context: ../
             dockerfile: ./build/Dockerfile
@@ -24,9 +25,7 @@ services:
                     - antihero-bot
 
     antihero-migrations:
-        build:
-          context: ../
-          dockerfile: ./build/Dockerfile
+        image: antihero
         command: alembic upgrade head
         user: "1000:1000"
         restart: "no"
@@ -38,9 +37,7 @@ services:
                     - antihero-migrations
 
     antihero-withdrawal_processor:
-        build:
-            context: ../
-            dockerfile: ./build/Dockerfile
+        image: antihero
         command: python -m src.services.withdrawal_processor
         user: "1000:1000"
         restart: unless-stopped
@@ -52,9 +49,7 @@ services:
                     - antihero-withdrawal_processor
 
     antihero-game_processor:
-        build:
-            context: ../
-            dockerfile: ./build/Dockerfile
+        image: antihero
         command: python -m src.services.game_processor
         user: "1000:1000"
         restart: unless-stopped
@@ -99,9 +94,7 @@ services:
                     - antihero-game_broker
 
     antihero-web:
-        build:
-            context: ../
-            dockerfile: ./build/Dockerfile
+        image: antihero
         command: python -m src.web
         user: "1000:1000"
         restart: unless-stopped
