@@ -153,7 +153,7 @@ async def wallet(call: types.CallbackQuery, db_session: AsyncSession):
                 [
                     "\n"
                     + str(
-                        "Имя: %s\nАдрес: %s\nУровень: %d\nСтатус: %s\n"
+                        _("Имя: %s\nАдрес: %s\nУровень: %d\nСтатус: %s\n")
                         % (
                             nft.name_nft,
                             f"<code>{nft.address}</code>",
