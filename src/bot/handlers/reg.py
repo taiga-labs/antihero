@@ -1,5 +1,6 @@
 from aiogram import Dispatcher
 
+from src.bot.factories import i18n
 from src.bot.handlers.handlers_wallet import choose_wallet, connect_wallet
 from src.bot.handlers.handlers_game import (
     invite,
@@ -16,6 +17,7 @@ from src.bot.handlers.handlers_menu import (
     search,
     top_callback,
     ping,
+    lang_callback,
 )
 from src.bot.handlers.handlers_nft import (
     add_nft,
@@ -28,12 +30,9 @@ from src.bot.handlers.handlers_nft import (
     get_nft_withdrawable,
     withdraw_nft,
 )
+from src.bot.middlewares.storage import DbSessionMiddleware, RedisSessionMiddleware
+from src.bot.middlewares.wallet import WalletNotConnectedMiddleware
 from src.storage.driver import async_session
-from src.utils.middleware import (
-    WalletNotConnectedMiddleware,
-    DbSessionMiddleware,
-    RedisSessionMiddleware,
-)
 
 
 # bot handlers
@@ -43,6 +42,7 @@ def register_handlers_client(dp: Dispatcher) -> None:
 
     # menu
     dp.register_message_handler(start, commands=["start"])
+    dp.register_callback_query_handler(lang_callback, text="lang")
     # dp.register_callback_query_handler(main, text='main')  # registered by decorator
     dp.register_callback_query_handler(wallet, text="wallet")
     dp.register_callback_query_handler(search, text="Search")
@@ -76,3 +76,7 @@ def register_handlers_client(dp: Dispatcher) -> None:
     dp.middleware.setup(WalletNotConnectedMiddleware())
     dp.middleware.setup(DbSessionMiddleware(session_pool=async_session))
     dp.middleware.setup(RedisSessionMiddleware())
+
+    # i18n = LocalizationMiddleware("antihero-bot")
+    dp.middleware.setup(i18n)
+    # _a = i18n.lazy_gettext

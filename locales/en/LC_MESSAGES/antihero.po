@@ -1,0 +1,333 @@
+# English translations for antihero.
+# Copyright (C) 2024 ORGANIZATION
+# This file is distributed under the same license as the antihero project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: antihero VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-04-08 17:32+0300\n"
+"PO-Revision-Date: 2024-04-08 15:59+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+msgid "Главное меню"
+msgstr "Main menu"
+
+msgid "Выберите свободные NFT для арены"
+msgstr "Pick unbound NFT for arena"
+
+msgid "Пригласить на бой"
+msgstr "Invite to play"
+
+msgid "Пригласи противника"
+msgstr "Invite opponent"
+
+#, fuzzy
+msgid "Выбери NFT для игры"
+msgstr "Pick NFT to play"
+
+#, fuzzy
+msgid "ИГРАТЬ"
+msgstr "Play"
+
+msgid "Выйти"
+msgstr "Exit"
+
+msgid "Начинаю поиск"
+msgstr "Discovering"
+
+msgid "Ты не успел! Истек срок приглашения"
+msgstr "Time is over! The invitation has expired"
+
+msgid "Ты не успел! Соперник снял героя с арены"
+msgstr "Time is over! The opponent removed hero from arena"
+
+msgid "Ты не успел! Соперник уже в бою"
+msgstr "Time is over! The opponent is already in battle"
+
+msgid "Нельзя сражаться с самим собой!"
+msgstr "You can't battle yourself!"
+
+msgid "Главное меню:"
+msgstr "Main menu:"
+
+msgid "Мои Герои"
+msgstr "My Heroes"
+
+msgid "Добавить NFT"
+msgstr "Add NFT"
+
+msgid "ТОП"
+msgstr "TOP"
+
+msgid "Игра"
+msgstr "Play"
+
+msgid "Pong"
+msgstr "Pong"
+
+msgid "Выберите NFT для игры"
+msgstr "Pick NFT to play"
+
+msgid "Подключить кошелёк"
+msgstr "Connect wallet"
+
+msgid "Меню"
+msgstr "Menu"
+
+msgid "Сменить язык"
+msgstr "Change language"
+
+msgid ""
+"Приветствуем в боте коллекции <a "
+"href='https://getgems.io/collection/{MAIN_COLLECTION_ADDRESS}'>TON "
+"ANTIHERO!</a>\n"
+"Наш <a href='https://t.me/TON_ANTIHERO_NFT'>ТЕЛЕГРАМ КАНАЛ☢️</a>\n"
+msgstr ""
+"Welcome to <a "
+"href='https://getgems.io/collection/{MAIN_COLLECTION_ADDRESS}'>TON "
+"ANTIHERO!</a> collection bot\n"
+"Our <a href='https://t.me/TON_ANTIHERO_NFT'>TELEGRAM CHANNEL☢️</a>\n"
+
+msgid "ожидает вывода из игры 📩"
+msgstr "waiting for withdraw 📩"
+
+msgid "не активирована ❌"
+msgstr "not activated ❌"
+
+msgid "в битве ⚔"
+msgstr "in battle ⚔"
+
+msgid "ожидает соперника на арене 🛡"
+msgstr "waiting opponent on arena 🛡"
+
+msgid "активирована ✅"
+msgstr "activated ✅"
+
+msgid "в обработке..."
+msgstr "in processing..."
+
+msgid "NFT на арене"
+msgstr "NFT on arena"
+
+msgid "Активировать NFT"
+msgstr "Activate NFT"
+
+msgid "Вывести NFT"
+msgstr "Withdraw NFT"
+
+msgid ""
+"Адрес кошелька: <code>{user_address}</code>\n"
+"\n"
+msgstr ""
+"Wallet address: <code>{user_address}</code>\n"
+"\n"
+
+msgid ""
+"Ваши герои:\n"
+"{}"
+msgstr ""
+"Your Heroes:\n"
+"{}"
+
+msgid "Поиск игры"
+msgstr "Search game"
+
+msgid "Выберите игру"
+msgstr "Pick game"
+
+msgid "Топ пользователей:{}"
+msgstr "Top players{:}"
+
+msgid "язык установлен {new_lang}"
+msgstr "set language {new_lang}"
+
+msgid ""
+"<a href='{TELEGRAM_BOT_URL}'>TON ANTIHERO☢️</a>\n"
+"Сразись с моим {name_nft} [LVL {rare}]\n"
+"НА АРЕНЕ"
+msgstr ""
+"<a href='{TELEGRAM_BOT_URL}'>TON ANTIHERO☢️</a>\n"
+"Can you beat my {name_nft} [LVL {rare}]\n"
+"ON ARENA"
+
+msgid "Пригласи друга в бой"
+msgstr "Invite friend into battle"
+
+msgid "Сразиться"
+msgstr "Battle"
+
+msgid "Выбери свою NFT, которую хочешь добавить"
+msgstr "Choose NFT to add"
+
+msgid "Подтвердите перевод в приложении своего кошелька в течение 5 минут"
+msgstr "Confirm transfer in your wallet app within 5 minutes"
+
+msgid "Время подтверждения истекло"
+msgstr "Confirmation time has expired"
+
+msgid "Вы отменили перевод"
+msgstr "Payment canceled"
+
+msgid "Неизвестная ошибка! Обратитесь к администратору"
+msgstr "Unknow error! Contact game administrator"
+
+msgid "Оплатить комиссию"
+msgstr "Pay fee"
+
+msgid ""
+"Твоя NFT добавлена во внутренний кошелёк\n"
+"Для активации NFT необходимо заплатить комиссию 0.1 TON"
+msgstr ""
+"NFT has been added to your internal wallet\n"
+"To activate NFT you have to pay a fee: 0.1 TON"
+
+msgid "Выбери NFT, которую хочешь активировать"
+msgstr "Choose NFT to activate"
+
+msgid "Оплатить"
+msgstr "Pay"
+
+msgid "Для активации NFT необходимо заплатить комиссию 0.1 TON"
+msgstr "To activate NFT you have to pay a fee: 0.1 TON"
+
+msgid "Подтвердите платёж в приложении своего кошелька в течение 5 минут"
+msgstr "Confirm payment in your wallet app within 5 minutes"
+
+msgid ""
+"Время подтверждения истекло\n"
+" Повторно активировать NFT можно в разделе Кошелек"
+msgstr ""
+"Confirmation time has expired\n"
+" You can activate NFT in the Wallet section"
+
+msgid ""
+"Вы отменили перевод\n"
+" Повторно активировать NFT можно в разделе Кошелек"
+msgstr ""
+"Payment canceled\n"
+" You can activate NFT in the Wallet section"
+
+msgid ""
+"Неизвестная ошибка!\n"
+" Повторно активировать NFT можно в разделе Кошелек"
+msgstr ""
+"Unknown error!\n"
+" You can activate NFT in the Wallet section"
+
+msgid "NFT <code>{nft_address}</code> активирована"
+msgstr "NFT <code>{nft_address}</code> has been activated"
+
+msgid "Выберите NFT чтобы снять с арены"
+msgstr "Pick NFT to remove from arena"
+
+msgid "NFT {name_nft} снята с арены"
+msgstr "NFT {name_nft} removed from the arena"
+
+msgid ""
+"Выберите NFT чтобы вывести из игры\n"
+"\n"
+"NFT будет отправлена на адрес <code>{address}</code>"
+msgstr ""
+"Choose NFT to withdraw\n"
+"\n"
+"The NFT will be sent to <code>{address}</code>"
+
+msgid ""
+"⛔ Вывод NFT {name_nft} отклонен\n"
+"Необходимо снять героя с арены"
+msgstr ""
+"⛔ NFT {name_nft} withdrawal rejected\n"
+"First remove the hero from arena"
+
+msgid ""
+"⛔ Вывод NFT {name_nft} отклонен\n"
+"Герой сейчас в битве"
+msgstr ""
+"⛔ NFT {name_nft} withdrawal rejected\n"
+"The hero is in battle"
+
+msgid ""
+"⛔ Вывод NFT {name_nft} отклонен\n"
+"NFT уже ожидает вывода из игры"
+msgstr ""
+"⛔ NFT {name_nft} withdrawal rejected\n"
+"NFT is already waiting for withdrawal"
+
+msgid ""
+"⚠ Упс...\n"
+"Ошибка при попытке перевода NFT {name_nft}\n"
+"\n"
+"Попробуйте позже"
+msgstr ""
+"⚠ Oops...\n"
+"NFT {name_nft} transfer failed\n"
+"\n"
+"Try again later"
+
+msgid ""
+"Перевод принят в обработку\n"
+"NFT {name_nft} скоро придет на ваш кошелек"
+msgstr ""
+"Transfer accepted\n"
+"NFT {name_nft} will be transfered soonly"
+
+msgid "Выбери кошелек для авторизации"
+msgstr "Choose wallet to authorize with"
+
+msgid ""
+"На данный момент поддерживаюся только подключения через <a "
+"href='https://tonkeeper.com/'>Tonkeeper</a>\n"
+"\n"
+"Повторите попытку подключения"
+msgstr ""
+"<a href='https://tonkeeper.com/'>Tonkeeper</a> support only\n"
+"\n"
+"Try again"
+
+#, fuzzy
+msgid "Подключить"
+msgstr "Connect wallet"
+
+msgid ""
+"Отсканируй QR код или нажми Подключить, чтобы начать авторизацию\n"
+"У тебя есть 5 минут на подключение кошелька"
+msgstr ""
+"Scan the QR code or click Connect to begin authorization\n"
+"You have 5 min to connect your wallet"
+
+#, fuzzy
+msgid ""
+"Успешная авторизация!\n"
+"Адрес кошелька:\n"
+"\n"
+"<code>{wallet_address}</code>\n"
+"\n"
+"Главное меню:"
+msgstr ""
+"Authorized successfully\n"
+"Wallet address:\n"
+"\n"
+"<code>{wallet_address}</code>\n"
+"\n"
+"Main menu:"
+
+msgid "Повторить"
+msgstr "Again"
+
+msgid "Истекло время авторизации"
+msgstr "Authorization timed out"
+
+msgid ""
+"Требуется аутентификация кошелька!\n"
+"/start - пройти аутентификацию"
+msgstr ""
+

@@ -17,13 +17,13 @@ from pytonconnect.exceptions import UserRejectsError
 # from TonTools import *
 
 from settings import settings
-from src.bot.factories import dp, bot, logger
+from src.bot.factories import dp, bot, logger, _
 from src.storage.dao.nfts_dao import NftDAO
 from src.storage.dao.users_dao import UserDAO
 from src.storage.dao.withdrawals_dao import WithdrawalDAO
 from src.storage.schemas import NftModel, WithdrawModel
 from src.utils.exceptions import ProviderFailed
-from src.utils.middleware import anti_flood
+from src.utils.antiflood import anti_flood
 from src.utils.ton import get_nft_by_account, fetch_nft_by_address
 from src.utils.wallet import get_connector
 
@@ -44,10 +44,10 @@ async def select_to_add_nft(call: types.CallbackQuery, db_session: AsyncSession)
             text=f"{name}", callback_data=f"add_nft_{nft_address}"
         )
         keyboard.add(button)
-    kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    kb_main_menu = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main_menu)
     await call.message.edit_text(
-        "Выбери свою NFT, которую хочешь добавить", reply_markup=keyboard
+        _("Выбери свою NFT, которую хочешь добавить"), reply_markup=keyboard
     )
 
 
@@ -81,11 +81,11 @@ async def add_nft(
         ],
     }
     keyboard = types.InlineKeyboardMarkup(row_width=1)
-    kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    kb_main = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main)
 
     await call.message.edit_text(
-        text="Подтвердите перевод в приложении своего кошелька в течение 5 минут",
+        text=_("Подтвердите перевод в приложении своего кошелька в течение 5 минут"),
         reply_markup=keyboard,
     )
 
@@ -95,7 +95,7 @@ async def add_nft(
         )
     except asyncio.TimeoutError:
         await call.message.edit_text(
-            text="Время подтверждения истекло", reply_markup=keyboard
+            text=_("Время подтверждения истекло"), reply_markup=keyboard
         )
         connector.pause_connection()
         logger.info(
@@ -103,7 +103,9 @@ async def add_nft(
         )
         return
     except UserRejectsError:
-        await call.message.edit_text(text="Вы отменили перевод", reply_markup=keyboard)
+        await call.message.edit_text(
+            text=_("Вы отменили перевод"), reply_markup=keyboard
+        )
         connector.pause_connection()
         logger.info(
             f"add_nft | User {call.from_user.first_name}:{call.from_user.id} nft transfer declined"
@@ -111,7 +113,7 @@ async def add_nft(
         return
     except Exception as e:
         await call.message.edit_text(
-            text=f"Неизвестная ошибка! Обратитесь к администратору",
+            text=_("Неизвестная ошибка! Обратитесь к администратору"),
             reply_markup=keyboard,
         )
         connector.pause_connection()
@@ -134,16 +136,18 @@ async def add_nft(
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_nft_prov = InlineKeyboardButton(
-        text="Оплатить комиссию", callback_data=f"pay_fee_{nft_address}"
+        text=_("Оплатить комиссию"), callback_data=f"pay_fee_{nft_address}"
     )
     keyboard.add(kb_nft_prov)
-    kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    kb_main_menu = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main_menu)
     await bot.send_photo(
         chat_id=call.from_user.id,
         photo=open(f"images/{nft_address}.png", "rb"),
-        caption=f"Твоя NFT добавлена во внутренний кошелёк\n"
-        f"Для активации NFT необходимо заплатить комиссию 0.1 TON",
+        caption=_(
+            "Твоя NFT добавлена во внутренний кошелёк\n"
+            "Для активации NFT необходимо заплатить комиссию 0.1 TON"
+        ),
         reply_markup=keyboard,
     )
     await bot.delete_message(
@@ -168,10 +172,10 @@ async def select_to_activate_nft(call: types.CallbackQuery, db_session: AsyncSes
             text=f"{nft.name_nft}", callback_data=f"show_nft_{nft.address}"
         )
         keyboard.add(kb_nft)
-    kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    kb_main_menu = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main_menu)
     await call.message.edit_text(
-        "Выбери NFT, которую хочешь активировать", reply_markup=keyboard
+        _("Выбери NFT, которую хочешь активировать"), reply_markup=keyboard
     )
 
 
@@ -179,10 +183,10 @@ async def show_nft(call: types.CallbackQuery):
     nft_address = call.data[9:]
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     kb_nft_prov = InlineKeyboardButton(
-        text="Оплатить", callback_data=f"pay_fee_{nft_address}"
+        text=_("Оплатить"), callback_data=f"pay_fee_{nft_address}"
     )
     keyboard.add(kb_nft_prov)
-    kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    kb_main_menu = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main_menu)
     await bot.delete_message(
         chat_id=call.from_user.id, message_id=call.message.message_id
@@ -190,7 +194,7 @@ async def show_nft(call: types.CallbackQuery):
     await bot.send_photo(
         chat_id=call.from_user.id,
         photo=open(f"images/{nft_address}.png", "rb"),
-        caption=f"Для активации NFT необходимо заплатить комиссию 0.1 TON",
+        caption=_("Для активации NFT необходимо заплатить комиссию 0.1 TON"),
         reply_markup=keyboard,
     )
 
@@ -217,11 +221,11 @@ async def pay_fee(
     transaction = {"valid_until": int(time.time() + 3600), "messages": [data]}
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
-    kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    kb_main = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main)
 
     await call.message.edit_caption(
-        caption="Подтвердите платёж в приложении своего кошелька в течение 5 минут",
+        caption=_("Подтвердите платёж в приложении своего кошелька в течение 5 минут"),
         reply_markup=keyboard,
     )
 
@@ -231,7 +235,7 @@ async def pay_fee(
         )
     except asyncio.TimeoutError:
         await call.message.edit_caption(
-            caption="Время подтверждения истекло\n Повторно активировать NFT можно в разделе Кошелек",
+            caption=_("Время подтверждения истекло\n Повторно активировать NFT можно в разделе Кошелек"),
             reply_markup=keyboard,
         )
         connector.pause_connection()
@@ -241,7 +245,7 @@ async def pay_fee(
         return
     except UserRejectsError:
         await call.message.edit_caption(
-            caption="Вы отменили перевод\n Повторно активировать NFT можно в разделе Кошелек",
+            caption=_("Вы отменили перевод\n Повторно активировать NFT можно в разделе Кошелек"),
             reply_markup=keyboard,
         )
         connector.pause_connection()
@@ -251,7 +255,7 @@ async def pay_fee(
         return
     except Exception as e:
         await call.message.edit_caption(
-            caption=f"Неизвестная ошибка!\n Повторно активировать NFT можно в разделе Кошелек",
+            caption=_("Неизвестная ошибка!\n Повторно активировать NFT можно в разделе Кошелек"),
             reply_markup=keyboard,
         )
         connector.pause_connection()
@@ -265,7 +269,7 @@ async def pay_fee(
 
     await bot.send_message(
         chat_id=call.message.chat.id,
-        text=f"NFT <code>{nft_address}</code> активирована",
+        text=_("NFT <code>{nft_address}</code> активирована").format(nft_address=nft_address),
         reply_markup=keyboard,
     )
     await bot.delete_message(
@@ -295,10 +299,10 @@ async def get_nft_on_arena(call: types.CallbackQuery, db_session: AsyncSession):
         )
         buttons.append(button)
     keyboard.add(*buttons)
-    kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    kb_main_menu = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main_menu)
     await call.message.edit_text(
-        "Выберите NFT чтобы снять с арены", reply_markup=keyboard
+        _("Выберите NFT чтобы снять с арены"), reply_markup=keyboard
     )
 
 
@@ -317,10 +321,10 @@ async def remove_nft_from_arena(call: types.CallbackQuery, db_session: AsyncSess
     )
 
     keyboard = types.InlineKeyboardMarkup(row_width=2)
-    kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    kb_main = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main)
     await call.message.edit_text(
-        f"NFT {nft.name_nft} снята с арены", reply_markup=keyboard
+        _("NFT {name_nft} снята с арены").format(name_nft=nft.name_nft), reply_markup=keyboard
     )
 
 
@@ -343,10 +347,11 @@ async def get_nft_withdrawable(call: types.CallbackQuery, db_session: AsyncSessi
         )
         buttons.append(button)
     keyboard.add(*buttons)
-    kb_main_menu = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    kb_main_menu = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main_menu)
     await call.message.edit_text(
-        f"Выберите NFT чтобы вывести из игры\n\nNFT будет отправлена на адрес <code>{user.address}</code>",
+        _("Выберите NFT чтобы вывести из игры\n\n"
+          "NFT будет отправлена на адрес <code>{address}</code>").format(address=user.address),
         reply_markup=keyboard,
     )
 
@@ -361,22 +366,25 @@ async def withdraw_nft(call: types.CallbackQuery, db_session: AsyncSession):
     nft = nft_data[0]
 
     keyboard = types.InlineKeyboardMarkup(row_width=2)
-    kb_main = InlineKeyboardButton(text="Главное меню", callback_data="main")
+    kb_main = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main)
 
     if nft.arena:
         return await call.message.edit_text(
-            f"⛔ Вывод NFT {nft.name_nft} отклонен\n" f"Необходимо снять героя с арены",
+            _("⛔ Вывод NFT {name_nft} отклонен\n"
+              "Необходимо снять героя с арены").format(name_nft=nft.name_nft),
             reply_markup=keyboard,
         )
     if nft.duel:
         return await call.message.edit_text(
-            f"⛔ Вывод NFT {nft.name_nft} отклонен\n" f"Герой сейчас в битве",
+            _("⛔ Вывод NFT {name_nft} отклонен\n"
+              "Герой сейчас в битве").format(name_nft=nft.name_nft),
             reply_markup=keyboard,
         )
     if nft.withdraw:
         return await call.message.edit_text(
-            f"⛔ Вывод NFT {nft.name_nft} отклонен\n" f"NFT уже ожидает вывода из игры",
+            _("⛔ Вывод NFT {name_nft} отклонен\n"
+              "NFT уже ожидает вывода из игры").format(name_nft=nft.name_nft),
             reply_markup=keyboard,
         )
 
@@ -395,7 +403,10 @@ async def withdraw_nft(call: types.CallbackQuery, db_session: AsyncSession):
             f"withdraw_nft | transfer error | nft:{nft.address} -> user:{nft.user.address} | Error: {ex}"
         )
         return await call.message.edit_text(
-            f"⚠ Упс...\nОшибка при попытке перевода NFT {nft.name_nft}\n\nПопробуйте позже",
+            _("⚠ Упс...\n"
+              "Ошибка при попытке перевода NFT {name_nft}\n\n"
+              "Попробуйте позже")
+            .format(name_nft=nft.name_nft),
             reply_markup=keyboard,
         )
 
@@ -417,6 +428,8 @@ async def withdraw_nft(call: types.CallbackQuery, db_session: AsyncSession):
     )
 
     await call.message.edit_text(
-        f"Перевод принят в обработку\nNFT {nft.name_nft} скоро придет на ваш кошелек",
+        _("Перевод принят в обработку\n"
+          "NFT {name_nft} скоро придет на ваш кошелек")
+        .format(name_nft=nft.name_nft),
         reply_markup=keyboard,
     )

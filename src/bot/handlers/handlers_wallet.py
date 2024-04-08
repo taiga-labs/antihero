@@ -8,10 +8,10 @@ from aioredis import Redis
 from pytonconnect import TonConnect
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.bot.factories import dp, bot, logger
+from src.bot.factories import dp, bot, logger, _
 from src.bot.handlers.handlers_menu import main_menu
 from src.storage.dao.users_dao import UserDAO
-from src.utils.middleware import anti_flood
+from src.utils.antiflood import anti_flood
 from src.utils.wallet import get_connector
 
 
@@ -24,7 +24,7 @@ async def choose_wallet(call: types.CallbackQuery):
         )
         keyboard.add(walet_button)
     await call.message.answer(
-        text="Выбери кошелек для авторизации", reply_markup=keyboard
+        text=_("Выбери кошелек для авторизации"), reply_markup=keyboard
     )
 
 
@@ -53,9 +53,11 @@ async def connect_wallet(
         kb_retry = InlineKeyboardButton(text="Повторить", callback_data="choose_wallet")
         keyboard.add(kb_retry)
         await call.message.edit_text(
-            f"На данный момент поддерживаюся только подключения через "
-            f"<a href='https://tonkeeper.com/'>Tonkeeper</a>\n\n"
-            f"Повторите попытку подключения",
+            _(
+                "На данный момент поддерживаюся только подключения через "
+                "<a href='https://tonkeeper.com/'>Tonkeeper</a>\n\n"
+                "Повторите попытку подключения"
+            ),
             reply_markup=keyboard,
         )
         return
@@ -67,15 +69,17 @@ async def connect_wallet(
     img.save(stream)
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
-    url_button = InlineKeyboardButton(text="Подключить", url=generated_url)
+    url_button = InlineKeyboardButton(text=_("Подключить"), url=generated_url)
     keyboard.add(url_button)
     await bot.delete_message(
         chat_id=call.from_user.id, message_id=call.message.message_id
     )
     wait_msg = await call.message.answer_photo(
         photo=stream.getvalue(),
-        caption="Отсканируй QR код или нажми Подключить, чтобы начать авторизацию\n"
-        "У тебя есть 5 минут на подключение кошелька",
+        caption=_(
+            "Отсканируй QR код или нажми Подключить, чтобы начать авторизацию\n"
+            "У тебя есть 5 минут на подключение кошелька"
+        ),
         reply_markup=keyboard,
     )
 
@@ -97,7 +101,10 @@ async def connect_wallet(
                     chat_id=wait_msg.chat.id, message_id=wait_msg.message_id
                 )
                 await call.message.answer(
-                    text=f"Успешная авторизация!\nАдрес кошелька:\n\n<code>{wallet_address}</code>\n\nГлавное меню:",
+                    text=_("Успешная авторизация!\n"
+                           "Адрес кошелька:\n\n"
+                           "<code>{wallet_address}</code>\n\n"
+                           "Главное меню:").format(wallet_address=wallet_address),
                     reply_markup=keyboard,
                 )
                 logger.info(
@@ -107,11 +114,11 @@ async def connect_wallet(
             return
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
-    kb_retry = InlineKeyboardButton(text="Повторить", callback_data="choose_wallet")
+    kb_retry = InlineKeyboardButton(text=_("Повторить"), callback_data="choose_wallet")
     keyboard.add(kb_retry)
     await bot.delete_message(chat_id=wait_msg.chat.id, message_id=wait_msg.message_id)
     await call.message.answer(
-        f"Истекло время авторизации", parse_mode=ParseMode.HTML, reply_markup=keyboard
+        _("Истекло время авторизации"), parse_mode=ParseMode.HTML, reply_markup=keyboard
     )
     connector.pause_connection()
     logger.info(

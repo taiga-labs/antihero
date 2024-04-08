@@ -1,36 +1,8 @@
-from aiogram.dispatcher.handler import CancelHandler
-from aiogram.dispatcher.middlewares import BaseMiddleware, LifetimeControllerMiddleware
-from aiogram.types import CallbackQuery
+from aiogram.dispatcher.middlewares import LifetimeControllerMiddleware
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from settings import settings
 from src.storage.driver import get_redis_async_client
-from src.utils.wallet import get_connector
-
-
-async def anti_flood(*args, **kwargs):
-    m = args[0]
-    await m.answer("Не так быстро")
-
-
-class WalletNotConnectedMiddleware(BaseMiddleware):
-    SKIP_ROUTERS = ["choose_wallet", "connect:"]
-
-    async def on_process_callback_query(self, call: CallbackQuery, data: dict):
-        if any(sr in call.data for sr in self.SKIP_ROUTERS):
-            return
-        redis = await get_redis_async_client(url=settings.TONCONNECT_BROKER_URL)
-        connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
-        connected = await connector.restore_connection()
-        if not connected:
-            await call.answer(
-                "Требуется аутентификация кошелька!\n" "/start - пройти аутентификацию",
-                show_alert=True,
-            )
-            await redis.close()
-            raise CancelHandler
-        connector.pause_connection()
-        await redis.close()
 
 
 class DbSessionMiddleware(LifetimeControllerMiddleware):
