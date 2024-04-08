@@ -48,7 +48,7 @@ async def main(call: types.CallbackQuery):
 
 
 @dp.throttled(anti_flood, rate=3)
-async def start(message: types.Message, db_session: AsyncSession):
+async def start(message: types.Message, db_session: AsyncSession, language: str):
     user_dao = UserDAO(session=db_session)
     nft_dao = NftDAO(session=db_session)
 
@@ -88,14 +88,12 @@ async def start(message: types.Message, db_session: AsyncSession):
                 text=_("Подключить кошелёк"), callback_data="choose_wallet"
             )
             kb_main_menu = InlineKeyboardButton(text=_("Меню"), callback_data="main")
-            kb_lang = InlineKeyboardButton(text=_("Сменить язык"), callback_data="lang")
+            new_lang = "RU" if language == "en" else "EN"
+            kb_lang = InlineKeyboardButton(text=_("Сменить язык")+f" [{new_lang}]", callback_data="lang")
             keyboard.add(kb_wallet, kb_main_menu, kb_lang)
             await bot.send_animation(
                 chat_id=message.chat.id,
                 animation=open(f"images/ah.mp4", "rb"),
-                # caption=f"Приветствуем в боте коллекции "
-                # f"<a href='https://getgems.io/collection/{settings.MAIN_COLLECTION_ADDRESS}'>TON ANTIHERO!</a>\n"
-                # f"Наш <a href='https://t.me/TON_ANTIHERO_NFT'>ТЕЛЕГРАМ КАНАЛ☢️</a>\n",
                 caption=_(
                     "Приветствуем в боте коллекции "
                     "<a href='https://getgems.io/collection/{MAIN_COLLECTION_ADDRESS}'>TON ANTIHERO!</a>\n"
@@ -207,7 +205,7 @@ async def top_callback(call: types.CallbackQuery, db_session: AsyncSession):
 @dp.throttled(anti_flood, rate=3)
 async def lang_callback(call: types.CallbackQuery, db_session: AsyncSession, language: str):
     user_dao = UserDAO(session=db_session)
-    new_lang = "ru" if language == "en" else "en"
+    new_lang = "RU" if language == "en" else "EN"
     await user_dao.edit_by_telegram_id(telegram_id=call.from_user.id, language=new_lang)
     await db_session.commit()
     await call.message.answer(_("язык установлен {new_lang}").format(new_lang=new_lang))
