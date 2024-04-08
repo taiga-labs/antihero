@@ -27,7 +27,7 @@ async def ping(message: types.Message):
     await message.answer(_("Pong"))
 
 
-@dp.callback_query_handler(lambda c: c.message.content_type == "text")
+@dp.callback_query_handler(lambda c: c.message.content_type == "text", text="main")
 async def main(call: types.CallbackQuery):
     keyboard = await main_menu()
     try:
@@ -89,7 +89,9 @@ async def start(message: types.Message, db_session: AsyncSession, language: str)
             )
             kb_main_menu = InlineKeyboardButton(text=_("Меню"), callback_data="main")
             new_lang = "RU" if language == "en" else "EN"
-            kb_lang = InlineKeyboardButton(text=_("Сменить язык")+f" [{new_lang}]", callback_data="lang")
+            kb_lang = InlineKeyboardButton(
+                text=_("Сменить язык") + f" [{new_lang}]", callback_data="lang"
+            )
             keyboard.add(kb_wallet, kb_main_menu, kb_lang)
             await bot.send_animation(
                 chat_id=message.chat.id,
@@ -203,7 +205,9 @@ async def top_callback(call: types.CallbackQuery, db_session: AsyncSession):
 
 
 @dp.throttled(anti_flood, rate=3)
-async def lang_callback(call: types.CallbackQuery, db_session: AsyncSession, language: str):
+async def lang_callback(
+    call: types.CallbackQuery, db_session: AsyncSession, language: str
+):
     user_dao = UserDAO(session=db_session)
     new_lang = "RU" if language == "en" else "EN"
     await user_dao.edit_by_telegram_id(telegram_id=call.from_user.id, language=new_lang)
