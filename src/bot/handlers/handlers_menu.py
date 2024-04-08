@@ -88,9 +88,9 @@ async def start(message: types.Message, db_session: AsyncSession, language: str)
                 text=_("Подключить кошелёк"), callback_data="choose_wallet"
             )
             kb_main_menu = InlineKeyboardButton(text=_("Меню"), callback_data="main")
-            new_lang = "RU" if language == "en" else "EN"
+            new_lang = "ru" if language == "en" else "en"
             kb_lang = InlineKeyboardButton(
-                text=_("Сменить язык") + f" [{new_lang}]", callback_data="lang"
+                text=_("Сменить язык") + f" [{new_lang.upper()}]", callback_data="lang"
             )
             keyboard.add(kb_wallet, kb_main_menu, kb_lang)
             await bot.send_animation(
@@ -209,10 +209,10 @@ async def lang_callback(
     call: types.CallbackQuery, db_session: AsyncSession, language: str
 ):
     user_dao = UserDAO(session=db_session)
-    new_lang = "RU" if language == "en" else "EN"
+    new_lang = "ru" if language == "en" else "en"
     await user_dao.edit_by_telegram_id(telegram_id=call.from_user.id, language=new_lang)
     await db_session.commit()
-    await call.message.answer(_("язык установлен {new_lang}").format(new_lang=new_lang))
+    await call.message.answer(_("язык установлен {new_lang}").format(new_lang=new_lang.upper()))
 
 
 async def inline_handler(query: types.InlineQuery, db_session: AsyncSession):
