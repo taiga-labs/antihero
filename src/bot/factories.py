@@ -6,10 +6,14 @@ import logging
 from aiogram.types import ParseMode
 
 from settings import settings
+from src.bot.middlewares.locale import LocalizationMiddleware
 
 storage = MemoryStorage()
 bot = Bot(token=settings.TELEGRAM_API_KEY.get_secret_value(), parse_mode=ParseMode.HTML)
 dp = Dispatcher(bot, storage=storage)
 logging.basicConfig()
-logger = logging.getLogger('ANTIHERO')
+logger = logging.getLogger("ANTIHERO")
 logger.setLevel(logging.INFO)
+
+i18n = LocalizationMiddleware('antihero', 'locales')
+_ = i18n.lazy_gettext
