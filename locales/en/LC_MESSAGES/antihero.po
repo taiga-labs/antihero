@@ -46,13 +46,11 @@ msgid "Пригласи противника"
 msgstr "Invite opponent"
 
 #: src/bot/handlers/handlers_game.py:77
-#, fuzzy
 msgid "Выбери NFT для игры"
 msgstr "Pick NFT to play"
 
 #: src/bot/handlers/handlers_game.py:136 src/bot/handlers/handlers_game.py:159
 #: src/bot/handlers/handlers_game.py:280 src/bot/handlers/handlers_game.py:303
-#, fuzzy
 msgid "ИГРАТЬ"
 msgstr "Play"
 
@@ -386,7 +384,6 @@ msgstr ""
 "Try again"
 
 #: src/bot/handlers/handlers_wallet.py:72
-#, fuzzy
 msgid "Подключить"
 msgstr "Connect wallet"
 
@@ -399,7 +396,6 @@ msgstr ""
 "You have 5 min to connect your wallet"
 
 #: src/bot/handlers/handlers_wallet.py:104
-#, fuzzy
 msgid ""
 "Успешная авторизация!\n"
 "Адрес кошелька:\n"
