@@ -134,7 +134,7 @@ async def process_games():
                                     l_rare=game.player_l.nft.rare,
                                     r_name_nft=game.player_r.nft.name_nft,
                                     r_rare=game.player_r.nft.rare,
-                                    attempts=game_state.player_l.attempts,
+                                    attempts=game_state.player_r.attempts,
                                 ),
                             )
                             await player_dao.edit_by_id(
