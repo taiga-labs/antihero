@@ -142,7 +142,6 @@ async def game_draw(nft_d1: Nft, score_d1: int, nft_d2: Nft, score_d2: int) -> N
         address=nft_d2.address, duel=False, arena=False, activated=False
     )
     await db_session.commit()
-    await db_session.refresh(nft_d1.user, nft_d2.user)
 
     vs = (
         f"{nft_d1.user.name}'s {nft_d1.name_nft} [LVL {nft_d1.rare}]: {score_d1}\n"
