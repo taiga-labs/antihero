@@ -8,9 +8,22 @@ from src.bot.factories import bot
 from src.services import processor_logger
 from src.storage.dao.games_dao import GameDAO
 from src.storage.dao.players_dao import PlayerDAO
+from src.storage.dao.users_dao import UserDAO
 from src.storage.driver import async_session, get_redis_async_client
 from src.storage.schemas import GameState
 from src.utils.game import game_winner_determined, game_draw
+
+
+WARNING = {
+    "ru": "    ⚠️ Предупреждение ⚠️\n"
+    "Игра #{uuid} завершится через 5 минут.\n"
+    "{l_name_nft} [LVL {l_rare}] vs {r_name_nft} [LVL {r_rare}]\n\n"
+    "Осталось попыток: {attempts}",
+    "en": "    ⚠️ ATTENTION ⚠️\n"
+    "The game #{uuid} will be closed in 5 minutes.\n"
+    "{l_name_nft} [LVL {l_rare}] vs {r_name_nft} [LVL {r_rare}]\n\n"
+    "Attemtps left: {attempts}",
+}
 
 
 async def process_games():
@@ -21,6 +34,7 @@ async def process_games():
     try:
         game_dao = GameDAO(db_session)
         player_dao = PlayerDAO(db_session)
+        user_dao = UserDAO(db_session)
 
         while True:
             await asyncio.sleep(1)
@@ -58,18 +72,24 @@ async def process_games():
 
                     if game_state.player_l.score > game_state.player_r.score:
                         await game_winner_determined(
-                            w_nft=game.player_l.nft, w_score=game_state.player_l.score,
-                            l_nft=game.player_r.nft, l_score=game_state.player_r.score
+                            w_nft=game.player_l.nft,
+                            w_score=game_state.player_l.score,
+                            l_nft=game.player_r.nft,
+                            l_score=game_state.player_r.score,
                         )
                     elif game_state.player_l.score < game_state.player_r.score:
                         await game_winner_determined(
-                            w_nft=game.player_r.nft, w_score=game_state.player_r.score,
-                            l_nft=game.player_l.nft, l_score=game_state.player_l.score
+                            w_nft=game.player_r.nft,
+                            w_score=game_state.player_r.score,
+                            l_nft=game.player_l.nft,
+                            l_score=game_state.player_l.score,
                         )
                     else:
                         await game_draw(
-                            nft_d1=game.player_l.nft, score_d1=game_state.player_l.score,
-                            nft_d2=game.player_r.nft, score_d2=game_state.player_r.score
+                            nft_d1=game.player_l.nft,
+                            score_d1=game_state.player_l.score,
+                            nft_d2=game.player_r.nft,
+                            score_d2=game_state.player_r.score,
                         )
                 elif (
                     600 <= int(time.time()) - game_state.start_time <= 630
@@ -78,12 +98,21 @@ async def process_games():
                         game_data = await game_dao.get_by_params(uuid=game_uuid)
                         game = game_data[0]
                         if not game.player_l.notified:
+                            user_data = await user_dao.get_by_params(
+                                telegram_id=game.player_l.nft.user.telegram_id
+                            )
+                            user = user_data[0]
+                            await db_session.refresh(user)
                             await bot.send_message(
                                 chat_id=game.player_l.nft.user.telegram_id,
-                                text=f"    ⚠️ Предупреждение ⚠️\n"
-                                f"Игра #{game.uuid.rsplit('-', 1)[-1]} завершится через 5 минут.\n"
-                                f"{game.player_l.nft.name_nft} [LVL {game.player_l.nft.rare}] vs {game.player_r.nft.name_nft} [LVL {game.player_r.nft.rare}]\n\n"
-                                f"Осталось попыток: {game_state.player_l.attempts}",
+                                text=WARNING[user.language].format(
+                                    uuid=game.uuid.rsplit("-", 1)[-1],
+                                    l_name_nft=game.player_l.nft.name_nft,
+                                    l_rare=game.player_l.nft.rare,
+                                    r_name_nft=game.player_r.nft.name_nft,
+                                    r_rare=game.player_r.nft.rare,
+                                    attempts=game_state.player_l.attempts,
+                                ),
                             )
                             await player_dao.edit_by_id(
                                 id=game.player_l_id, notified=True
@@ -92,12 +121,21 @@ async def process_games():
                         game_data = await game_dao.get_by_params(uuid=game_uuid)
                         game = game_data[0]
                         if not game.player_r.notified:
+                            user_data = await user_dao.get_by_params(
+                                telegram_id=game.player_l.nft.user.telegram_id
+                            )
+                            user = user_data[0]
+                            await db_session.refresh(user)
                             await bot.send_message(
                                 chat_id=game.player_r.nft.user.telegram_id,
-                                text=f"    ⚠️ Предупреждение ⚠️\n"
-                                f"Игра #{game.uuid.rsplit('-', 1)[-1]} завершится через 5 минут.\n"
-                                f"{game.player_l.nft.name_nft} [LVL {game.player_l.nft.rare}] vs {game.player_r.nft.name_nft} [LVL {game.player_r.nft.rare}]\n\n"
-                                f"Осталось попыток: {game_state.player_r.attempts}",
+                                text=WARNING[user.language].format(
+                                    uuid=game.uuid.rsplit("-", 1)[-1],
+                                    l_name_nft=game.player_l.nft.name_nft,
+                                    l_rare=game.player_l.nft.rare,
+                                    r_name_nft=game.player_r.nft.name_nft,
+                                    r_rare=game.player_r.nft.rare,
+                                    attempts=game_state.player_l.attempts,
+                                ),
                             )
                             await player_dao.edit_by_id(
                                 id=game.player_r_id, notified=True
