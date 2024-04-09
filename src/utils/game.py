@@ -68,7 +68,6 @@ async def game_winner_determined(
         activated=False,
     )
     await db_session.commit()
-    await db_session.refresh(l_nft.user, w_nft.user)
 
     w_keyboard = types.InlineKeyboardMarkup(row_width=1)
     w_kb_main = InlineKeyboardButton(
