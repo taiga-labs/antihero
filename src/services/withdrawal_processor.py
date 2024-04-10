@@ -28,9 +28,14 @@ async def process_withdrawals():
                 continue
 
             for withdrawal in unprocessed_withdrawals:
-                nft_owner = await provider.get_nft_owner(
-                    nft_address=withdrawal.nft_address
-                )
+                try:
+                    nft_owner = await provider.get_nft_owner(
+                        nft_address=withdrawal.nft_address
+                    )
+                except Exception as ex:
+                    processor_logger.error(f"process_withdrawals | failed get nft owner: {ex}")
+                    continue
+
                 nft_owner_address = (
                     Address(nft_owner.address)
                     .to_string(is_user_friendly=True, is_bounceable=True)
