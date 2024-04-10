@@ -22,7 +22,7 @@ router = APIRouter()
 
 @router.post("/auth")
 async def auth(data: AuthModel):
-    data_check_string = parse.unquote(data.data_check_string)
+    data_check_string = parse.unquote_plus(data.data_check_string)
 
     secret_key = hmac.new(
         key="WebAppData".encode(),
