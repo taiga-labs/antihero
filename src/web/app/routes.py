@@ -1,8 +1,4 @@
-import hmac
-import hashlib
 import json
-from urllib import parse
-
 from aiogram import Bot, types
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
@@ -14,29 +10,15 @@ from src.storage.schemas import GameState
 
 from src.web import web_logger
 from src.web.app import get_bot
-from src.web.app.models import AuthModel, IDsModel, ScoreModel
-
+from src.web.app.models import AuthModel, IDsModel, ScoreModel, StartModel
+from src.web.app.utils import validation
 
 router = APIRouter()
 
 
 @router.post("/auth")
 async def auth(data: AuthModel):
-    data_check_string = parse.unquote_plus(data.data_check_string)
-
-    secret_key = hmac.new(
-        key="WebAppData".encode(),
-        msg=settings.TELEGRAM_API_KEY.get_secret_value().encode(),
-        digestmod=hashlib.sha256,
-    )
-
-    hash_check = hmac.new(
-        key=secret_key.digest(),
-        msg=data_check_string.encode(),
-        digestmod=hashlib.sha256,
-    )
-
-    if hash_check.hexdigest() != data.hash:
+    if not validation(data_check_string=data.data_check_string, hash=data.hash):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Authentication failed",
@@ -74,7 +56,13 @@ async def preinfo(data: IDsModel):
 
 
 @router.post("/start")
-async def start(data: IDsModel):
+async def start(data: StartModel):
+    if not validation(data_check_string=data.data_check_string, hash=data.hash):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Validation failed",
+        )
+
     redis_session = await get_redis_async_client(url=settings.GAME_BROKER_URL)
 
     if not await redis_session.exists(data.uuid):
@@ -118,6 +106,12 @@ async def start(data: IDsModel):
 
 @router.post("/score")
 async def score(data: ScoreModel, bot: Bot = Depends(get_bot)):
+    if not validation(data_check_string=data.data_check_string, hash=data.hash):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Validation failed",
+        )
+
     redis_session = await get_redis_async_client(url=settings.GAME_BROKER_URL)
 
     if not await redis_session.exists(data.uuid):
