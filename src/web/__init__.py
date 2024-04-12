@@ -1,8 +1,8 @@
-import logging
-
 import socketio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from src.web.app.events import SocketWrapper
 
 fastapp = FastAPI()
 
@@ -15,10 +15,9 @@ fastapp.add_middleware(
     allow_headers=["*"],
 )
 
-sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*")
-socket_app = socketio.ASGIApp(socketio_server=sio)
+sockw = SocketWrapper()
+sockw.setup()
+socket_app = socketio.ASGIApp(socketio_server=sockw.sio)
 
 
-logging.basicConfig()
-web_logger = logging.getLogger("ANTIHERO_WEB")
-web_logger.setLevel(logging.INFO)
+
