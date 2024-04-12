@@ -15,19 +15,6 @@ from src.utils.antiflood import anti_flood
 from src.utils.wallet import get_connector
 
 
-async def choose_wallet(call: types.CallbackQuery):
-    wallets_list = TonConnect.get_wallets()
-    keyboard = types.InlineKeyboardMarkup(row_width=1)
-    for w in wallets_list:
-        walet_button = InlineKeyboardButton(
-            text=w["name"], callback_data=f'connect:{w["name"]}'
-        )
-        keyboard.add(walet_button)
-    await call.message.answer(
-        text=_("Выбери кошелек для авторизации"), reply_markup=keyboard
-    )
-
-
 @dp.throttled(anti_flood, rate=3)
 async def connect_wallet(
     call: types.CallbackQuery, db_session: AsyncSession, tonconnect_redis_session: Redis
@@ -38,31 +25,9 @@ async def connect_wallet(
         chat_id=call.message.chat.id, broker=tonconnect_redis_session
     )
     wallets_list = connector.get_wallets()
-    wallet_name = call.data[8:]
-    wlt = None
+    tonkeeper = next(w for w in wallets_list if w["name"] == "Tonkeeper")
 
-    for w in wallets_list:
-        if w["name"] == wallet_name:
-            wlt = w
-            break
-    if wlt is None:
-        raise Exception(f"Unknown wallet: {wlt}")
-
-    if wlt["name"] not in ["Tonkeeper"]:
-        keyboard = types.InlineKeyboardMarkup(row_width=1)
-        kb_retry = InlineKeyboardButton(text="Повторить", callback_data="choose_wallet")
-        keyboard.add(kb_retry)
-        await call.message.edit_text(
-            _(
-                "На данный момент поддерживаюся только подключения через "
-                "<a href='https://tonkeeper.com/'>Tonkeeper</a>\n\n"
-                "Повторите попытку подключения"
-            ),
-            reply_markup=keyboard,
-        )
-        return
-
-    generated_url = await connector.connect(wlt)
+    generated_url = await connector.connect(tonkeeper)
 
     img = qrcode.make(generated_url)
     stream = BytesIO()

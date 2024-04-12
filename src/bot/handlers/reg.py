@@ -1,7 +1,7 @@
 from aiogram import Dispatcher
 
 from src.bot.factories import i18n
-from src.bot.handlers.handlers_wallet import choose_wallet, connect_wallet
+from src.bot.handlers.handlers_wallet import connect_wallet
 from src.bot.handlers.handlers_game import (
     invite,
     arena_yes,
@@ -50,8 +50,7 @@ def register_handlers_client(dp: Dispatcher) -> None:
     dp.register_inline_handler(inline_handler)
 
     # auth
-    dp.register_callback_query_handler(choose_wallet, text="choose_wallet")
-    dp.register_callback_query_handler(connect_wallet, text_contains="connect:")
+    dp.register_callback_query_handler(connect_wallet, text_contains="connect")
 
     # nft
     dp.register_callback_query_handler(select_to_add_nft, text="select_nft")
