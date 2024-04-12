@@ -393,11 +393,14 @@ async def withdraw_nft(call: types.CallbackQuery, db_session: AsyncSession):
     wallet = Wallet(mnemonics=wallet_mnemonics, version="v4r2", provider=provider)
 
     try:
+        cur_seqno = await wallet.get_seqno()
         withdraw_resp = await wallet.transfer_nft(
             destination_address=nft.user.address, nft_address=nft.address, fee=0.015
         )
         if withdraw_resp != 200:
             raise ProviderFailed(withdraw_resp)
+        while cur_seqno == await wallet.get_seqno():
+            asyncio.sleep(1)
     except (ProviderFailed, Exception) as ex:
         logger.error(
             f"withdraw_nft | transfer error | nft:{nft.address} -> user:{nft.user.address} | Error: {ex}"
