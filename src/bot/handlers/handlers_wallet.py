@@ -5,7 +5,6 @@ from aiogram import types
 from aiogram.types import InlineKeyboardButton, ParseMode
 from TonTools import *
 from aioredis import Redis
-from pytonconnect import TonConnect
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.factories import dp, bot, logger, _
@@ -79,7 +78,7 @@ async def connect_wallet(
             return
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
-    kb_retry = InlineKeyboardButton(text=_("Повторить"), callback_data="choose_wallet")
+    kb_retry = InlineKeyboardButton(text=_("Повторить"), callback_data="connect")
     keyboard.add(kb_retry)
     await bot.delete_message(chat_id=wait_msg.chat.id, message_id=wait_msg.message_id)
     await call.message.answer(

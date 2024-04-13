@@ -1,3 +1,3 @@
 #!/bin/sh -e
 
-alembic revision -m "user language" --autogenerate
+alembic revision -m "user address seqno" --autogenerate

@@ -235,7 +235,9 @@ async def pay_fee(
         )
     except asyncio.TimeoutError:
         await call.message.edit_caption(
-            caption=_("Время подтверждения истекло\n Повторно активировать NFT можно в разделе Кошелек"),
+            caption=_(
+                "Время подтверждения истекло\n Повторно активировать NFT можно в разделе Кошелек"
+            ),
             reply_markup=keyboard,
         )
         connector.pause_connection()
@@ -245,7 +247,9 @@ async def pay_fee(
         return
     except UserRejectsError:
         await call.message.edit_caption(
-            caption=_("Вы отменили перевод\n Повторно активировать NFT можно в разделе Кошелек"),
+            caption=_(
+                "Вы отменили перевод\n Повторно активировать NFT можно в разделе Кошелек"
+            ),
             reply_markup=keyboard,
         )
         connector.pause_connection()
@@ -255,7 +259,9 @@ async def pay_fee(
         return
     except Exception as e:
         await call.message.edit_caption(
-            caption=_("Неизвестная ошибка!\n Повторно активировать NFT можно в разделе Кошелек"),
+            caption=_(
+                "Неизвестная ошибка!\n Повторно активировать NFT можно в разделе Кошелек"
+            ),
             reply_markup=keyboard,
         )
         connector.pause_connection()
@@ -269,7 +275,9 @@ async def pay_fee(
 
     await bot.send_message(
         chat_id=call.message.chat.id,
-        text=_("NFT <code>{nft_address}</code> активирована").format(nft_address=nft_address),
+        text=_("NFT <code>{nft_address}</code> активирована").format(
+            nft_address=nft_address
+        ),
         reply_markup=keyboard,
     )
     await bot.delete_message(
@@ -324,7 +332,8 @@ async def remove_nft_from_arena(call: types.CallbackQuery, db_session: AsyncSess
     kb_main = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main)
     await call.message.edit_text(
-        _("NFT {name_nft} снята с арены").format(name_nft=nft.name_nft), reply_markup=keyboard
+        _("NFT {name_nft} снята с арены").format(name_nft=nft.name_nft),
+        reply_markup=keyboard,
     )
 
 
@@ -350,8 +359,10 @@ async def get_nft_withdrawable(call: types.CallbackQuery, db_session: AsyncSessi
     kb_main_menu = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
     keyboard.add(kb_main_menu)
     await call.message.edit_text(
-        _("Выберите NFT чтобы вывести из игры\n\n"
-          "NFT будет отправлена на адрес <code>{address}</code>").format(address=user.address),
+        _(
+            "Выберите NFT чтобы вывести из игры\n\n"
+            "NFT будет отправлена на адрес <code>{address}</code>"
+        ).format(address=user.address),
         reply_markup=keyboard,
     )
 
@@ -359,6 +370,7 @@ async def get_nft_withdrawable(call: types.CallbackQuery, db_session: AsyncSessi
 @dp.throttled(anti_flood)
 async def withdraw_nft(call: types.CallbackQuery, db_session: AsyncSession):
     withdrawal_dao = WithdrawalDAO(session=db_session)
+    user_dao = UserDAO(session=db_session)
 
     address = call.data[9:]
     nft_dao = NftDAO(session=db_session)
@@ -371,20 +383,26 @@ async def withdraw_nft(call: types.CallbackQuery, db_session: AsyncSession):
 
     if nft.arena:
         return await call.message.edit_text(
-            _("⛔ Вывод NFT {name_nft} отклонен\n"
-              "Необходимо снять героя с арены").format(name_nft=nft.name_nft),
+            _(
+                "⛔ Вывод NFT {name_nft} отклонен\n"
+                "Необходимо снять героя с арены"
+            ).format(name_nft=nft.name_nft),
             reply_markup=keyboard,
         )
     if nft.duel:
         return await call.message.edit_text(
             _("⛔ Вывод NFT {name_nft} отклонен\n"
-              "Герой сейчас в битве").format(name_nft=nft.name_nft),
+              "Герой сейчас в битве").format(
+                name_nft=nft.name_nft
+            ),
             reply_markup=keyboard,
         )
     if nft.withdraw:
         return await call.message.edit_text(
-            _("⛔ Вывод NFT {name_nft} отклонен\n"
-              "NFT уже ожидает вывода из игры").format(name_nft=nft.name_nft),
+            _(
+                "⛔ Вывод NFT {name_nft} отклонен\n"
+                "NFT уже ожидает вывода из игры"
+            ).format(name_nft=nft.name_nft),
             reply_markup=keyboard,
         )
 
@@ -392,30 +410,47 @@ async def withdraw_nft(call: types.CallbackQuery, db_session: AsyncSession):
     wallet_mnemonics = json.loads(settings.MAIN_WALLET_MNEMONICS.get_secret_value())
     wallet = Wallet(mnemonics=wallet_mnemonics, version="v4r2", provider=provider)
 
+    cur_seqno = await wallet.get_seqno()
+    user_data = await user_dao.get_by_params(telegram_id=call.from_user.id)
+    user = user_data[0]
+
+    if user.seqno == cur_seqno:
+        logger.error(
+            f"withdraw_nft | transfer declined | nft:{nft.address} -> user:{nft.user.address} | seqno has not changed"
+        )
+        return await call.message.edit_text(
+            _(
+                "⛔ Вывод NFT {name_nft} отклонен\n"
+                "Провайдер не успел обработать предыдущую заявку\n"
+                "Попробуйте позже"
+            ).format(name_nft=nft.name_nft),
+            reply_markup=keyboard,
+        )
+
     try:
-        cur_seqno = await wallet.get_seqno()
         withdraw_resp = await wallet.transfer_nft(
             destination_address=nft.user.address, nft_address=nft.address, fee=0.015
         )
         if withdraw_resp != 200:
             raise ProviderFailed(withdraw_resp)
-        while cur_seqno == await wallet.get_seqno():
-            asyncio.sleep(1)
     except (ProviderFailed, Exception) as ex:
         logger.error(
             f"withdraw_nft | transfer error | nft:{nft.address} -> user:{nft.user.address} | Error: {ex}"
         )
         return await call.message.edit_text(
-            _("⚠ Упс...\n"
-              "Ошибка при попытке перевода NFT {name_nft}\n\n"
-              "Попробуйте позже")
-            .format(name_nft=nft.name_nft),
+            _(
+                "⚠ Упс...\n"
+                "Ошибка при попытке перевода NFT {name_nft}\n\n"
+                "Попробуйте позже"
+            ).format(name_nft=nft.name_nft),
             reply_markup=keyboard,
         )
 
     logger.info(
         f"withdraw_nft | provider bid accepted | nft:{nft.address} -> user:{nft.user.address}"
     )
+
+    await user_dao.edit_by_telegram_id(telegram_id=call.from_user.id, seqno=cur_seqno)
 
     withdrawal_model = WithdrawModel(
         nft_address=nft.address, dst_address=nft.user.address
@@ -431,8 +466,8 @@ async def withdraw_nft(call: types.CallbackQuery, db_session: AsyncSession):
     )
 
     await call.message.edit_text(
-        _("Перевод принят в обработку\n"
-          "NFT {name_nft} скоро придет на ваш кошелек")
-        .format(name_nft=nft.name_nft),
+        _(
+            "Перевод принят в обработку\n" "NFT {name_nft} скоро придет на ваш кошелек"
+        ).format(name_nft=nft.name_nft),
         reply_markup=keyboard,
     )

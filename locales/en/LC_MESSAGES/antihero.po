@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: antihero VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-04-08 23:33+0300\n"
+"POT-Creation-Date: 2024-04-13 13:34+0300\n"
 "PO-Revision-Date: 2024-04-08 15:59+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -26,9 +26,9 @@ msgstr ""
 #: src/bot/handlers/handlers_menu.py:191 src/bot/handlers/handlers_nft.py:47
 #: src/bot/handlers/handlers_nft.py:84 src/bot/handlers/handlers_nft.py:142
 #: src/bot/handlers/handlers_nft.py:175 src/bot/handlers/handlers_nft.py:189
-#: src/bot/handlers/handlers_nft.py:224 src/bot/handlers/handlers_nft.py:302
-#: src/bot/handlers/handlers_nft.py:324 src/bot/handlers/handlers_nft.py:350
-#: src/bot/handlers/handlers_nft.py:369
+#: src/bot/handlers/handlers_nft.py:224 src/bot/handlers/handlers_nft.py:310
+#: src/bot/handlers/handlers_nft.py:332 src/bot/handlers/handlers_nft.py:359
+#: src/bot/handlers/handlers_nft.py:381
 msgid "Главное меню"
 msgstr "Main menu"
 
@@ -108,8 +108,8 @@ msgid "Выберите NFT для игры"
 msgstr "Pick NFT to play"
 
 #: src/bot/handlers/handlers_menu.py:88
-msgid "Подключить кошелёк"
-msgstr "Connect wallet"
+msgid "💎 Подключить Tonkeeper 💎"
+msgstr "💎 Connect Tonkeeper 💎"
 
 #: src/bot/handlers/handlers_menu.py:90
 msgid "Меню"
@@ -286,7 +286,7 @@ msgstr ""
 "Confirmation time has expired\n"
 " You can activate NFT in the Wallet section"
 
-#: src/bot/handlers/handlers_nft.py:248
+#: src/bot/handlers/handlers_nft.py:250
 msgid ""
 "Вы отменили перевод\n"
 " Повторно активировать NFT можно в разделе Кошелек"
@@ -294,7 +294,7 @@ msgstr ""
 "Payment canceled\n"
 " You can activate NFT in the Wallet section"
 
-#: src/bot/handlers/handlers_nft.py:258
+#: src/bot/handlers/handlers_nft.py:262
 msgid ""
 "Неизвестная ошибка!\n"
 " Повторно активировать NFT можно в разделе Кошелек"
@@ -302,19 +302,19 @@ msgstr ""
 "Unknown error!\n"
 " You can activate NFT in the Wallet section"
 
-#: src/bot/handlers/handlers_nft.py:272
+#: src/bot/handlers/handlers_nft.py:278
 msgid "NFT <code>{nft_address}</code> активирована"
 msgstr "NFT <code>{nft_address}</code> has been activated"
 
-#: src/bot/handlers/handlers_nft.py:305
+#: src/bot/handlers/handlers_nft.py:313
 msgid "Выберите NFT чтобы снять с арены"
 msgstr "Pick NFT to remove from arena"
 
-#: src/bot/handlers/handlers_nft.py:327
+#: src/bot/handlers/handlers_nft.py:335
 msgid "NFT {name_nft} снята с арены"
 msgstr "NFT {name_nft} removed from the arena"
 
-#: src/bot/handlers/handlers_nft.py:353
+#: src/bot/handlers/handlers_nft.py:362
 msgid ""
 "Выберите NFT чтобы вывести из игры\n"
 "\n"
@@ -324,7 +324,7 @@ msgstr ""
 "\n"
 "The NFT will be sent to <code>{address}</code>"
 
-#: src/bot/handlers/handlers_nft.py:374
+#: src/bot/handlers/handlers_nft.py:386
 msgid ""
 "⛔ Вывод NFT {name_nft} отклонен\n"
 "Необходимо снять героя с арены"
@@ -332,7 +332,7 @@ msgstr ""
 "⛔ NFT {name_nft} withdrawal rejected\n"
 "First remove the hero from arena"
 
-#: src/bot/handlers/handlers_nft.py:380
+#: src/bot/handlers/handlers_nft.py:394
 msgid ""
 "⛔ Вывод NFT {name_nft} отклонен\n"
 "Герой сейчас в битве"
@@ -340,7 +340,7 @@ msgstr ""
 "⛔ NFT {name_nft} withdrawal rejected\n"
 "The hero is in battle"
 
-#: src/bot/handlers/handlers_nft.py:386
+#: src/bot/handlers/handlers_nft.py:402
 msgid ""
 "⛔ Вывод NFT {name_nft} отклонен\n"
 "NFT уже ожидает вывода из игры"
@@ -348,7 +348,17 @@ msgstr ""
 "⛔ NFT {name_nft} withdrawal rejected\n"
 "NFT is already waiting for withdrawal"
 
-#: src/bot/handlers/handlers_nft.py:406
+#: src/bot/handlers/handlers_nft.py:422
+msgid ""
+"⛔ Вывод NFT {name_nft} отклонен\n"
+"Провайдер не успел обработать предыдущую заявку\n"
+"Попробуйте позже"
+msgstr ""
+"⛔ NFT {name_nft} withdrawal rejected\n"
+"The provider did not process the previous request\n"
+"Try again later"
+
+#: src/bot/handlers/handlers_nft.py:441
 msgid ""
 "⚠ Упс...\n"
 "Ошибка при попытке перевода NFT {name_nft}\n"
@@ -360,7 +370,7 @@ msgstr ""
 "\n"
 "Try again later"
 
-#: src/bot/handlers/handlers_nft.py:431
+#: src/bot/handlers/handlers_nft.py:469
 msgid ""
 "Перевод принят в обработку\n"
 "NFT {name_nft} скоро придет на ваш кошелек"
@@ -368,26 +378,11 @@ msgstr ""
 "Transfer accepted\n"
 "NFT {name_nft} will be transfered soonly"
 
-#: src/bot/handlers/handlers_wallet.py:27
-msgid "Выбери кошелек для авторизации"
-msgstr "Choose wallet to authorize with"
-
-#: src/bot/handlers/handlers_wallet.py:56
-msgid ""
-"На данный момент поддерживаюся только подключения через <a "
-"href='https://tonkeeper.com/'>Tonkeeper</a>\n"
-"\n"
-"Повторите попытку подключения"
-msgstr ""
-"<a href='https://tonkeeper.com/'>Tonkeeper</a> support only\n"
-"\n"
-"Try again"
-
-#: src/bot/handlers/handlers_wallet.py:72
+#: src/bot/handlers/handlers_wallet.py:37
 msgid "Подключить"
 msgstr "Connect wallet"
 
-#: src/bot/handlers/handlers_wallet.py:79
+#: src/bot/handlers/handlers_wallet.py:44
 msgid ""
 "Отсканируй QR код или нажми Подключить, чтобы начать авторизацию\n"
 "У тебя есть 5 минут на подключение кошелька"
@@ -395,7 +390,7 @@ msgstr ""
 "Scan the QR code or click Connect to begin authorization\n"
 "You have 5 min to connect your wallet"
 
-#: src/bot/handlers/handlers_wallet.py:104
+#: src/bot/handlers/handlers_wallet.py:69
 msgid ""
 "Успешная авторизация!\n"
 "Адрес кошелька:\n"
@@ -411,11 +406,11 @@ msgstr ""
 "\n"
 "Main menu:"
 
-#: src/bot/handlers/handlers_wallet.py:117
+#: src/bot/handlers/handlers_wallet.py:82
 msgid "Повторить"
 msgstr "Again"
 
-#: src/bot/handlers/handlers_wallet.py:121
+#: src/bot/handlers/handlers_wallet.py:86
 msgid "Истекло время авторизации"
 msgstr "Authorization timed out"
 
@@ -424,4 +419,3 @@ msgid ""
 "Требуется аутентификация кошелька!\n"
 "/start - пройти аутентификацию"
 msgstr ""
-

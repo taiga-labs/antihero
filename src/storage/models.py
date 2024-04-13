@@ -19,6 +19,7 @@ class User(Base):
     telegram_id: Mapped[int] = mapped_column(BIGINT, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     address: Mapped[str] = mapped_column(String, nullable=True, unique=True)
+    seqno: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     language: Mapped[str] = mapped_column(String, nullable=False, server_default="en")
     win: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
