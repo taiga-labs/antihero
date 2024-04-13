@@ -137,7 +137,8 @@ async def duel_yes(
             web_app=WebAppInfo(
                 url=f"https://{settings.MINIAPP_HOST}/{settings.MINIAPP_PATH}?"
                 f"uuid={game_uuid}&"
-                f"player_id={player_id}"
+                f"player_id={player_id}&"
+                f"level={nft.rare}"
             ),
         )
         keyboard.add(kb_webapp)
@@ -160,7 +161,8 @@ async def duel_yes(
             web_app=WebAppInfo(
                 url=f"https://{settings.MINIAPP_HOST}/{settings.MINIAPP_PATH}?"
                 f"uuid={game_uuid}&"
-                f"player_id={player_opponent_id}"
+                f"player_id={player_opponent_id}&"
+                f"level={nft_opponent.rare}"
             ),
         )
         keyboard.add(kb_webapp)
@@ -281,7 +283,8 @@ async def fight_yes(
         web_app=WebAppInfo(
             url=f"https://{settings.MINIAPP_HOST}/{settings.MINIAPP_PATH}?"
             f"uuid={game_uuid}&"
-            f"player_id={player_id}"
+            f"player_id={player_id}&"
+            f"level={nft.rare}"
         ),
     )
     keyboard.add(kb_webapp)
@@ -304,7 +307,8 @@ async def fight_yes(
         web_app=WebAppInfo(
             url=f"https://{settings.MINIAPP_HOST}/{settings.MINIAPP_PATH}?"
             f"uuid={game_uuid}&"
-            f"player_id={player_opponent_id}"
+            f"player_id={player_opponent_id}&"
+            f"level={nft_opponent.rare}"
         ),
     )
     keyboard.add(kb_webapp)
