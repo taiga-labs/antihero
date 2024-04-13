@@ -17,4 +17,4 @@ async_session = async_sessionmaker(
 
 
 async def get_redis_async_client(url: str) -> Redis:
-    return aioredis.from_url(url=url, decode_responses=True)
+    return aioredis.from_url(url=url, decode_responses=True, max_connections=32)

@@ -9,7 +9,7 @@ from src.bot.factories import _
 
 
 class WalletNotConnectedMiddleware(BaseMiddleware):
-    SKIP_ROUTERS = ["choose_wallet", "connect:", "lang"]
+    SKIP_ROUTERS = ["connect", "lang"]
 
     async def on_process_callback_query(self, call: CallbackQuery, data: dict):
         if any(sr in call.data for sr in self.SKIP_ROUTERS):

@@ -40,8 +40,3 @@ class GameState(BaseModel):
     player_l: PlayerState
     player_r: PlayerState
     start_time: int
-
-
-class GameConnection(BaseModel):
-    player_id: int
-    uuid: str

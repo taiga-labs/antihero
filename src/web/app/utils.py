@@ -5,7 +5,7 @@ from urllib import parse
 from settings import settings
 
 
-def validation(data_check_string: str, hash: str) -> bool:
+def authentication(data_check_string: str, hash: str) -> bool:
     data_check_string = parse.unquote_plus(data_check_string)
 
     secret_key = hmac.new(

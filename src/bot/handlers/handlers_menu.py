@@ -85,7 +85,7 @@ async def start(message: types.Message, db_session: AsyncSession, language: str)
                 await db_session.commit()
             keyboard = types.InlineKeyboardMarkup(row_width=1)
             kb_wallet = InlineKeyboardButton(
-                text=_("Подключить кошелёк"), callback_data="choose_wallet"
+                text=_("💎 Подключить Tonkeeper 💎"), callback_data="connect"
             )
             kb_main_menu = InlineKeyboardButton(text=_("Меню"), callback_data="main")
             new_lang = "ru" if language == "en" else "en"
