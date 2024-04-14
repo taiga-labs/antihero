@@ -207,6 +207,7 @@ class SocketWrapper:
             )
             await game_client.close()
             del self.redis_game_sessions[sid]
+            await connections_client.delete(sid)
             await connections_client.close()
             del self.redis_socket_sessions[sid]
 
