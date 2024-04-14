@@ -32,7 +32,6 @@ class WithdrawModel(BaseModel):
 class PlayerState(BaseModel):
     player_id: int
     score: int = 0
-    attempts: int = 3
     sid: str | None = None
 
 

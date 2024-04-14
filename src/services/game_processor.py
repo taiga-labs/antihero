@@ -17,12 +17,10 @@ from src.utils.game import game_winner_determined, game_draw
 WARNING = {
     "ru": "    ⚠️ Предупреждение ⚠️\n"
     "Игра #{uuid} завершится через 5 минут.\n"
-    "{l_name_nft} [LVL {l_rare}] vs {r_name_nft} [LVL {r_rare}]\n\n"
-    "Осталось попыток: {attempts}",
+    "{l_name_nft} [LVL {l_rare}] vs {r_name_nft} [LVL {r_rare}]\n\n",
     "en": "    ⚠️ ATTENTION ⚠️\n"
     "The game #{uuid} will be closed in 5 minutes.\n"
-    "{l_name_nft} [LVL {l_rare}] vs {r_name_nft} [LVL {r_rare}]\n\n"
-    "Attemtps left: {attempts}",
+    "{l_name_nft} [LVL {l_rare}] vs {r_name_nft} [LVL {r_rare}]\n\n",
 }
 
 
@@ -48,8 +46,8 @@ async def process_games():
                     continue
 
                 if (
-                    game_state.player_l.attempts == 0
-                    and game_state.player_r.attempts == 0
+                    game_state.player_l.sid == "@"
+                    and game_state.player_r.sid == "@"
                 ) or (
                     int(time.time()) - game_state.start_time >= 900
                 ):  # 15 min left
@@ -94,7 +92,7 @@ async def process_games():
                 elif (
                     600 <= int(time.time()) - game_state.start_time <= 630
                 ):  # warning on 10 min left
-                    if game_state.player_l.attempts > 0:
+                    if game_state.player_l.sid != "@":
                         game_data = await game_dao.get_by_params(uuid=game_uuid)
                         game = game_data[0]
                         if not game.player_l.notified:
@@ -111,13 +109,12 @@ async def process_games():
                                     l_rare=game.player_l.nft.rare,
                                     r_name_nft=game.player_r.nft.name_nft,
                                     r_rare=game.player_r.nft.rare,
-                                    attempts=game_state.player_l.attempts,
                                 ),
                             )
                             await player_dao.edit_by_id(
                                 id=game.player_l_id, notified=True
                             )
-                    if game_state.player_r.attempts > 0:
+                    if game_state.player_r.sid != "@":
                         game_data = await game_dao.get_by_params(uuid=game_uuid)
                         game = game_data[0]
                         if not game.player_r.notified:
@@ -134,7 +131,6 @@ async def process_games():
                                     l_rare=game.player_l.nft.rare,
                                     r_name_nft=game.player_r.nft.name_nft,
                                     r_rare=game.player_r.nft.rare,
-                                    attempts=game_state.player_r.attempts,
                                 ),
                             )
                             await player_dao.edit_by_id(

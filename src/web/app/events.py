@@ -151,10 +151,10 @@ class SocketWrapper:
             game_state = GameState.model_validate_json(game_state_raw)
 
             if game_connection.player_id == game_state.player_l.player_id:
-                game_state.player_l.sid = None
+                game_state.player_l.sid = "@"
                 total_score = game_state.player_l.score
             else:
-                game_state.player_r.sid = None
+                game_state.player_r.sid = "@"
                 total_score = game_state.player_r.score
             await game_client.set(
                 name=game_connection.uuid, value=json.dumps(game_state.model_dump())
@@ -197,10 +197,10 @@ class SocketWrapper:
             game_state = GameState.model_validate_json(game_state_raw)
 
             if game_connection.player_id == game_state.player_l.player_id:
-                game_state.player_l.sid = None
+                game_state.player_l.sid = "@"
                 total_score = game_state.player_l.score
             else:
-                game_state.player_r.sid = None
+                game_state.player_r.sid = "@"
                 total_score = game_state.player_r.score
             await game_client.set(
                 name=game_connection.uuid, value=json.dumps(game_state.model_dump())
