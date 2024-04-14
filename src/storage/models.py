@@ -62,6 +62,7 @@ class Game(Base):
     player_r: Mapped[User] = relationship(
         Player, foreign_keys="[Game.player_r_id]", lazy="joined"
     )
+    closed: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="f")
     start_time: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
