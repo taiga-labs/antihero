@@ -1,3 +1,4 @@
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.storage.dao.base import BaseDAO
@@ -14,3 +15,7 @@ class GameDAO(BaseDAO):
 
     async def get_active(self) -> list:
         return await self.get_by_params(active=True)
+
+    async def edit_by_uuid(self, uuid: str, **params) -> None:
+        sql = update(self.model).where(self.model.uuid == uuid).values(**params)
+        await self.session.execute(sql)

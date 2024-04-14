@@ -3,9 +3,11 @@ import json
 import socketio
 from aiogram import Bot, types
 from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from settings import settings
-from src.storage.driver import get_redis_async_client
+from src.storage.dao.games_dao import GameDAO
+from src.storage.driver import get_redis_async_client, async_session
 from src.storage.schemas import GameState
 
 from src.web.app import get_bot
@@ -65,6 +67,12 @@ class SocketWrapper:
                 web_logger.error(f"init_game | validation error: {ve}")
                 await self.sio.disconnect(sid=sid)
                 return
+
+            db_session: AsyncSession = async_session()
+            game_dao = GameDAO(db_session)
+            await game_dao.edit_by_uuid(uuid=game_connection.uuid, closed=True)
+            await db_session.commit()
+            await db_session.close()
 
             # broker sessions
             connections_client = self.redis_socket_sessions[sid]

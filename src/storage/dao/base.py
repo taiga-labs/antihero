@@ -1,6 +1,6 @@
-from typing import Any, Tuple
+from typing import Any
 
-from sqlalchemy import select, insert, update, delete, Row
+from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
