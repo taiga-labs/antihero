@@ -9,9 +9,11 @@ class GameDAO(BaseDAO):
     def __init__(self, session: AsyncSession, model=Game):
         super().__init__(model, session)
 
-    async def is_closed(self, uuid: str) -> bool:
+    async def get_status(self, uuid: str) -> int:
         data = await self.get_by_params(uuid=uuid)
-        return data[0].closed
+        if data:
+            return 1 if data[0].closed else 0
+        return -1
 
     async def get_active(self) -> list:
         return await self.get_by_params(active=True)

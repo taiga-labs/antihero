@@ -14,10 +14,18 @@ def get_session_local():
 @router.get("/game_status")
 async def game_status(uuid: str, db_session: AsyncSession = Depends(get_session_local)):
     game_dao = GameDAO(db_session)
-    is_c = await game_dao.is_closed(uuid=uuid)
+    gstat = await game_dao.get_status(uuid=uuid)
     await db_session.close()
-    if is_c:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Игра была завершена",
-        )
+    match gstat:
+        case -1:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Игра недоступна",
+            )
+        case 1:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Игра была завершена",
+            )
+        case _:
+            pass
