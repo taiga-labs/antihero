@@ -9,6 +9,7 @@ class AuthModel(BaseModel):
 class GameConnectionModel(BaseModel):
     player_id: int
     uuid: str
+    query_id: str
 
 
 class ScoreModel(BaseModel):

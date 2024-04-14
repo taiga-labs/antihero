@@ -62,6 +62,7 @@ class SocketWrapper:
                 game_connection = GameConnectionModel(
                     player_id=data["player_id"],
                     uuid=data["uuid"],
+                    query_id=data["query_id"]
                 )
             except ValidationError as ve:
                 web_logger.error(f"init_game | validation error: {ve}")
