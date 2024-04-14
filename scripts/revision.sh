@@ -1,3 +1,3 @@
 #!/bin/sh -e
 
-alembic revision -m "game closed" --autogenerate
+alembic revision -m "players played" --autogenerate
