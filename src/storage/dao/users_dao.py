@@ -23,6 +23,15 @@ class UserDAO(BaseDAO):
         )
         await self.session.execute(sql)
 
+    async def change_address_ex(self, telegram_id: int, addr: str) -> bool:
+        data = await self.get_by_params(telegram_id=telegram_id)
+        if data:
+            user = data[0]
+            if user.address != addr:
+                await self.edit_by_telegram_id(telegram_id=telegram_id, address=addr)
+                return True
+        return False
+
     async def get_top(self) -> list:
         sql = select(self.model).order_by(User.win.desc()).limit(10)
         data = await self.session.execute(sql)

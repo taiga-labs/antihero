@@ -56,10 +56,8 @@ async def connect_wallet(
                     is_user_friendly=True, is_bounceable=False
                 )
                 wallet_address = wallet_address.replace("+", "-").replace("/", "_")
-                await user_dao.edit_by_telegram_id(
-                    telegram_id=call.from_user.id, address=wallet_address
-                )
-                await db_session.commit()
+                if await user_dao.change_address_ex(telegram_id=call.from_user.id, addr=wallet_address):
+                    await db_session.commit()
                 keyboard = await main_menu()
                 await bot.delete_message(
                     chat_id=wait_msg.chat.id, message_id=wait_msg.message_id
