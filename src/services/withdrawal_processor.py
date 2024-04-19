@@ -1,6 +1,6 @@
 import asyncio
 
-from TonTools.Providers.TonCenterClient import TonCenterClient
+from TonTools.Providers.TonCenterClient import TonCenterClient, TonCenterClientError
 from sqlalchemy.ext.asyncio import AsyncSession
 from tonsdk.utils import Address
 
@@ -32,8 +32,15 @@ async def process_withdrawals():
                     nft_owner = await provider.get_nft_owner(
                         nft_address=withdrawal.nft_address
                     )
-                except Exception as ex:
-                    processor_logger.error(f"process_withdrawals | failed get nft owner: {ex}")
+                except TonCenterClientError as ex:
+                    processor_logger.error(
+                        f"process_withdrawals | failed get nft owner: {ex}"
+                    )
+                    continue
+                except Exception as e:
+                    processor_logger.error(
+                        f"process_withdrawals | unknown error: {e}"
+                    )
                     continue
 
                 nft_owner_address = (
