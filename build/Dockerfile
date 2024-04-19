@@ -10,4 +10,4 @@ RUN chown -R 1000:1000 /antihero_bot
 
 RUN pip install -r requirements.txt --no-cache-dir --no-deps
 
-# ENTRYPOINT python runner.py
+# ENTRYPOINT python runners.py

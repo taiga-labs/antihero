@@ -1,38 +1,42 @@
-from aiogram.dispatcher.middlewares import LifetimeControllerMiddleware
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from typing import Callable, Dict, Any, Awaitable
 
-from settings import settings
+from aiogram import BaseMiddleware
+from aiogram.types import TelegramObject
+from aioredis import Redis
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+
+from settings import config
 from src.storage.driver import get_redis_async_client
 
 
-class DbSessionMiddleware(LifetimeControllerMiddleware):
-    def __init__(self, session_pool: async_sessionmaker):
+class DatabaseMiddleware(BaseMiddleware):
+    def __init__(self, session_pool: async_sessionmaker[AsyncSession]):
         super().__init__()
         self.session_pool = session_pool
 
-    async def pre_process(self, obj, data, *args):
+    async def __call__(
+            self,
+            handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+            event: TelegramObject,
+            data: Dict[str, Any],
+    ) -> Any:
         async with self.session_pool() as session:
             data["db_session"] = session
-
-    async def post_process(self, obj, data, *args):
-        await data["db_session"].close()
+            return await handler(event, data)
 
 
-class RedisSessionMiddleware(LifetimeControllerMiddleware):
-    TONCONNECT_ROUTERS = ["connect:", "add_nft_", "pay_fee_"]
-    GAME_ROUTERS = ["nft_", "fight_"]
-
-    def __init__(self):
+class RedisMiddleware(BaseMiddleware):
+    def __init__(self, redis_dsn: str):
         super().__init__()
+        self.redis_dsn = redis_dsn
 
-    async def pre_process(self, obj, data, *args):
-        data["tonconnect_redis_session"] = await get_redis_async_client(
-            url=settings.TONCONNECT_BROKER_URL
-        )
-        data["game_redis_session"] = await get_redis_async_client(
-            url=settings.GAME_BROKER_URL
-        )
-
-    async def post_process(self, obj, data, *args):
-        await data["tonconnect_redis_session"].close()
-        await data["game_redis_session"].close()
+    async def __call__(
+            self,
+            handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+            event: TelegramObject,
+            data: Dict[str, Any],
+    ) -> Any:
+        connection = await get_redis_async_client(url=self.redis_dsn)
+        async with connection as conn:
+            data["redis_connection"] = conn
+            return await handler(event, data)

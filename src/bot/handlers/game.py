@@ -1,14 +1,15 @@
 import json
 import time
 import uuid
+from typing import Final
 
-from aiogram import types
+from aiogram import types, Router
 from aiogram.types import InlineKeyboardButton, WebAppInfo
 from aioredis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.factories import dp, logger, bot, _
-from src.bot.handlers.handlers_menu import main_menu
+from src.bot.handlers.menu import main_menu
 from src.storage.dao.games_dao import GameDAO
 from src.storage.dao.nfts_dao import NftDAO
 from src.storage.dao.players_dao import PlayerDAO
@@ -16,6 +17,8 @@ from src.storage.dao.users_dao import UserDAO
 from src.storage.schemas import GameModel, PlayerModel, PlayerState, GameState
 from src.utils.antiflood import anti_flood
 from settings import settings
+
+router_game: Final[Router] = Router(name=__name__)
 
 
 async def invite(call: types.CallbackQuery, db_session: AsyncSession):

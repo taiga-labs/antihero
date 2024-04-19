@@ -1,6 +1,9 @@
+from typing import Callable, Dict, Any, Awaitable
+
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.dispatcher.middlewares import BaseMiddleware
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, TelegramObject
+from aiogram_tonconnect.tonconnect.storage.base import ATCStorageBase
 
 from settings import settings
 from src.storage.driver import get_redis_async_client
@@ -8,21 +11,23 @@ from src.utils.wallet import get_connector
 from src.bot.factories import _
 
 
-class WalletNotConnectedMiddleware(BaseMiddleware):
+class WalletCheckConnectionMiddleware(BaseMiddleware):
     SKIP_ROUTERS = ["connect", "lang"]
 
-    async def on_process_callback_query(self, call: CallbackQuery, data: dict):
-        if any(sr in call.data for sr in self.SKIP_ROUTERS):
-            return
-        redis = await get_redis_async_client(url=settings.TONCONNECT_BROKER_URL)
-        connector = await get_connector(chat_id=call.message.chat.id, broker=redis)
-        connected = await connector.restore_connection()
-        if not connected:
-            await call.answer(
+    def __init__(
+            self,
+            storage: ATCStorageBase,
+    ) -> None:
+        self.storage = storage
+
+    async def __call__(
+            self,
+            handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+            event: TelegramObject,
+            data: Dict[str, Any],
+    ) -> Any:
+        if not data["account_wallet"]:
+            await event.answer(
                 _("Требуется аутентификация кошелька!\n" "/start - пройти аутентификацию"),
                 show_alert=True,
             )
-            await redis.close()
-            raise CancelHandler
-        connector.pause_connection()
-        await redis.close()

@@ -2,8 +2,9 @@ import asyncio
 import json
 import time
 from base64 import urlsafe_b64encode
+from typing import Final
 
-from aiogram import types
+from aiogram import types, Router
 from aiogram.types import InlineKeyboardButton
 from aioredis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,6 +27,8 @@ from src.utils.exceptions import ProviderFailed
 from src.utils.antiflood import anti_flood
 from src.utils.ton import get_nft_by_account, fetch_nft_by_address
 from src.utils.wallet import get_connector
+
+router_nft: Final[Router] = Router(name=__name__)
 
 
 async def select_to_add_nft(call: types.CallbackQuery, db_session: AsyncSession):
@@ -384,15 +387,13 @@ async def withdraw_nft(call: types.CallbackQuery, db_session: AsyncSession):
     if nft.arena:
         return await call.message.edit_text(
             _(
-                "⛔ Вывод NFT {name_nft} отклонен\n"
-                "Необходимо снять героя с арены"
+                "⛔ Вывод NFT {name_nft} отклонен\n" "Необходимо снять героя с арены"
             ).format(name_nft=nft.name_nft),
             reply_markup=keyboard,
         )
     if nft.duel:
         return await call.message.edit_text(
-            _("⛔ Вывод NFT {name_nft} отклонен\n"
-              "Герой сейчас в битве").format(
+            _("⛔ Вывод NFT {name_nft} отклонен\n" "Герой сейчас в битве").format(
                 name_nft=nft.name_nft
             ),
             reply_markup=keyboard,
@@ -400,8 +401,7 @@ async def withdraw_nft(call: types.CallbackQuery, db_session: AsyncSession):
     if nft.withdraw:
         return await call.message.edit_text(
             _(
-                "⛔ Вывод NFT {name_nft} отклонен\n"
-                "NFT уже ожидает вывода из игры"
+                "⛔ Вывод NFT {name_nft} отклонен\n" "NFT уже ожидает вывода из игры"
             ).format(name_nft=nft.name_nft),
             reply_markup=keyboard,
         )

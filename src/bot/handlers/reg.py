@@ -1,8 +1,8 @@
 from aiogram import Dispatcher
 
 from src.bot.factories import i18n
-from src.bot.handlers.handlers_wallet import connect_wallet
-from src.bot.handlers.handlers_game import (
+from src.bot.handlers.wallet import connect_wallet
+from src.bot.handlers.game import (
     invite,
     arena_yes,
     search_game,
@@ -10,7 +10,7 @@ from src.bot.handlers.handlers_game import (
     fight_yes,
     exit_game,
 )
-from src.bot.handlers.handlers_menu import (
+from src.bot.handlers.menu import (
     start,
     inline_handler,
     wallet,
@@ -19,7 +19,7 @@ from src.bot.handlers.handlers_menu import (
     ping,
     lang_callback,
 )
-from src.bot.handlers.handlers_nft import (
+from src.bot.handlers.nft import (
     add_nft,
     select_to_add_nft,
     select_to_activate_nft,

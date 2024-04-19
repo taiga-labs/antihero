@@ -1,17 +1,20 @@
 from io import BytesIO
+from typing import Final
 
 import qrcode
-from aiogram import types
+from aiogram import types, Router
 from aiogram.types import InlineKeyboardButton, ParseMode
 from TonTools import *
 from aioredis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.bot.factories import dp, bot, logger, _
-from src.bot.handlers.handlers_menu import main_menu
+from src.bot.handlers.menu import main_menu
 from src.storage.dao.users_dao import UserDAO
 from src.utils.antiflood import anti_flood
 from src.utils.wallet import get_connector
+
+router_wallet: Final[Router] = Router(name=__name__)
 
 
 @dp.throttled(anti_flood, rate=3)
@@ -56,17 +59,21 @@ async def connect_wallet(
                     is_user_friendly=True, is_bounceable=False
                 )
                 wallet_address = wallet_address.replace("+", "-").replace("/", "_")
-                if await user_dao.change_address_ex(telegram_id=call.from_user.id, addr=wallet_address):
+                if await user_dao.change_address_ex(
+                    telegram_id=call.from_user.id, addr=wallet_address
+                ):
                     await db_session.commit()
                 keyboard = await main_menu()
                 await bot.delete_message(
                     chat_id=wait_msg.chat.id, message_id=wait_msg.message_id
                 )
                 await call.message.answer(
-                    text=_("Успешная авторизация!\n"
-                           "Адрес кошелька:\n\n"
-                           "<code>{wallet_address}</code>\n\n"
-                           "Главное меню:").format(wallet_address=wallet_address),
+                    text=_(
+                        "Успешная авторизация!\n"
+                        "Адрес кошелька:\n\n"
+                        "<code>{wallet_address}</code>\n\n"
+                        "Главное меню:"
+                    ).format(wallet_address=wallet_address),
                     reply_markup=keyboard,
                 )
                 logger.info(

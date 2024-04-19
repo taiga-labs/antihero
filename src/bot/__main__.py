@@ -1,7 +1,8 @@
-from .runner import bot_start_polling, bot_start_webhook
-from settings import settings
+from src.bot import dispatcher, bot
+from settings import config
+from src.bot.runners import run_polling, run_webhook
 
-if settings.DEV:
-    bot_start_polling()
-else:
-    bot_start_webhook()
+# setup_logger()
+if config.telegram_bot.USE_WEBHOOK:
+    run_webhook(dispatcher=dispatcher)
+run_polling(dispatcher=dispatcher, bot=bot)
