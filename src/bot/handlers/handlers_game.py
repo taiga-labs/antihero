@@ -31,7 +31,7 @@ async def invite(call: types.CallbackQuery, db_session: AsyncSession):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for nft in nft_data:
         button = InlineKeyboardButton(
-            text=f"{nft.name_nft}", callback_data=f"arena_{nft.id}"
+            text=f"{nft.name_nft} [LVL {nft.rare}]", callback_data=f"arena_{nft.id}"
         )
         buttons.append(button)
     keyboard.add(*buttons)
@@ -68,7 +68,7 @@ async def search_game(call: types.CallbackQuery, db_session: AsyncSession):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for nft in nft_data:
         button = InlineKeyboardButton(
-            text=f"{nft.name_nft}", callback_data=f"nft_{nft.id}"
+            text=f"{nft.name_nft} [LVL {nft.rare}]", callback_data=f"nft_{nft.id}"
         )
         buttons.append(button)
     keyboard.add(*buttons)
@@ -98,7 +98,7 @@ async def duel_yes(
         f"duel_yes | User {call.from_user.first_name}:{call.from_user.id} search game with nft {nft.name_nft}:{nft.address}"
     )
 
-    nft_opponent = await nft_dao.get_opponent(user_id=user.id)
+    nft_opponent = await nft_dao.get_opponent(user_id=user.id, lvl=nft.rare)
     if nft_opponent:
         logger.info(
             f"duel_yes | {nft.user.name}:{nft.user.telegram_id}:{nft.address} vs {nft_opponent.user.name}{nft_opponent.user.telegram_id}:{nft_opponent.address}"

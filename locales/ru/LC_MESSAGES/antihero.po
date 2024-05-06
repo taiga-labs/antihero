@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: antihero VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-04-13 13:34+0300\n"
+"POT-Creation-Date: 2024-05-06 15:09+0300\n"
 "PO-Revision-Date: 2024-04-08 15:59+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -20,11 +20,11 @@ msgstr ""
 "Generated-By: Babel 2.9.1\n"
 
 #: src/bot/handlers/handlers_game.py:38 src/bot/handlers/handlers_game.py:52
-#: src/bot/handlers/handlers_game.py:75 src/bot/handlers/handlers_game.py:208
-#: src/bot/handlers/handlers_game.py:217 src/bot/handlers/handlers_game.py:225
-#: src/bot/handlers/handlers_game.py:233 src/bot/handlers/handlers_menu.py:72
-#: src/bot/handlers/handlers_menu.py:136 src/bot/handlers/handlers_menu.py:181
-#: src/bot/handlers/handlers_menu.py:191 src/bot/handlers/handlers_nft.py:47
+#: src/bot/handlers/handlers_game.py:75 src/bot/handlers/handlers_game.py:210
+#: src/bot/handlers/handlers_game.py:219 src/bot/handlers/handlers_game.py:227
+#: src/bot/handlers/handlers_game.py:235 src/bot/handlers/handlers_menu.py:80
+#: src/bot/handlers/handlers_menu.py:144 src/bot/handlers/handlers_menu.py:189
+#: src/bot/handlers/handlers_menu.py:199 src/bot/handlers/handlers_nft.py:47
 #: src/bot/handlers/handlers_nft.py:84 src/bot/handlers/handlers_nft.py:142
 #: src/bot/handlers/handlers_nft.py:175 src/bot/handlers/handlers_nft.py:189
 #: src/bot/handlers/handlers_nft.py:224 src/bot/handlers/handlers_nft.py:310
@@ -37,8 +37,8 @@ msgstr ""
 msgid "Выберите свободные NFT для арены"
 msgstr ""
 
-#: src/bot/handlers/handlers_game.py:50 src/bot/handlers/handlers_menu.py:179
-#: src/bot/handlers/handlers_menu.py:236
+#: src/bot/handlers/handlers_game.py:50 src/bot/handlers/handlers_menu.py:187
+#: src/bot/handlers/handlers_menu.py:244
 msgid "Пригласить на бой"
 msgstr ""
 
@@ -50,36 +50,36 @@ msgstr ""
 msgid "Выбери NFT для игры"
 msgstr ""
 
-#: src/bot/handlers/handlers_game.py:136 src/bot/handlers/handlers_game.py:159
-#: src/bot/handlers/handlers_game.py:280 src/bot/handlers/handlers_game.py:303
+#: src/bot/handlers/handlers_game.py:136 src/bot/handlers/handlers_game.py:160
+#: src/bot/handlers/handlers_game.py:282 src/bot/handlers/handlers_game.py:306
 msgid "ИГРАТЬ"
 msgstr ""
 
-#: src/bot/handlers/handlers_game.py:184
+#: src/bot/handlers/handlers_game.py:186
 msgid "Выйти"
 msgstr ""
 
-#: src/bot/handlers/handlers_game.py:186
+#: src/bot/handlers/handlers_game.py:188
 msgid "Начинаю поиск"
 msgstr ""
 
-#: src/bot/handlers/handlers_game.py:211
+#: src/bot/handlers/handlers_game.py:213
 msgid "Ты не успел! Истек срок приглашения"
 msgstr ""
 
-#: src/bot/handlers/handlers_game.py:220
+#: src/bot/handlers/handlers_game.py:222
 msgid "Ты не успел! Соперник снял героя с арены"
 msgstr ""
 
-#: src/bot/handlers/handlers_game.py:228
+#: src/bot/handlers/handlers_game.py:230
 msgid "Ты не успел! Соперник уже в бою"
 msgstr ""
 
-#: src/bot/handlers/handlers_game.py:236
+#: src/bot/handlers/handlers_game.py:238
 msgid "Нельзя сражаться с самим собой!"
 msgstr ""
 
-#: src/bot/handlers/handlers_game.py:334 src/bot/handlers/handlers_menu.py:34
+#: src/bot/handlers/handlers_game.py:338 src/bot/handlers/handlers_menu.py:34
 #: src/bot/handlers/handlers_menu.py:43
 msgid "Главное меню:"
 msgstr ""
@@ -108,19 +108,23 @@ msgstr ""
 msgid "Выберите NFT для игры"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:88
+#: src/bot/handlers/handlers_menu.py:78
+msgid "Нет активированных или подходящих по уровню NFT"
+msgstr ""
+
+#: src/bot/handlers/handlers_menu.py:96
 msgid "💎 Подключить Tonkeeper 💎"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:90
+#: src/bot/handlers/handlers_menu.py:98
 msgid "Меню"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:93
+#: src/bot/handlers/handlers_menu.py:101
 msgid "Сменить язык"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:99
+#: src/bot/handlers/handlers_menu.py:107
 msgid ""
 "Приветствуем в боте коллекции <a "
 "href='https://getgems.io/collection/{MAIN_COLLECTION_ADDRESS}'>TON "
@@ -128,55 +132,55 @@ msgid ""
 "Наш <a href='https://t.me/TON_ANTIHERO_NFT'>ТЕЛЕГРАМ КАНАЛ☢️</a>\n"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:113
+#: src/bot/handlers/handlers_menu.py:121
 msgid "ожидает вывода из игры 📩"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:115
+#: src/bot/handlers/handlers_menu.py:123
 msgid "не активирована ❌"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:117
+#: src/bot/handlers/handlers_menu.py:125
 msgid "в битве ⚔"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:119
+#: src/bot/handlers/handlers_menu.py:127
 msgid "ожидает соперника на арене 🛡"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:121
+#: src/bot/handlers/handlers_menu.py:129
 msgid "активирована ✅"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:123
+#: src/bot/handlers/handlers_menu.py:131
 msgid "в обработке..."
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:137
+#: src/bot/handlers/handlers_menu.py:145
 msgid "NFT на арене"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:139
+#: src/bot/handlers/handlers_menu.py:147
 msgid "Активировать NFT"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:142
+#: src/bot/handlers/handlers_menu.py:150
 msgid "Вывести NFT"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:145
+#: src/bot/handlers/handlers_menu.py:153
 msgid ""
 "Адрес кошелька: <code>{user_address}</code>\n"
 "\n"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:148
+#: src/bot/handlers/handlers_menu.py:156
 msgid ""
 "Ваши герои:\n"
 "{}"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:156
+#: src/bot/handlers/handlers_menu.py:164
 #, python-format
 msgid ""
 "Имя: %s\n"
@@ -185,34 +189,34 @@ msgid ""
 "Статус: %s\n"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:176
+#: src/bot/handlers/handlers_menu.py:184
 msgid "Поиск игры"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:183
+#: src/bot/handlers/handlers_menu.py:191
 msgid "Выберите игру"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:198
+#: src/bot/handlers/handlers_menu.py:206
 msgid "Топ пользователей:{}"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:215
+#: src/bot/handlers/handlers_menu.py:223
 msgid "язык установлен {new_lang}"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:230
+#: src/bot/handlers/handlers_menu.py:238
 msgid ""
 "<a href='{TELEGRAM_BOT_URL}'>TON ANTIHERO☢️</a>\n"
 "Сразись с моим {name_nft} [LVL {rare}]\n"
 "НА АРЕНЕ"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:237
+#: src/bot/handlers/handlers_menu.py:245
 msgid "Пригласи друга в бой"
 msgstr ""
 
-#: src/bot/handlers/handlers_menu.py:241
+#: src/bot/handlers/handlers_menu.py:249
 msgid "Сразиться"
 msgstr ""
 
@@ -338,17 +342,17 @@ msgid ""
 "NFT {name_nft} скоро придет на ваш кошелек"
 msgstr ""
 
-#: src/bot/handlers/handlers_wallet.py:37
+#: src/bot/handlers/handlers_wallet.py:36
 msgid "Подключить"
 msgstr ""
 
-#: src/bot/handlers/handlers_wallet.py:44
+#: src/bot/handlers/handlers_wallet.py:43
 msgid ""
 "Отсканируй QR код или нажми Подключить, чтобы начать авторизацию\n"
 "У тебя есть 5 минут на подключение кошелька"
 msgstr ""
 
-#: src/bot/handlers/handlers_wallet.py:69
+#: src/bot/handlers/handlers_wallet.py:66
 msgid ""
 "Успешная авторизация!\n"
 "Адрес кошелька:\n"
@@ -358,11 +362,11 @@ msgid ""
 "Главное меню:"
 msgstr ""
 
-#: src/bot/handlers/handlers_wallet.py:82
+#: src/bot/handlers/handlers_wallet.py:79
 msgid "Повторить"
 msgstr ""
 
-#: src/bot/handlers/handlers_wallet.py:86
+#: src/bot/handlers/handlers_wallet.py:83
 msgid "Истекло время авторизации"
 msgstr ""
 
@@ -373,3 +377,4 @@ msgid ""
 msgstr ""
 "Wallet authentication required!\n"
 "/start - authenticate"
+

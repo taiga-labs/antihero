@@ -169,7 +169,7 @@ async def select_to_activate_nft(call: types.CallbackQuery, db_session: AsyncSes
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for nft in nft_data:
         kb_nft = InlineKeyboardButton(
-            text=f"{nft.name_nft}", callback_data=f"show_nft_{nft.address}"
+            text=f"{nft.name_nft} [LVL {nft.rare}]", callback_data=f"show_nft_{nft.address}"
         )
         keyboard.add(kb_nft)
     kb_main_menu = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
@@ -303,7 +303,7 @@ async def get_nft_on_arena(call: types.CallbackQuery, db_session: AsyncSession):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for nft in nft_data:
         button = InlineKeyboardButton(
-            text=f"{nft.name_nft}", callback_data=f"remove_{nft.address}"
+            text=f"{nft.name_nft} [LVL {nft.rare}]", callback_data=f"remove_{nft.address}"
         )
         buttons.append(button)
     keyboard.add(*buttons)
@@ -352,7 +352,7 @@ async def get_nft_withdrawable(call: types.CallbackQuery, db_session: AsyncSessi
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     for nft in nft_data:
         button = InlineKeyboardButton(
-            text=f"{nft.name_nft}", callback_data=f"withdraw_{nft.address}"
+            text=f"{nft.name_nft} [LVL {nft.rare}]", callback_data=f"withdraw_{nft.address}"
         )
         buttons.append(button)
     keyboard.add(*buttons)

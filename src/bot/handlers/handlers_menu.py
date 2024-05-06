@@ -61,19 +61,27 @@ async def start(message: types.Message, db_session: AsyncSession, language: str)
         if message.get_args() and user_data:
             user = user_data[0]
             opponent_nft_id = message.get_args()
-            nfts = await nft_dao.get_by_params(user_id=user.id, activated=True)
+            nft_data = await nft_dao.get_by_params(id=opponent_nft_id)
+            opponent_nft = nft_data[0]
+
+            nfts = await nft_dao.get_by_level_pass(user_id=user.id, op_lvl=opponent_nft.rare)
             keyboard = types.InlineKeyboardMarkup(row_width=1)
-            for nft in nfts:
-                button = InlineKeyboardButton(
-                    text=f"{nft.name_nft}",
-                    callback_data=f"fight_{nft.id}:{opponent_nft_id}",
-                )
-                keyboard.add(button)
+            if nfts:
+                for nft in nfts:
+                    button = InlineKeyboardButton(
+                        text=f"{nft.name_nft} [LVL {nft.rare}]",
+                        callback_data=f"fight_{nft.id}:{opponent_nft_id}",
+                    )
+                    keyboard.add(button)
+                text = _("Выберите NFT для игры")
+            else:
+                text = _("Нет активированных или подходящих по уровню NFT")
+
             kb_main = InlineKeyboardButton(text=_("Главное меню"), callback_data="main")
             keyboard.add(kb_main)
             await bot.send_message(
                 chat_id=message.chat.id,
-                text=_("Выберите NFT для игры"),
+                text=text,
                 reply_markup=keyboard,
             )
         else:
